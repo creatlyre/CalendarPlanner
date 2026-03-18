@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 from fastapi import Depends, FastAPI, Request
 from fastapi.exceptions import HTTPException
@@ -9,8 +10,10 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.auth.dependencies import get_current_user
 from app.auth.routes import router as auth_router
 from app.database.database import Base, engine
+from app.events.routes import router as events_router
 from app.middleware.auth_middleware import SessionValidationMiddleware
 from app.users.routes import router as users_router
+from app.views.calendar_routes import router as calendar_router
 
 # Initialize database schema. Use Alembic migrations for production evolution.
 try:
@@ -31,6 +34,8 @@ templates = Jinja2Templates(directory="app/templates")
 app.add_middleware(SessionValidationMiddleware)
 app.include_router(auth_router)
 app.include_router(users_router)
+app.include_router(events_router)
+app.include_router(calendar_router)
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -40,6 +45,7 @@ async def root(request: Request, user=Depends(get_current_user)):
         {
             "request": request,
             "user": user,
+            "now": datetime.utcnow(),
         },
     )
 

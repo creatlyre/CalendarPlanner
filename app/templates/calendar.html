@@ -3,22 +3,116 @@
 {% block title %}Calendar - CalendarPlanner{% endblock %}
 
 {% block content %}
-<div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-    <section class="rounded bg-white p-4 shadow md:col-span-2">
-        <h2 class="mb-2 text-2xl font-bold">Calendar</h2>
-        <p class="text-sm text-gray-600">Calendar UI lands in Phase 2.</p>
-        <p class="mt-4 text-sm"><strong>User:</strong> {{ user.email }}</p>
-        <p class="text-sm"><strong>Calendar ID:</strong> {{ user.calendar_id }}</p>
+<script src="https://unpkg.com/htmx.org@1.9.12"></script>
+
+<div class="grid grid-cols-1 gap-4 lg:grid-cols-4">
+    <section class="space-y-4 lg:col-span-3">
+        <div id="month-grid" hx-get="/calendar/month?year={{ now.year }}&month={{ now.month }}" hx-trigger="load" hx-swap="innerHTML">
+            <div class="rounded bg-white p-4 shadow">Loading month view...</div>
+        </div>
+        <div id="day-events" hx-get="/calendar/day?year={{ now.year }}&month={{ now.month }}&day={{ now.day }}" hx-trigger="load" hx-swap="innerHTML">
+            <div class="rounded bg-white p-4 shadow">Loading day events...</div>
+        </div>
     </section>
 
-    <aside class="rounded bg-white p-4 shadow">
-        <h3 class="mb-2 text-xl font-bold">Household</h3>
-        <div id="household-info" class="text-sm text-gray-600">Loading...</div>
-        <a href="/invite" class="mt-4 inline-block rounded bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700">Invite Member</a>
+    <aside class="space-y-4">
+        <div class="rounded bg-white p-4 shadow">
+            <h3 class="mb-3 text-lg font-semibold">Event Editor</h3>
+            {% include "partials/event_form.html" %}
+        </div>
+
+        <div class="rounded bg-white p-4 shadow">
+            <h3 class="mb-2 text-lg font-semibold">Household</h3>
+            <div id="household-info" class="text-sm text-gray-600">Loading...</div>
+            <a href="/invite" class="mt-3 inline-block rounded bg-blue-600 px-3 py-2 text-sm text-white hover:bg-blue-700">Invite Member</a>
+        </div>
     </aside>
 </div>
 
 <script>
+let currentYear = {{ now.year }};
+let currentMonth = {{ now.month }};
+let currentDay = {{ now.day }};
+
+function setMonthState(year, month) {
+  currentYear = year;
+  currentMonth = month;
+}
+
+function loadDay(year, month, day) {
+  currentYear = year;
+  currentMonth = month;
+  currentDay = day;
+  htmx.ajax('GET', `/calendar/day?year=${year}&month=${month}&day=${day}`, '#day-events');
+}
+
+function resetEventForm() {
+  document.getElementById('event-id').value = '';
+  document.getElementById('event-title').value = '';
+  document.getElementById('event-description').value = '';
+  document.getElementById('event-start').value = '';
+  document.getElementById('event-end').value = '';
+}
+
+function prefillEvent(id, title, description, startAt, endAt) {
+  document.getElementById('event-id').value = id;
+  document.getElementById('event-title').value = title;
+  document.getElementById('event-description').value = description;
+  document.getElementById('event-start').value = startAt;
+  document.getElementById('event-end').value = endAt;
+}
+
+async function refreshPanels() {
+  await htmx.ajax('GET', `/calendar/month?year=${currentYear}&month=${currentMonth}`, '#month-grid');
+  await htmx.ajax('GET', `/calendar/day?year=${currentYear}&month=${currentMonth}&day=${currentDay}`, '#day-events');
+}
+
+async function submitEventForm(event) {
+  event.preventDefault();
+  const eventId = document.getElementById('event-id').value;
+  const payload = {
+    title: document.getElementById('event-title').value,
+    description: document.getElementById('event-description').value || null,
+    start_at: new Date(document.getElementById('event-start').value).toISOString(),
+    end_at: new Date(document.getElementById('event-end').value).toISOString(),
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
+  };
+
+  const method = eventId ? 'PUT' : 'POST';
+  const endpoint = eventId ? `/api/events/${eventId}` : '/api/events';
+
+  const response = await fetch(endpoint, {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    alert(data.detail || 'Failed to save event');
+    return false;
+  }
+
+  const saved = await response.json();
+  const savedDate = new Date(saved.start_at);
+  currentYear = savedDate.getUTCFullYear();
+  currentMonth = savedDate.getUTCMonth() + 1;
+  currentDay = savedDate.getUTCDate();
+
+  resetEventForm();
+  await refreshPanels();
+  return false;
+}
+
+async function deleteEvent(eventId) {
+  const response = await fetch(`/api/events/${eventId}`, { method: 'DELETE' });
+  if (!response.ok) {
+    alert('Failed to delete event');
+    return;
+  }
+  await refreshPanels();
+}
+
 fetch('/api/users/household')
   .then((res) => res.json())
   .then((data) => {
