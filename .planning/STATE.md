@@ -124,6 +124,7 @@ v1.0 — Foundation through Image OCR (6 phases, 23 requirements)
 - Automated validation: `python -m pytest tests/test_events_api.py tests/test_calendar_views.py tests/test_events_integration.py tests/test_users.py tests/test_auth.py -q` (14 passed)
 - Phase 3 executed: RFC5545 recurrence engine, recurring UI fields, recurrence-expanded day/month rendering
 - Automated validation: `python -m pytest tests/test_recurrence.py tests/test_events_api.py tests/test_calendar_views.py tests/test_events_integration.py tests/test_users.py tests/test_auth.py -q` (16 passed)
+- Supabase MCP provisioning completed for project `zwciuzqozupxksdzofyd` (migration `20260318202504`): users, calendars, calendar_invitations, events tables created
 
 **What comes next:**
 
