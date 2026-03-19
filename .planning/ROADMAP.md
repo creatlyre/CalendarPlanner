@@ -42,17 +42,19 @@ Plans:
 
 ### Phase 10: Verify parser works with Polish language after localization
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Ensure NLP and OCR event parsing supports Polish language input (including diacritics) with parity to existing English parsing flows.
+**Requirements**: I18N-07
 **Depends on:** Phase 8, Phase 9
-**Plans:** 0 plans
+**Plans:** 2 plans
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 10 to break down)
+- [ ] 10-01-PLAN.md - Add locale-aware NLP/OCR parsing contracts for Polish text and diacritics
+- [ ] 10-02-PLAN.md - Add Polish parser/OCR verification tests and regression gate
 
 ---
 
 *Roadmap updated for v1.1 on 2026-03-19*
 *Phase 8: ✅ Complete and committed (2a4dd7c)*
 *Phase 9: ✅ Complete and committed (553369f) — 117/117 tests passing*
-*Next step: /gsd-plan-phase 10*
+*Phase 10: ✅ Planned (ready for execution)*
+*Next step: /gsd-execute-phase 10*
