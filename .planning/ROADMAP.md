@@ -156,7 +156,11 @@
 **Pitfalls Addressed:**
 - NLP date edge cases: validate against user's timezone + current date; limit initial implementation to explicit/relative formats; add user confirmation step
 
-**Plans:** TBD
+**Plans:** 3/3 planned
+
+- [ ] 05-01-PLAN.md - NLP parsing service + /api/events/parse endpoint
+- [ ] 05-02-PLAN.md - quick-add modal UI + parse/review/save orchestration  
+- [ ] 05-03-PLAN.md - error handling, confidence highlighting, fallback form, a11y
 
 ---
 
@@ -194,9 +198,9 @@
 | 2. Core Event Management | 4/4 | Complete | 2026-03-18 |
 | 3. Recurring Events | 2/2 | Complete | 2026-03-18 |
 | 4. Google Calendar Sync | 3/3 | Complete | 2026-03-18 |
-| 5. Natural Language Input | 0/2 | Not started | — |
+| 5. Natural Language Input | 0/3 | Planned | — |
 | 6. Image / OCR | 0/2 | Not started | — |
-| **TOTAL** | **12/16** | **In progress** | 2026-03-18 |
+| **TOTAL** | **12/19** | **In progress** | 2026-03-18 |
 
 ---
 
