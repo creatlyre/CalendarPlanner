@@ -25,6 +25,8 @@ class EventService:
         event = self.repository.get_by_id(event_id, calendar_id)
         if not event:
             raise ValueError("Event not found")
+        if event.visibility == "private" and event.created_by_user_id != user_id:
+            raise ValueError("Event not found")
 
         next_start = payload.start_at or event.start_at
         next_end = payload.end_at or event.end_at
@@ -38,20 +40,22 @@ class EventService:
         event = self.repository.get_by_id(event_id, calendar_id)
         if not event:
             raise ValueError("Event not found")
+        if event.visibility == "private" and event.created_by_user_id != user_id:
+            raise ValueError("Event not found")
         return self.repository.soft_delete(event, user_id)
 
-    def list_day(self, calendar_id: str, year: int, month: int, day: int):
-        return self.repository.list_for_day(calendar_id, year, month, day)
+    def list_day(self, calendar_id: str, year: int, month: int, day: int, *, requesting_user_id: str | None = None):
+        return self.repository.list_for_day(calendar_id, year, month, day, requesting_user_id=requesting_user_id)
 
-    def list_month(self, calendar_id: str, year: int, month: int):
-        return self.repository.list_for_month(calendar_id, year, month)
+    def list_month(self, calendar_id: str, year: int, month: int, *, requesting_user_id: str | None = None):
+        return self.repository.list_for_month(calendar_id, year, month, requesting_user_id=requesting_user_id)
 
-    def list_day_expanded(self, calendar_id: str, year: int, month: int, day: int):
+    def list_day_expanded(self, calendar_id: str, year: int, month: int, day: int, *, requesting_user_id: str | None = None):
         range_start = datetime(year, month, day, 0, 0, 0)
         range_end = datetime(year, month, day, 23, 59, 59)
 
-        base_events = self.repository.list_for_day(calendar_id, year, month, day)
-        recurrence_roots = self.repository.list_recurrence_roots_until(calendar_id, range_end)
+        base_events = self.repository.list_for_day(calendar_id, year, month, day, requesting_user_id=requesting_user_id)
+        recurrence_roots = self.repository.list_recurrence_roots_until(calendar_id, range_end, requesting_user_id=requesting_user_id)
 
         expanded = list(base_events)
         for root in recurrence_roots:
@@ -59,7 +63,7 @@ class EventService:
 
         return sorted(expanded, key=lambda item: item.start_at)
 
-    def list_month_expanded(self, calendar_id: str, year: int, month: int):
+    def list_month_expanded(self, calendar_id: str, year: int, month: int, *, requesting_user_id: str | None = None):
         range_start = datetime(year, month, 1, 0, 0, 0)
         if month == 12:
             next_month = datetime(year + 1, 1, 1, 0, 0, 0)
@@ -67,8 +71,8 @@ class EventService:
             next_month = datetime(year, month + 1, 1, 0, 0, 0)
         range_end = next_month - timedelta(seconds=1)
 
-        base_events = self.repository.list_for_month(calendar_id, year, month)
-        recurrence_roots = self.repository.list_recurrence_roots_until(calendar_id, range_end)
+        base_events = self.repository.list_for_month(calendar_id, year, month, requesting_user_id=requesting_user_id)
+        recurrence_roots = self.repository.list_recurrence_roots_until(calendar_id, range_end, requesting_user_id=requesting_user_id)
 
         expanded = list(base_events)
         for root in recurrence_roots:

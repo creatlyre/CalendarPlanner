@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import Literal, Optional
 
 from pydantic import BaseModel, Field
 
@@ -11,6 +11,7 @@ class EventCreate(BaseModel):
     end_at: datetime
     timezone: str = "UTC"
     rrule: Optional[str] = None
+    visibility: Literal["shared", "private"] = "shared"
 
 
 class EventUpdate(BaseModel):
@@ -20,6 +21,7 @@ class EventUpdate(BaseModel):
     end_at: Optional[datetime] = None
     timezone: Optional[str] = None
     rrule: Optional[str] = None
+    visibility: Optional[Literal["shared", "private"]] = None
 
 
 class EventResponse(BaseModel):
@@ -33,5 +35,6 @@ class EventResponse(BaseModel):
     timezone: str
     is_deleted: bool
     rrule: Optional[str] = None
+    visibility: str = "shared"
 
     model_config = {"from_attributes": True}

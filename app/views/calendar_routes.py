@@ -27,7 +27,7 @@ async def month_grid(
     db=Depends(get_db),
 ):
     service = _service(db)
-    events = service.list_month_expanded(user.calendar_id, year, month)
+    events = service.list_month_expanded(user.calendar_id, year, month, requesting_user_id=user.id)
 
     days = calendar.Calendar(firstweekday=0).monthdatescalendar(year, month)
 
@@ -67,7 +67,7 @@ async def day_events(
     db=Depends(get_db),
 ):
     service = _service(db)
-    events = service.list_day_expanded(user.calendar_id, year, month, day)
+    events = service.list_day_expanded(user.calendar_id, year, month, day, requesting_user_id=user.id)
 
     return templates.TemplateResponse(
         "partials/day_events.html",

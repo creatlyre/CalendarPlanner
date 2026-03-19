@@ -43,6 +43,7 @@ def _to_event(row: dict[str, Any]) -> Event:
         updated_at=_parse_dt(row.get("updated_at")),
         last_edited_by_user_id=row.get("last_edited_by_user_id"),
         is_deleted=bool(row.get("is_deleted", False)),
+        visibility=row.get("visibility") or "shared",
     )
 
 
@@ -64,6 +65,7 @@ class EventRepository:
                 "timezone": payload.timezone,
                 "rrule": payload.rrule,
                 "is_deleted": False,
+                "visibility": payload.visibility,
             },
         )
         return _to_event(row)
@@ -122,7 +124,17 @@ class EventRepository:
         events = [_to_event(item) for item in rows]
         return [item for item in events if item.start_at is not None]
 
-    def list_for_day(self, calendar_id: str, year: int, month: int, day: int) -> list[Event]:
+    @staticmethod
+    def _visible_to(events: list[Event], user_id: str | None) -> list[Event]:
+        """Filter out private events not owned by requesting user."""
+        if not user_id:
+            return events
+        return [
+            e for e in events
+            if e.visibility != "private" or e.created_by_user_id == user_id
+        ]
+
+    def list_for_day(self, calendar_id: str, year: int, month: int, day: int, *, requesting_user_id: str | None = None) -> list[Event]:
         day_start = datetime(year, month, day, 0, 0, 0)
         day_end = datetime(year, month, day, 23, 59, 59)
         events = [
@@ -130,20 +142,23 @@ class EventRepository:
             for item in self._all_active_for_calendar(calendar_id)
             if item.rrule is None and item.start_at and day_start <= item.start_at <= day_end
         ]
+        events = self._visible_to(events, requesting_user_id)
         return sorted(events, key=lambda item: item.start_at or datetime.min)
 
-    def list_for_month(self, calendar_id: str, year: int, month: int) -> list[Event]:
+    def list_for_month(self, calendar_id: str, year: int, month: int, *, requesting_user_id: str | None = None) -> list[Event]:
         events = [
             item
             for item in self._all_active_for_calendar(calendar_id)
             if item.rrule is None and item.start_at and item.start_at.year == year and item.start_at.month == month
         ]
+        events = self._visible_to(events, requesting_user_id)
         return sorted(events, key=lambda item: item.start_at or datetime.min)
 
-    def list_recurrence_roots_until(self, calendar_id: str, range_end: datetime) -> list[Event]:
+    def list_recurrence_roots_until(self, calendar_id: str, range_end: datetime, *, requesting_user_id: str | None = None) -> list[Event]:
         events = [
             item
             for item in self._all_active_for_calendar(calendar_id)
             if item.rrule is not None and item.start_at and item.start_at <= range_end
         ]
+        events = self._visible_to(events, requesting_user_id)
         return sorted(events, key=lambda item: item.start_at or datetime.min)

@@ -60,3 +60,4 @@ class Event:
     updated_at: datetime | None = None
     last_edited_by_user_id: str | None = None
     is_deleted: bool = False
+    visibility: str = "shared"

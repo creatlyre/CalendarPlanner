@@ -199,7 +199,7 @@ async def list_day(
     db=Depends(get_db),
 ):
     service = _service(db)
-    return service.list_day(user.calendar_id, year, month, day)
+    return service.list_day(user.calendar_id, year, month, day, requesting_user_id=user.id)
 
 
 @router.get("/month", response_model=list[EventResponse])
@@ -210,4 +210,4 @@ async def list_month(
     db=Depends(get_db),
 ):
     service = _service(db)
-    return service.list_month(user.calendar_id, year, month)
+    return service.list_month(user.calendar_id, year, month, requesting_user_id=user.id)
