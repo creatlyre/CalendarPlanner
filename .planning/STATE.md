@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-19T11:48:28.481Z"
+last_updated: "2026-03-19T12:03:17.387Z"
 progress:
   total_phases: 6
-  completed_phases: 5
-  total_plans: 15
-  completed_plans: 15
+  completed_phases: 4
+  total_plans: 17
+  completed_plans: 16
 ---
 
 # State: CalendarPlanner
@@ -21,8 +21,8 @@ progress:
 
 ## Current Position
 
-Phase: 05 (natural-language-input) - COMPLETE
-Plan: 3 of 3
+Phase: 05 (natural-language-input) — EXECUTING
+Plan: 4 of 5
 
 ## Phase Status
 
@@ -32,7 +32,7 @@ Plan: 3 of 3
 | 2. Core Event Management | Complete | 100% | 2026-03-18 |
 | 3. Recurring Events | Complete | 100% | 2026-03-18 |
 | 4. Google Calendar Sync | Complete | 100% | 2026-03-18 |
-| 5. Natural Language Input | Complete | 100% | 2026-03-19 |
+| 5. Natural Language Input | In Progress | 80% | 2026-03-19 |
 | 6. Image / OCR | Not started | 0% | 2026-03-18 |
 
 ---
@@ -62,6 +62,8 @@ v1.0 — Foundation through Image OCR (6 phases, 23 requirements)
 | EasyOCR (not Cloud Vision) | Privacy (local processing); offline; cost-effective | Approved |
 | 05-02 quick-add flow tracked as continuation | Task 1 already delivered in existing commit `f1e48be`; task 2 executed with new plan-aligned tests | Approved |
 | Parse error contract in UI tests | Parse endpoint currently returns HTTP 200 with `errors` list for recoverable parse failures | Approved |
+| 05-04 weekday and relative-day parser safeguards | Added plain weekday anchor handling and blocked `in N days` numeric token from being misread as clock hour | Approved |
+| 05-04 parse timezone source | Parse endpoint now resolves timezone from authenticated user/calendar context with UTC fallback | Approved |
 
 ---
 
@@ -132,6 +134,8 @@ v1.0 — Foundation through Image OCR (6 phases, 23 requirements)
 - Phase 5 discuss completed: captured implementation decisions in `.planning/phases/05-natural-language-input/05-CONTEXT.md`
 - Phase 5 plan 02 execution completed: quick-add modal orchestration verified and integration coverage refreshed (`test(05-02)` commit `71623dd`)
 - Automated validation: `.venv\\Scripts\\python.exe -m pytest -q tests/test_calendar_views.py` (13 passed)
+- Phase 5 plan 04 executed: NLP parser regressions fixed (plain weekday anchors, `in N days` hour semantics, recurrence-only anchor defaults) and parse timezone propagation wired from user/calendar context
+- Automated validation: `.venv\\Scripts\\python.exe -m pytest -q tests/test_nlp.py tests/test_events_api.py` (34 passed)
 
 **What comes next:**
 
@@ -141,7 +145,7 @@ Command to run:
 node "$HOME/.copilot/get-shit-done/bin/gsd-tools.cjs" next
 ```
 
-**Resume file:** `.planning/phases/05-natural-language-input/05-02-SUMMARY.md`
+**Resume file:** `.planning/phases/05-natural-language-input/05-04-SUMMARY.md`
 
 ---
 
