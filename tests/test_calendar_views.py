@@ -327,12 +327,12 @@ def test_google_sync_panel_wiring(authenticated_client):
     assert "fetch(`/api/sync/export-month?year=${currentYear}&month=${currentMonth}`" in html
     assert "fetch(`/api/sync/import-month?year=${currentYear}&month=${currentMonth}`" in html
     assert "formatSyncTimestamp" in html
-    assert "Last successful sync:" in html
+    assert "syncLastPrefix" in html
     assert "loadSyncStatus();" in html
     assert "syncRefreshBtn.addEventListener('click', loadSyncStatus)" in html
     assert "syncExportBtn.addEventListener('click', exportCurrentMonthToGoogle)" in html
     assert "syncImportBtn.addEventListener('click', importCurrentMonthFromGoogle)" in html
-    assert "No events found for this month" in html
+    assert "syncPullEmpty" in html
     assert "calendars_scanned" in html
 
 
@@ -398,7 +398,7 @@ def test_invite_back_link_present(authenticated_client):
     assert response.status_code == 200
     html = response.text
     assert 'href="/calendar"' in html
-    assert_contains_any(html, "Back to Calendar", "Powrot do kalendarza")
+    assert_contains_any(html, "Back to Calendar", "Powrot do kalendarza", "Powr\u00f3t do kalendarza")
     assert "focus-visible:ring-cyan-300" in html
 
 
@@ -408,7 +408,7 @@ def test_invite_back_link_present(authenticated_client):
 def test_event_entry_visibility_control_present(authenticated_client):
     html = _calendar_html(authenticated_client)
     assert 'id="event-entry-visibility"' in html
-    assert_contains_any(html, "Shared (household)", "Wspolne (domownicy)")
+    assert_contains_any(html, "Shared (household)", "Wspolne (domownicy)", "Wsp\u00f3lne (domownicy)")
     assert_contains_any(html, "Private (only me)", "Prywatne (tylko ja)")
     assert 'value="shared"' in html
     assert 'value="private"' in html
@@ -417,7 +417,7 @@ def test_event_entry_visibility_control_present(authenticated_client):
 def test_quick_add_visibility_control_present(authenticated_client):
     html = _calendar_html(authenticated_client)
     assert 'id="qa-parsed-visibility"' in html
-    assert_contains_any(html, "Shared (household)", "Wspolne (domownicy)")
+    assert_contains_any(html, "Shared (household)", "Wspolne (domownicy)", "Wsp\u00f3lne (domownicy)")
     assert_contains_any(html, "Private (only me)", "Prywatne (tylko ja)")
 
 

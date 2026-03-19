@@ -17,20 +17,22 @@
 
     <aside class="space-y-4">
         <div class="glass rounded-2xl p-4">
-            <div class="mb-3 flex items-center justify-between">
-          <h3 class="text-lg font-semibold text-white">{{ t('calendar.event_entry') }}</h3>
-          <button id="event-entry-open-btn"
-              type="button"
-              class="glass-btn-secondary rounded-xl px-3 py-1.5 text-sm font-medium">
-            {{ t('calendar.add_event') }}
-          </button>
+            <div class="mb-3">
+              <h3 class="text-lg font-semibold text-white mb-2">{{ t('calendar.event_entry') }}</h3>
+              <div class="flex flex-wrap gap-2">
+                <button id="event-entry-open-btn"
+                    type="button"
+                    class="glass-btn-secondary rounded-xl px-3 py-1.5 text-sm font-medium">
+                  {{ t('calendar.add_event') }}
+                </button>
                 <button id="qa-open-btn"
                         type="button"
                     class="glass-btn-primary rounded-xl px-3 py-1.5 text-sm font-medium">
                     &#9889; {{ t('calendar.quick_add') }}
                 </button>
+              </div>
             </div>
-              <p class="text-sm text-white/70">{{ t('calendar.entry_help') }}</p>
+            <p class="text-sm text-white/70">{{ t('calendar.entry_help') }}</p>
         </div>
 
       {% include "partials/event_entry_modal.html" %}
@@ -75,7 +77,21 @@ const I18N = {
   syncingNow: {{ t('sync.export_in_progress')|tojson }},
   pullNow: {{ t('sync.import_in_progress')|tojson }},
   syncFailed: {{ t('sync.failed')|tojson }},
-  pullFailed: {{ t('sync.pull_failed')|tojson }}
+  pullFailed: {{ t('sync.pull_failed')|tojson }},
+  syncLastPrefix: {{ t('sync.last_sync_prefix')|tojson }},
+  syncOauthNotConfigured: {{ t('sync.oauth_not_configured')|tojson }},
+  syncNotConnected: {{ t('sync.not_connected')|tojson }},
+  syncReady: {{ t('sync.ready')|tojson }},
+  syncMemberOne: {{ t('sync.member_one')|tojson }},
+  syncMemberFew: {{ t('sync.member_few')|tojson }},
+  syncSyncedResult: {{ t('sync.synced_result')|tojson }},
+  syncPullEmpty: {{ t('sync.pull_empty')|tojson }},
+  syncPullResult: {{ t('sync.pull_result')|tojson }},
+  syncWarnings: {{ t('sync.warnings')|tojson }},
+  syncReconnectGoogle: {{ t('sync.reconnect_google')|tojson }},
+  syncSyncFailedDetail: {{ t('sync.sync_failed_detail')|tojson }},
+  syncPullFailedDetail: {{ t('sync.pull_failed_detail')|tojson }},
+  householdMembersLabel: {{ t('household.members_label')|tojson }}
 };
 
 function pad2(value) {
@@ -473,7 +489,7 @@ fetch('/api/users/household')
   .then((data) => {
     const div = document.getElementById('household-info');
     const members = (data.members || []).map((m) => `<li>${m.email}</li>`).join('');
-    div.innerHTML = `<p><strong>Members:</strong> ${data.member_count}</p><ul class="mt-2 list-disc pl-5">${members}</ul>`;
+    div.innerHTML = `<p><strong>${I18N.householdMembersLabel}</strong> ${data.member_count}</p><ul class="mt-2 list-disc pl-5">${members}</ul>`;
   })
   .catch(() => {
     document.getElementById('household-info').textContent = I18N.householdFailed;
@@ -507,23 +523,23 @@ function setSyncBusy(isBusy) {
 function renderSyncStatus(data) {
   if (!data) {
     syncStatusEl.textContent = I18N.syncUnableLoad;
-    syncLastSuccessEl.textContent = 'Last successful sync: unknown';
+    syncLastSuccessEl.textContent = I18N.syncLastPrefix + I18N.syncUnknown;
     return;
   }
 
-  syncLastSuccessEl.textContent = `Last successful sync: ${formatSyncTimestamp(data.last_successful_sync_at)}`;
+  syncLastSuccessEl.textContent = I18N.syncLastPrefix + formatSyncTimestamp(data.last_successful_sync_at);
 
   if (!data.oauth_configured) {
-    syncStatusEl.textContent = 'Google OAuth is not configured on this server.';
+    syncStatusEl.textContent = I18N.syncOauthNotConfigured;
     syncConnectLink.classList.add('hidden');
     syncExportBtn.disabled = true;
     syncImportBtn.disabled = true;
     return;
   }
 
-  const householdText = data.household_users === 1 ? '1 member' : `${data.household_users} members`;
+  const householdText = data.household_users === 1 ? I18N.syncMemberOne : I18N.syncMemberFew.replace('{count}', data.household_users);
   if (!data.google_connected) {
-    syncStatusEl.textContent = `Google account not connected. Household: ${householdText}.`;
+    syncStatusEl.textContent = I18N.syncNotConnected.replace('{count}', householdText);
     syncConnectLink.href = data.connect_url || '/auth/login';
     syncConnectLink.classList.remove('hidden');
     syncExportBtn.disabled = true;
@@ -531,7 +547,7 @@ function renderSyncStatus(data) {
     return;
   }
 
-  syncStatusEl.textContent = `Ready to sync. Household: ${householdText}.`;
+  syncStatusEl.textContent = I18N.syncReady.replace('{count}', householdText);
   syncConnectLink.classList.add('hidden');
   syncExportBtn.disabled = false;
   syncImportBtn.disabled = false;
@@ -569,11 +585,11 @@ async function exportCurrentMonthToGoogle() {
 
     const result = await response.json();
     const errorCount = (result.errors || []).length;
-    syncResultEl.textContent = `Synced ${result.events_synced} event(s) across ${result.users_synced} user(s).` +
-      (errorCount ? ` ${errorCount} warning(s): ${(result.errors || []).slice(0, 2).join(' | ')}` : '');
+    syncResultEl.textContent = I18N.syncSyncedResult.replace('{events}', result.events_synced).replace('{users}', result.users_synced) +
+      (errorCount ? ' ' + I18N.syncWarnings.replace('{count}', errorCount) + (result.errors || []).slice(0, 2).join(' | ') : '');
     await loadSyncStatus();
   } catch (error) {
-    syncResultEl.textContent = `Sync failed: ${error.message || I18N.syncUnknown}`;
+    syncResultEl.textContent = I18N.syncSyncFailedDetail.replace('{error}', error.message || I18N.syncUnknown);
   } finally {
     setSyncBusy(false);
   }
@@ -600,18 +616,18 @@ async function importCurrentMonthFromGoogle() {
       syncConnectLink.classList.remove('hidden');
     }
     if (!errorCount && result.events_imported === 0 && result.events_updated === 0) {
-      syncResultEl.textContent = `Pull complete. No events found for this month in ${scanned} Google calendar(s).`;
+      syncResultEl.textContent = I18N.syncPullEmpty.replace('{count}', scanned);
     } else {
-      syncResultEl.textContent = `Pulled ${result.events_imported} new event(s), updated ${result.events_updated} event(s) from ${scanned} calendar(s).` +
-        (errorCount ? ` ${errorCount} warning(s): ${(result.errors || []).slice(0, 2).join(' | ')}` : '');
+      syncResultEl.textContent = I18N.syncPullResult.replace('{imported}', result.events_imported).replace('{updated}', result.events_updated).replace('{count}', scanned) +
+        (errorCount ? ' ' + I18N.syncWarnings.replace('{count}', errorCount) + (result.errors || []).slice(0, 2).join(' | ') : '');
     }
     if (result.requires_reauth) {
-      syncResultEl.textContent += ' Reconnect Google to grant calendar permissions.';
+      syncResultEl.textContent += I18N.syncReconnectGoogle;
     }
     await refreshPanels();
     await loadSyncStatus();
   } catch (error) {
-    syncResultEl.textContent = `Pull failed: ${error.message || I18N.syncUnknown}`;
+    syncResultEl.textContent = I18N.syncPullFailedDetail.replace('{error}', error.message || I18N.syncUnknown);
   } finally {
     setSyncBusy(false);
   }
