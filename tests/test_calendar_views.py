@@ -223,3 +223,50 @@ def test_quick_add_edit_review_fields(authenticated_client):
     assert 'id="qa-parsed-title"' in html
     assert 'id="qa-parsed-repeat"' in html
     assert 'id="qa-save-btn"' in html
+
+
+# ── Year disambiguation (05-05) ────────────────────────────────────────────
+
+def test_quick_add_parse_returns_ambiguity_metadata(authenticated_client):
+    """Parser returns ambiguous flag and year candidates for month/day without explicit year."""
+    # "december 25" from context 2026-03-19 → Dec 25 2026 is in future → ambiguous
+    response = authenticated_client.post(
+        "/api/events/parse",
+        json={"text": "doctor appointment december 25", "context_date": "2026-03-19"},
+    )
+    assert response.status_code == 200
+    data = response.json()
+    assert "ambiguous" in data
+    assert data["ambiguous"] is True
+    assert "year_candidates" in data
+    assert 2026 in data["year_candidates"]
+    assert 2027 in data["year_candidates"]
+
+
+def test_quick_add_ambiguity_phase_markup(authenticated_client):
+    """Calendar page includes disambiguation phase section in quick-add modal."""
+    html = _calendar_html(authenticated_client)
+    assert 'id="qa-ambiguity-phase"' in html
+    assert 'id="qa-ambiguity-event-summary"' in html
+
+
+def test_quick_add_year_choice_controls(authenticated_client):
+    """Calendar page includes container for dynamically rendered year choice buttons."""
+    html = _calendar_html(authenticated_client)
+    assert 'id="qa-year-choice-container"' in html
+    assert 'id="qa-ambiguity-back-btn"' in html
+
+
+def test_quick_add_ambiguity_state_handling(authenticated_client):
+    """JS state machine routes to ambiguity phase when parse result carries ambiguous flag."""
+    html = _calendar_html(authenticated_client)
+    assert "_ambiguityPending" in html
+    assert "parsed.ambiguous" in html
+    assert "showPhase('ambiguity')" in html
+    assert "selectAmbiguousYear" in html
+
+
+def test_quick_add_save_gated_on_unresolved_ambiguity(authenticated_client):
+    """Save action checks _ambiguityPending and blocks save until year is chosen."""
+    html = _calendar_html(authenticated_client)
+    assert "if (_ambiguityPending)" in html
