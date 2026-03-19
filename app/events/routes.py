@@ -11,6 +11,7 @@ from app.events.repository import EventRepository
 from app.events.schemas import EventCreate, EventResponse, EventUpdate
 from app.events.service import EventService
 from app.sync.service import GoogleSyncService
+from app.users.repository import UserRepository
 
 router = APIRouter(prefix="/api/events", tags=["events"])
 
@@ -40,6 +41,24 @@ def _service(db) -> EventService:
     return EventService(EventRepository(db))
 
 
+def _resolve_timezone(user, db) -> str:
+    """Resolve timezone from authenticated user context with safe UTC fallback."""
+    user_timezone = getattr(user, "timezone", None)
+    if isinstance(user_timezone, str) and user_timezone.strip():
+        return user_timezone.strip()
+
+    calendar_id = getattr(user, "calendar_id", None)
+    if calendar_id:
+        try:
+            calendar = UserRepository(db).get_calendar_by_id(calendar_id)
+            if calendar and calendar.timezone:
+                return calendar.timezone
+        except Exception:
+            pass
+
+    return "UTC"
+
+
 @router.post("/parse", response_model=ParseEventResponse)
 async def parse_event(payload: ParseEventRequest, user=Depends(get_current_user), db=Depends(get_db)):
     """Parse natural language text into structured event data."""
@@ -51,8 +70,7 @@ async def parse_event(payload: ParseEventRequest, user=Depends(get_current_user)
         except ValueError:
             raise HTTPException(status_code=400, detail="Invalid context_date format, use ISO 8601") from None
     
-    # For now, use UTC timezone (could be enhanced to fetch from calendar metadata)
-    timezone = "UTC"
+    timezone = _resolve_timezone(user, db)
     
     # Parse the text
     nlp = NLPService()

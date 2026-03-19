@@ -89,23 +89,36 @@ class NLPService:
 
         result.title = title
 
+        recurrence = self._parse_recurrence(text)
+
         # Parse dates and times
         parsed_dates = self._parse_dates(text, context_date, user_timezone)
 
         if not parsed_dates.get("start_at"):
-            if parsed_dates.get("error"):
-                result.errors.append(parsed_dates["error"])
+            # Allow recurrence-only input by anchoring to context date.
+            if recurrence:
+                hour, minute = self._extract_time_from_text(text)
+                start_at = context_date.replace(hour=hour, minute=minute, second=0, microsecond=0)
+                if start_at < context_date:
+                    start_at = start_at + timedelta(days=1)
+                parsed_dates = {
+                    "start_at": start_at,
+                    "end_at": start_at + timedelta(hours=1),
+                    "confidence": 0.7,
+                }
             else:
-                result.errors.append("No date found in input")
-            result.confidence_date = 0.0
-            return result
+                if parsed_dates.get("error"):
+                    result.errors.append(parsed_dates["error"])
+                else:
+                    result.errors.append("No date found in input")
+                result.confidence_date = 0.0
+                return result
 
-        result. start_at = parsed_dates["start_at"]
+        result.start_at = parsed_dates["start_at"]
         result.end_at = parsed_dates.get("end_at")
         result.confidence_date = parsed_dates.get("confidence", 1.0)
 
         # Parse recurrence
-        recurrence = self._parse_recurrence(text)
         if recurrence:
             result.recurrence = recurrence
             # Validate RRULE if we have a start_at
@@ -125,6 +138,8 @@ class NLPService:
         """Extract event title from text (first meaningful words)."""
         # Remove common date/time patterns to isolate title
         cleaned = text
+        cleaned = re.sub(r"\b\d{4}-\d{1,2}-\d{1,2}\b", " ", cleaned)
+        cleaned = re.sub(r"\b\d{1,2}/\d{1,2}/\d{4}\b", " ", cleaned)
         cleaned = re.sub(
             r"\b(at|on|in|this|next|last|tomorrow|today|yesterday)\b",
             "",
@@ -138,6 +153,9 @@ class NLPService:
         )
         cleaned = re.sub(r"\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\b", "", cleaned, flags=re.IGNORECASE)
         cleaned = re.sub(r"\b(mon|tue|wed|thu|fri|sat|sun)[a-z]*\b", "", cleaned, flags=re.IGNORECASE)
+        cleaned = re.sub(r"\b\d+\b", " ", cleaned)
+        cleaned = re.sub(r"[^A-Za-z\s]", " ", cleaned)
+        cleaned = re.sub(r"\s+", " ", cleaned).strip()
 
         # Take first 1-3 words
         words = [w for w in cleaned.split() if w.strip()]
@@ -164,15 +182,21 @@ class NLPService:
         result = self._parse_explicit_date(text, context_date, user_timezone)
         if result.get("start_at"):
             return result
+        if result.get("error"):
+            return result
 
         # Try relative dates (tomorrow, next Friday, etc.)
         result = self._parse_relative_date(text, context_date, user_timezone)
         if result.get("start_at"):
             return result
+        if result.get("error"):
+            return result
 
         # Try month/day patterns (March 15, December 25)
         result = self._parse_month_day(text, context_date, user_timezone)
         if result.get("start_at"):
+            return result
+        if result.get("error"):
             return result
 
         # No date found
@@ -190,7 +214,13 @@ class NLPService:
         if iso_match:
             try:
                 year, month, day = int(iso_match.group(1)), int(iso_match.group(2)), int(iso_match.group(3))
-                start_at = datetime(year, month, day, 9, 0)  # Default 09:00
+                hour, minute = self._extract_time_from_text(text)
+                start_at = datetime(year, month, day, hour, minute)
+                if start_at < context_date.replace(hour=0, minute=0, second=0, microsecond=0):
+                    return {
+                        "error": f"Date is in the past: {start_at.date()}",
+                        "start_at": None,
+                    }
                 end_at = start_at + timedelta(hours=1)
                 return {
                     "start_at": start_at,
@@ -205,7 +235,8 @@ class NLPService:
         if ddmmyyyy_match:
             try:
                 day, month, year = int(ddmmyyyy_match.group(1)), int(ddmmyyyy_match.group(2)), int(ddmmyyyy_match.group(3))
-                start_at = datetime(year, month, day, 9, 0)  # Default 09:00
+                hour, minute = self._extract_time_from_text(text)
+                start_at = datetime(year, month, day, hour, minute)
                 # Check if past
                 if start_at < context_date.replace(hour=0, minute=0, second=0, microsecond=0):
                     return {
@@ -277,6 +308,15 @@ class NLPService:
             modifier = day_match.group(1)
             day_name = day_match.group(2)
             target_date = self._find_day_of_week(context_date, day_name, modifier)
+            return self._build_date_result(target_date, text, context_date)
+
+        plain_day_match = re.search(
+            r"\b(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b",
+            text_lower,
+        )
+        if plain_day_match:
+            day_name = plain_day_match.group(1)
+            target_date = self._find_day_of_week(context_date, day_name, "this")
             return self._build_date_result(target_date, text, context_date)
 
         # "in N days"
@@ -377,19 +417,7 @@ class NLPService:
         context_date: datetime,
     ) -> dict:
         """Build a date result with extracted time."""
-        # Extract time if present
-        time_match = re.search(r"\b(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\b", text, re.IGNORECASE)
-        hour, minute = 9, 0  # Default time
-
-        if time_match:
-            hour = int(time_match.group(1))
-            minute = int(time_match.group(2) or 0)
-            am_pm = time_match.group(3)
-
-            if am_pm and am_pm.lower() == "pm" and hour < 12:
-                hour += 12
-            elif am_pm and am_pm.lower() == "am" and hour == 12:
-                hour = 0
+        hour, minute = self._extract_time_from_text(text)
 
         start_at = target_date.replace(hour=hour, minute=minute, second=0, microsecond=0)
 
@@ -400,9 +428,66 @@ class NLPService:
         end_at = start_at + timedelta(hours=1)
         return {"start_at": start_at, "end_at": end_at, "confidence": 0.95}
 
+    def _extract_time_from_text(self, text: str) -> tuple[int, int]:
+        """Extract explicit clock time; return default 09:00 when no explicit time exists."""
+        hour, minute = 9, 0
+
+        # Prefer explicit HH:MM time first.
+        colon_match = re.search(r"\b(\d{1,2}):(\d{2})\s*(am|pm)?\b", text, re.IGNORECASE)
+        if colon_match:
+            hour = int(colon_match.group(1))
+            minute = int(colon_match.group(2))
+            am_pm = colon_match.group(3)
+            if am_pm and am_pm.lower() == "pm" and hour < 12:
+                hour += 12
+            elif am_pm and am_pm.lower() == "am" and hour == 12:
+                hour = 0
+            return hour, minute
+
+        # Only treat bare hour as time when am/pm is present.
+        ampm_match = re.search(r"\b(\d{1,2})\s*(am|pm)\b", text, re.IGNORECASE)
+        if ampm_match:
+            hour = int(ampm_match.group(1))
+            am_pm = ampm_match.group(2)
+            if am_pm.lower() == "pm" and hour < 12:
+                hour += 12
+            elif am_pm.lower() == "am" and hour == 12:
+                hour = 0
+            return hour, minute
+
+        # Semantic time keywords.
+        text_lower = text.lower()
+        for pattern, (keyword_hour, keyword_minute) in self.TIME_DEFAULTS.items():
+            if re.search(pattern, text_lower):
+                return keyword_hour, keyword_minute
+
+        return hour, minute
+
     def _parse_recurrence(self, text: str) -> Optional[dict]:
         """Parse recurrence patterns like 'every Friday' or 'daily for 10 times'."""
         text_lower = text.lower()
+
+        interval_match = re.search(r"every\s+(\d+)\s+(week|day|month|year)[s]?", text_lower)
+        if interval_match:
+            interval = int(interval_match.group(1))
+            freq_word = interval_match.group(2)
+            freq_map = {
+                "day": "DAILY",
+                "week": "WEEKLY",
+                "month": "MONTHLY",
+                "year": "YEARLY",
+            }
+            recurrence = {"freq": freq_map.get(freq_word, "WEEKLY")}
+            if interval > 1:
+                recurrence["interval"] = interval
+            return recurrence
+
+        weekday_every_match = re.search(
+            r"\bevery\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b",
+            text_lower,
+        )
+        if weekday_every_match:
+            return {"freq": "WEEKLY"}
 
         # Check for frequency keywords
         freq = None
@@ -422,17 +507,6 @@ class NLPService:
 
         # Extract interval (e.g., "every 2 weeks")
         interval = 1
-        interval_match = re.search(r"every\s+(\d+)\s+(week|day|month|year)[s]?", text_lower)
-        if interval_match:
-            interval = int(interval_match.group(1))
-            freq_word = interval_match.group(2)
-            freq_map = {
-                "day": "DAILY",
-                "week": "WEEKLY",
-                "month": "MONTHLY",
-                "year": "YEARLY",
-            }
-            freq = freq_map.get(freq_word, freq)
 
         result = {"freq": freq}
         if count:
