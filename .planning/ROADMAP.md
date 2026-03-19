@@ -17,15 +17,9 @@
 - [x] **Phase 6: Image / OCR Event Extraction** - Image upload and date/time extraction with review
 
 ---
-
-## Phase Details
-
-### Phase 1: Foundation
-**Goal:** Enable OAuth2 authentication and establish two-user shared calendar model with persistent database schema.
-
 **Requirements Covered:** AUTH-01, AUTH-02, AUTH-03, EVT-07 (4 total)
+- [ ] **Phase 7: UI/UX Improvements** - Navigation affordances, form validation feedback, modal-based event entry
 
-**Entry Conditions:**
 - Project scaffolding complete (FastAPI, SQLAlchemy, Supabase PostgreSQL initialized)
 - Google OAuth2 credentials created in Google Cloud Console
 
@@ -193,8 +187,41 @@
 - [x] 06-01-PLAN.md - OCR service + image parse endpoint + quick-add scan/review/fallback integration
 
 ---
-
 ## Progress
+### Phase 7: UI/UX Improvements
+**Goal:** Eliminate navigation friction and improve event entry workflow through targeted UX fixes: back navigation on invite page, modal-based event input, user-friendly date/time picker, and real-time form validation.
+
+**Requirements Covered:** None (UX polish phase, all v1 functional requirements met)
+
+**Entry Conditions:**
+- Phase 5 complete (glassmorphism visual redesign + light/dark theme)
+- Phase 6 complete (all functional requirements met)
+
+**Success Criteria:**
+1. Invite page displays back button that navigates to `/calendar`
+2. Event entry modal opens/closes without errors and integrates with glassmorphism theme
+3. Date and time inputs render as separate fields with user-friendly pickers
+4. Form validation prevents invalid submissions and shows real-time error feedback
+5. Submit button state correctly reflects validation result (enabled/disabled)
+6. All modal and form styles match glassmorphism design system
+7. All 52 existing tests pass (no regressions)
+8. Keyboard navigation works: Tab cycles focus, Escape closes modal, E key opens modal
+9. Mobile responsive: full-width modal, 44px+ touch targets, form flows naturally
+
+**Pitfalls Addressed:**
+- Navigation trap on invite page: add affordance (back button) to return to calendar
+- Event entry friction: sidebar form cumbersome; move to floating modal for clarity
+- Form validation: client-side instant feedback prevents invalid submissions
+- Date/time UX: replace datetime-local with separate date + time inputs using native pickers
+
+**Plans:** 0/4 planned (ready for execution)
+
+- [ ] 07-01-PLAN.md - Back button + modal structure
+- [ ] 07-02-PLAN.md - Date/time picker inputs + validation logic
+- [ ] 07-03-PLAN.md - Keyboard shortcuts + accessibility audit
+- [ ] 07-04-PLAN.md - Mobile responsive polish + test coverage
+
+---
 
 | Phase | Plans Complete | Status | Completed |
 |-------|---|--------|-----------|
@@ -206,7 +233,8 @@
 | 6. Image / OCR | 1/1 | Complete | 2026-03-19 |
 | **TOTAL** | **18/18** | **Complete** | 2026-03-19 |
 
----
+| 7. UI/UX Improvements | 0/4 | Planned | 2026-03-19 |
+| **TOTAL** | **18/22** | **In Progress** | 2026-03-19 |
 
 ## Coverage Validation
 
