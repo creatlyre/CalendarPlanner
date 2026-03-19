@@ -37,8 +37,8 @@
 ### Natural Language Input
 
 - [ ] **NLP-01**: User can type a natural language event description (e.g., "dentist Thursday 2pm") and the app parses it into a structured event for review
-- [ ] **NLP-02**: Parsed event is shown for confirmation before saving
-- [ ] **NLP-03**: User can correct any parsed fields before saving
+- [x] **NLP-02**: Parsed event is shown for confirmation before saving
+- [x] **NLP-03**: User can correct any parsed fields before saving
 
 ### Image / OCR Event Extraction
 
