@@ -24,6 +24,8 @@ class ParseResult:
     recurrence: Optional[dict] = None  # e.g., {"freq": "WEEKLY", "count": 10}
     errors: list[str] = field(default_factory=list)
     raw_text: str = ""
+    ambiguous: bool = False          # True when year is uncertain (month/day without year)
+    year_candidates: list[int] = field(default_factory=list)
 
 
 class NLPService:
@@ -117,6 +119,8 @@ class NLPService:
         result.start_at = parsed_dates["start_at"]
         result.end_at = parsed_dates.get("end_at")
         result.confidence_date = parsed_dates.get("confidence", 1.0)
+        result.ambiguous = parsed_dates.get("ambiguous", False)
+        result.year_candidates = parsed_dates.get("year_candidates", [])
 
         # Parse recurrence
         if recurrence:
@@ -359,19 +363,26 @@ class NLPService:
             if match:
                 day = int(match.group(1))
                 try:
-                    # Try current year first
-                    target_date = datetime(context_date.year, month_num, day, 9, 0)
-                    if target_date < context_date:
-                        # Try next year
-                        target_date = datetime(context_date.year + 1, month_num, day, 9, 0)
-                    return {
-                        "start_at": target_date,
-                        "end_at": target_date + timedelta(hours=1),
-                        "confidence": 0.85,  # Month/day without year is slightly uncertain
-                    }
+                    current_year_date = datetime(context_date.year, month_num, day, 9, 0)
+                    if current_year_date >= context_date:
+                        # Current-year date is still future — both years plausible → ambiguous
+                        return {
+                            "start_at": current_year_date,
+                            "end_at": current_year_date + timedelta(hours=1),
+                            "confidence": 0.85,
+                            "ambiguous": True,
+                            "year_candidates": [context_date.year, context_date.year + 1],
+                        }
+                    else:
+                        # Current year is past — only next year is valid
+                        next_year_date = datetime(context_date.year + 1, month_num, day, 9, 0)
+                        return {
+                            "start_at": next_year_date,
+                            "end_at": next_year_date + timedelta(hours=1),
+                            "confidence": 0.85,
+                        }
                 except ValueError:
                     return {"error": f"Invalid day for {month_name}: {day}", "start_at": None}
-
         return {}
 
     def _find_day_of_week(

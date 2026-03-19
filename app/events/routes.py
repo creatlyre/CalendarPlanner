@@ -35,6 +35,8 @@ class ParseEventResponse(BaseModel):
     recurrence: Optional[dict] = None
     errors: list[str]
     raw_text: str
+    ambiguous: bool = False
+    year_candidates: list[int] = []
 
 
 def _service(db) -> EventService:
@@ -87,6 +89,8 @@ async def parse_event(payload: ParseEventRequest, user=Depends(get_current_user)
         recurrence=result.recurrence,
         errors=result.errors,
         raw_text=result.raw_text,
+        ambiguous=result.ambiguous,
+        year_candidates=result.year_candidates,
     )
 
 

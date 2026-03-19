@@ -21,7 +21,7 @@
                 <h3 class="text-lg font-semibold">Event Editor</h3>
                 <button id="qa-open-btn"
                         type="button"
-                        class="rounded bg-green-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-green-700">
+                    class="rounded bg-blue-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-blue-700">
                     &#9889; Quick Add
                 </button>
             </div>
@@ -138,6 +138,10 @@ async function submitEventForm(event) {
 }
 
 async function deleteEvent(eventId) {
+  if (!confirm('Delete this event? This cannot be undone.')) {
+    return;
+  }
+
   const response = await fetch(`/api/events/${eventId}`, { method: 'DELETE' });
   if (!response.ok) {
     alert('Failed to delete event');
@@ -162,6 +166,7 @@ fetch('/api/users/household')
   const qaModal       = document.getElementById('quick-add-modal');
   const qaTextEntry   = document.getElementById('qa-text-entry');
   const qaReview      = document.getElementById('qa-review-phase');
+  const qaAmbiguity   = document.getElementById('qa-ambiguity-phase');
   const qaLoading     = document.getElementById('qa-loading');
   const qaTextInput   = document.getElementById('qa-text-input');
   const qaParseBtn    = document.getElementById('qa-parse-btn');
@@ -174,6 +179,9 @@ fetch('/api/users/household')
 
   let _saveInFlight = false;
   let qaParseFailures = 0;
+  let _ambiguityPending = false;
+  let _ambiguousParseData = null;
+  let _ambiguousOriginalText = '';
 
   // ── Open / Close helpers ────────────────────────────────────────────────
   function openModal() {
@@ -194,6 +202,9 @@ fetch('/api/users/household')
     showPhase('text-entry');
     qaTextInput.value = '';
     qaParseFailures = 0;  // Reset failure counter
+    _ambiguityPending = false;
+    _ambiguousParseData = null;
+    _ambiguousOriginalText = '';
     hideError();
     hideSaveError();
     clearReviewFields();
@@ -204,6 +215,7 @@ fetch('/api/users/household')
     qaTextEntry.classList.toggle('hidden', phase !== 'text-entry');
     qaLoading.classList.toggle('hidden', phase !== 'loading');
     qaLoading.setAttribute('aria-hidden', phase !== 'loading' ? 'true' : 'false');
+    qaAmbiguity.classList.toggle('hidden', phase !== 'ambiguity');
     qaReview.classList.toggle('hidden', phase !== 'review');
     document.getElementById('qa-fallback-phase').classList.toggle('hidden', phase !== 'fallback');
   }
@@ -375,6 +387,27 @@ fetch('/api/users/household')
     qaLiveRegion.textContent = announcement;
   }
 
+  // ── Ambiguity resolution ──────────────────────────────────────────────────
+  function selectAmbiguousYear(year) {
+    _ambiguityPending = false;
+    // Clone parsed data and apply the chosen year to start/end
+    const parsed = { ..._ambiguousParseData };
+    if (parsed.start_at) {
+      const d = new Date(parsed.start_at);
+      d.setFullYear(year);
+      parsed.start_at = d.toISOString();
+    }
+    if (parsed.end_at) {
+      const d = new Date(parsed.end_at);
+      d.setFullYear(year);
+      parsed.end_at = d.toISOString();
+    }
+    populateReview(_ambiguousOriginalText, parsed);
+    showPhase('review');
+    document.getElementById('qa-parsed-title').focus();
+    qaSrStatus.textContent = `Year ${year} selected. Review your event details.`;
+  }
+
   // ── Build rrule string from review fields ─────────────────────────────
   function buildQARRule() {
     const freq  = document.getElementById('qa-parsed-repeat').value;
@@ -468,10 +501,32 @@ fetch('/api/users/household')
       }
 
       qaParseFailures = 0;  // Reset on successful parse
-      populateReview(text, parsed);
-      showPhase('review');
-      document.getElementById('qa-parsed-title').focus();
-      qaSrStatus.textContent = 'Parsed. Review your event details.';
+      if (parsed.ambiguous && parsed.year_candidates && parsed.year_candidates.length > 1) {
+        // Ambiguous year: present explicit year-choice phase before review
+        _ambiguityPending = true;
+        _ambiguousParseData = parsed;
+        _ambiguousOriginalText = text;
+        document.getElementById('qa-ambiguity-event-summary').textContent = parsed.title || text;
+        const container = document.getElementById('qa-year-choice-container');
+        container.innerHTML = '';
+        parsed.year_candidates.forEach(year => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'flex-1 rounded border border-gray-300 px-4 py-2 text-sm font-medium hover:bg-blue-50 hover:border-blue-400';
+          btn.dataset.year = year;
+          btn.textContent = String(year);
+          btn.setAttribute('aria-label', `Use year ${year}`);
+          btn.addEventListener('click', () => selectAmbiguousYear(year));
+          container.appendChild(btn);
+        });
+        showPhase('ambiguity');
+        qaLiveRegion.textContent = `Which year did you mean? Choose ${parsed.year_candidates.join(' or ')}.`;
+      } else {
+        populateReview(text, parsed);
+        showPhase('review');
+        document.getElementById('qa-parsed-title').focus();
+        qaSrStatus.textContent = 'Parsed. Review your event details.';
+      }
 
     } catch (err) {
       qaParseFailures++;
@@ -607,6 +662,11 @@ fetch('/api/users/household')
 
   // ── Save ─────────────────────────────────────────────────────────────────
   async function saveEvent(keepOpen) {
+    if (_ambiguityPending) {
+      showSaveError('Please choose the intended year before saving.');
+      showPhase('ambiguity');
+      return;
+    }
     hideSaveError();
     const payload = buildPayload();
 
@@ -666,6 +726,14 @@ fetch('/api/users/household')
   document.getElementById('qa-close-btn-text').addEventListener('click', closeModal);
 
   document.getElementById('qa-back-btn').addEventListener('click', () => {
+    showPhase('text-entry');
+    qaTextInput.focus();
+  });
+
+  document.getElementById('qa-ambiguity-back-btn').addEventListener('click', () => {
+    _ambiguityPending = false;
+    _ambiguousParseData = null;
+    _ambiguousOriginalText = '';
     showPhase('text-entry');
     qaTextInput.focus();
   });
