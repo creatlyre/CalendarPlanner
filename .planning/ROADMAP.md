@@ -156,11 +156,13 @@
 **Pitfalls Addressed:**
 - NLP date edge cases: validate against user's timezone + current date; limit initial implementation to explicit/relative formats; add user confirmation step
 
-**Plans:** 3/3 planned
+**Plans:** 5/5 planned
 
 - [ ] 05-01-PLAN.md - NLP parsing service + /api/events/parse endpoint
 - [ ] 05-02-PLAN.md - quick-add modal UI + parse/review/save orchestration  
 - [ ] 05-03-PLAN.md - error handling, confidence highlighting, fallback form, a11y
+- [ ] 05-04-PLAN.md - NLP parser gap fixes (weekday anchors, relative dates, timezone propagation)
+- [ ] 05-05-PLAN.md - ambiguity-year confirmation flow in quick-add UI + integration tests
 
 ---
 
