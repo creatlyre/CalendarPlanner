@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-19T12:03:17.387Z"
+last_updated: "2026-03-19T12:12:44.399Z"
 progress:
   total_phases: 6
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 17
-  completed_plans: 16
+  completed_plans: 17
 ---
 
 # State: CalendarPlanner
@@ -21,8 +21,8 @@ progress:
 
 ## Current Position
 
-Phase: 05 (natural-language-input) — EXECUTING
-Plan: 4 of 5
+Phase: 05 (natural-language-input) — COMPLETE
+Plan: 5 of 5 (all complete)
 
 ## Phase Status
 
@@ -32,7 +32,7 @@ Plan: 4 of 5
 | 2. Core Event Management | Complete | 100% | 2026-03-18 |
 | 3. Recurring Events | Complete | 100% | 2026-03-18 |
 | 4. Google Calendar Sync | Complete | 100% | 2026-03-18 |
-| 5. Natural Language Input | In Progress | 80% | 2026-03-19 |
+| 5. Natural Language Input | Complete | 100% | 2026-03-19 |
 | 6. Image / OCR | Not started | 0% | 2026-03-18 |
 
 ---
@@ -64,6 +64,8 @@ v1.0 — Foundation through Image OCR (6 phases, 23 requirements)
 | Parse error contract in UI tests | Parse endpoint currently returns HTTP 200 with `errors` list for recoverable parse failures | Approved |
 | 05-04 weekday and relative-day parser safeguards | Added plain weekday anchor handling and blocked `in N days` numeric token from being misread as clock hour | Approved |
 | 05-04 parse timezone source | Parse endpoint now resolves timezone from authenticated user/calendar context with UTC fallback | Approved |
+| 05-05 year disambiguation rule | ambiguous flag emitted only when month/day is still in future (both years plausible); past month/day silently picks next year | Approved |
+| 05-05 disambiguation gate | _ambiguityPending gates saveEvent; year choice dynamically rendered from year_candidates; selectAmbiguousYear clones parsed data and applies setFullYear | Approved |
 
 ---
 
@@ -145,7 +147,7 @@ Command to run:
 node "$HOME/.copilot/get-shit-done/bin/gsd-tools.cjs" next
 ```
 
-**Resume file:** `.planning/phases/05-natural-language-input/05-04-SUMMARY.md`
+**Resume file:** None
 
 ---
 
