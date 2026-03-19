@@ -13,15 +13,16 @@
 **Requirements:** I18N-01, I18N-04, I18N-05
 **Depends on:** Phase 7
 **Plans:** 3 plans
+**Status:** ✅ COMPLETE (2a4dd7c)
 **Success criteria:**
 1. Calendar, auth, event forms, quick-add modals, and sync surfaces render Polish copy by default for first-time and signed-in users.
 2. User-facing API error/validation messages used by UI flows are available in Polish via localization resources.
 3. Locale-aware date/time rendering uses Polish formatting when locale is `pl`.
 
 Plans:
-- [ ] 08-01-PLAN.md - Add i18n architecture, locale resources, and Polish default resolution
-- [ ] 08-02-PLAN.md - Convert templates/components/partials and API-facing copy to translation keys
-- [ ] 08-03-PLAN.md - Locale-aware date/time formatting and regression verification for Polish defaults
+- [x] 08-01-PLAN.md - Add i18n architecture, locale resources, and Polish default resolution
+- [x] 08-02-PLAN.md - Convert templates/components/partials and API-facing copy to translation keys
+- [x] 08-03-PLAN.md - Locale-aware date/time formatting and regression verification for Polish defaults
 
 ### Phase 9: Language switcher, persistence, and translation coverage
 
@@ -35,8 +36,8 @@ Plans:
 3. Automated tests verify default Polish, runtime switching, and key bilingual render paths.
 
 Plans:
-- [ ] 09-01-PLAN.md - Add language switch UI and request/session persistence mechanics
-- [ ] 09-02-PLAN.md - Expand integration and view tests for default locale and switch behavior
+- [ ] 09-01-PLAN.md - Add language switcher UI and request/session persistence mechanics (Wave 1)
+- [ ] 09-02-PLAN.md - Expand integration and view tests for default locale and switch behavior (Wave 2)
 
 ### Phase 10: Verify parser works with Polish language after localization
 
@@ -51,4 +52,6 @@ Plans:
 ---
 
 *Roadmap updated for v1.1 on 2026-03-19*
-*Next step: /gsd-plan-phase 8*
+*Phase 8: ✅ Complete and committed (2a4dd7c)*
+*Phase 9: ✅ Planning complete, READY FOR EXECUTION*
+*Next step: /gsd-execute-phase 09-language-switcher-persistence-and-translation-coverage*
