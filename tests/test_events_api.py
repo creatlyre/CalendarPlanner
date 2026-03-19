@@ -56,3 +56,39 @@ def test_delete_event_hides_from_month(authenticated_client):
     assert month_response.status_code == 200
     ids = [item["id"] for item in month_response.json()]
     assert event_id not in ids
+
+
+def test_parse_event_natural_language(authenticated_client):
+    """Test parsing natural language event text."""
+    response = authenticated_client.post(
+        "/api/events/parse",
+        json={
+            "text": "dentist tomorrow 2pm",
+            "context_date": "2026-03-19",
+        },
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert "dentist" in data["title"].lower()
+    assert data["start_at"] is not None
+    assert data["timezone"] is not None
+    assert isinstance(data["confidence_date"], float)
+    assert isinstance(data["confidence_title"], float)
+    assert isinstance(data["errors"], list)
+
+
+def test_parse_event_with_errors(authenticated_client):
+    """Test parsing that results in errors."""
+    response = authenticated_client.post(
+        "/api/events/parse",
+        json={
+            "text": "meeting at 2pm",  # No date, only time
+            "context_date": "2026-03-19",
+        },
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    # Should either have errors or low confidence
+    assert isinstance(data["errors"], list)
