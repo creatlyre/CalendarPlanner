@@ -48,8 +48,8 @@ Plans:
 **Plans:** 2/2 plans complete
 
 Plans:
-- [ ] 10-01-PLAN.md - Add locale-aware NLP/OCR parsing contracts for Polish text and diacritics
-- [ ] 10-02-PLAN.md - Add Polish parser/OCR verification tests and regression gate
+- [x] 10-01-PLAN.md - Add locale-aware NLP/OCR parsing contracts for Polish text and diacritics — Complete
+- [x] 10-02-PLAN.md - Add Polish parser/OCR verification tests and regression gate — Complete
 
 ---
 
