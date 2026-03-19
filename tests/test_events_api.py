@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 from app.auth.dependencies import get_current_user
 from app.database.database import get_db
 from app.database.models import User
+from app.events.nlp import NLPService
 from app.events.ocr import OCRParseResult
 from config import Settings
 from main import app
@@ -169,6 +170,98 @@ def test_ocr_parse_event_empty_upload(authenticated_client):
     )
 
     assert response.status_code == 400
+
+
+# ── Polish locale OCR/parse tests ────────────────────────────────────────────
+
+
+def test_ocr_parse_polish_locale_propagation(authenticated_client, monkeypatch):
+    """Verify OCR route passes Polish locale from request to parse_image."""
+    captured = {}
+    now = datetime(2026, 3, 20, 14, 0, 0)
+
+    def spy_parse_image(self, image_bytes, timezone, context_date, locale="en"):
+        captured["locale"] = locale
+        return OCRParseResult(
+            title="Koncert",
+            start_at=now,
+            end_at=now + timedelta(hours=1),
+            timezone=timezone,
+            confidence_title=0.80,
+            confidence_date=0.75,
+            confidence_raw=0.85,
+            raw_text="Koncert jutro o 14",
+            errors=[],
+        )
+
+    monkeypatch.setattr("app.events.routes.OCRService.parse_image", spy_parse_image)
+
+    response = authenticated_client.post(
+        "/api/events/ocr-parse?lang=pl",
+        data={"context_date": "2026-03-19"},
+        files={"image": ("plakat.png", b"fake-bytes", "image/png")},
+    )
+
+    assert response.status_code == 200
+    assert captured["locale"] == "pl"
+    data = response.json()
+    assert data["title"] == "Koncert"
+    assert data["raw_text"] == "Koncert jutro o 14"
+
+
+def test_parse_event_polish_locale_propagation(authenticated_client, monkeypatch):
+    """Verify parse route passes Polish locale from request to NLPService.parse."""
+    captured = {}
+    original_parse = NLPService.parse
+
+    def spy_parse(self, text, user_timezone, context_date=None, locale="en"):
+        captured["locale"] = locale
+        return original_parse(self, text, user_timezone, context_date, locale=locale)
+
+    monkeypatch.setattr("app.events.routes.NLPService.parse", spy_parse)
+
+    response = authenticated_client.post(
+        "/api/events/parse?lang=pl",
+        json={"text": "dentysta jutro o 14", "context_date": "2026-03-19"},
+    )
+
+    assert response.status_code == 200
+    assert captured["locale"] == "pl"
+    data = response.json()
+    assert data["errors"] == []
+    assert data["start_at"] is not None
+
+
+def test_ocr_parse_polish_diacritics_in_title(authenticated_client, monkeypatch):
+    """Verify OCR route preserves Polish diacritics in parsed title."""
+    now = datetime(2026, 3, 20, 10, 0, 0)
+
+    def fake_parse_image(self, image_bytes, timezone, context_date, locale="en"):
+        return OCRParseResult(
+            title="Zaj\u0119cia j\u0119zykowe",
+            start_at=now,
+            end_at=now + timedelta(hours=1),
+            timezone=timezone,
+            confidence_title=0.78,
+            confidence_date=0.70,
+            confidence_raw=0.82,
+            raw_text="Zaj\u0119cia j\u0119zykowe jutro rano",
+            errors=[],
+        )
+
+    monkeypatch.setattr("app.events.routes.OCRService.parse_image", fake_parse_image)
+
+    response = authenticated_client.post(
+        "/api/events/ocr-parse?lang=pl",
+        data={"context_date": "2026-03-19"},
+        files={"image": ("plakat.png", b"fake-bytes", "image/png")},
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    # Diacritics preserved in title
+    assert "ę" in data["title"]
+    assert data["raw_text"] == "Zaj\u0119cia j\u0119zykowe jutro rano"
 
 
 # ── Visibility tests ─────────────────────────────────────────────────────────
