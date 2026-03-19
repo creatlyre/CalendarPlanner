@@ -92,3 +92,24 @@ def test_parse_event_with_errors(authenticated_client):
     data = response.json()
     # Should either have errors or low confidence
     assert isinstance(data["errors"], list)
+
+
+def test_parse_event_uses_calendar_timezone(authenticated_client, test_db, test_user_a):
+    """Regression: parse endpoint should propagate user calendar timezone, not hardcoded UTC."""
+    test_db.update(
+        "calendars",
+        {"id": f"eq.{test_user_a.calendar_id}"},
+        {"timezone": "America/New_York"},
+    )
+
+    response = authenticated_client.post(
+        "/api/events/parse",
+        json={
+            "text": "dentist tomorrow 2pm",
+            "context_date": "2026-03-19",
+        },
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["timezone"] == "America/New_York"

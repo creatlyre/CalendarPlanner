@@ -58,6 +58,19 @@ class TestExplicitDateParsing:
 class TestRelativeDateParsing:
     """Test parsing of relative date formats."""
 
+    def test_parse_dentist_thursday_2pm(self, nlp_service, context_date):
+        """Regression: plain weekday anchors like 'Thursday' should parse without modifiers."""
+        result = nlp_service.parse(
+            "dentist Thursday 2pm",
+            "America/New_York",
+            context_date,
+        )
+        assert result.errors == []
+        assert result.start_at is not None
+        assert result.start_at.weekday() == 3  # Thursday
+        assert result.start_at.hour == 14
+        assert result.title.lower() == "dentist"
+
     def test_parse_tomorrow(self, nlp_service, context_date):
         """Test 'tomorrow' keyword."""
         result = nlp_service.parse(
@@ -79,6 +92,20 @@ class TestRelativeDateParsing:
         expected = context_date + timedelta(days=5)
         assert result.start_at.date() == expected.date()
         assert result.errors == []
+
+    def test_parse_in_3_days_keeps_default_hour(self, nlp_service, context_date):
+        """Regression: the day-count number should not be interpreted as an hour value."""
+        result = nlp_service.parse(
+            "meeting in 3 days",
+            "America/New_York",
+            context_date,
+        )
+        expected = context_date + timedelta(days=3)
+        assert result.errors == []
+        assert result.start_at is not None
+        assert result.start_at.date() == expected.date()
+        assert result.start_at.hour == 9
+        assert result.start_at.minute == 0
 
     def test_parse_next_friday(self, nlp_service, context_date):
         """Test 'next Friday' format."""
