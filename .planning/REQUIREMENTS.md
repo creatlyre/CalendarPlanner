@@ -1,4 +1,4 @@
-# Requirements: CalendarPlanner
+﻿# Requirements: CalendarPlanner
 
 **Defined:** 2026-03-18
 **Core Value:** A shared calendar both partners can edit that stays in sync with Google Calendar, so the family schedule is always current everywhere - on the web and on their phones.
@@ -56,6 +56,7 @@
 - [ ] **I18N-04**: Calendar, auth, events, sync, NLP, and OCR user-facing labels/messages are available in both Polish and English
 - [ ] **I18N-05**: Date and time presentation follows selected locale conventions (Polish vs English)
 - [ ] **I18N-06**: Automated test coverage verifies Polish default and English switching behavior on key user flows
+- [ ] **I18N-07**: NLP and OCR parsing accept Polish phrases and diacritics (ą, ć, ę, ł, ń, ó, ś, ź, ż) with behavior parity to English parsing flows
 
 ## v2 Requirements
 
@@ -112,12 +113,15 @@
 | I18N-02 | Phase 9 | Language switcher, persistence, and translation coverage | Pending |
 | I18N-03 | Phase 9 | Language switcher, persistence, and translation coverage | Pending |
 | I18N-06 | Phase 9 | Language switcher, persistence, and translation coverage | Pending |
+| I18N-07 | Phase 10 | Verify parser works with Polish language after localization | Pending |
 
 **Coverage:**
-- v1.1 requirements: 6 total
-- Mapped to phases: 6
+- v1.1 requirements: 7 total
+- Mapped to phases: 7
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-18*
 *Last updated: 2026-03-19 after starting v1.1 localization milestone*
+
+
