@@ -30,14 +30,15 @@ Plans:
 **Requirements:** I18N-02, I18N-03, I18N-06
 **Depends on:** Phase 8
 **Plans:** 2 plans
+**Status:** ✅ COMPLETE (553369f)
 **Success criteria:**
 1. User can switch between Polish and English from app navigation in authenticated and unauthenticated flows.
 2. Selected language persists across refresh and session restart.
 3. Automated tests verify default Polish, runtime switching, and key bilingual render paths.
 
 Plans:
-- [ ] 09-01-PLAN.md - Add language switcher UI and request/session persistence mechanics (Wave 1)
-- [ ] 09-02-PLAN.md - Expand integration and view tests for default locale and switch behavior (Wave 2)
+- [x] 09-01-PLAN.md - Add language switcher UI and request/session persistence mechanics (Wave 1) — Complete
+- [x] 09-02-PLAN.md - Expand integration and view tests for default locale and switch behavior (Wave 2) — Complete
 
 ### Phase 10: Verify parser works with Polish language after localization
 
@@ -53,5 +54,5 @@ Plans:
 
 *Roadmap updated for v1.1 on 2026-03-19*
 *Phase 8: ✅ Complete and committed (2a4dd7c)*
-*Phase 9: ✅ Planning complete, READY FOR EXECUTION*
-*Next step: /gsd-execute-phase 09-language-switcher-persistence-and-translation-coverage*
+*Phase 9: ✅ Complete and committed (553369f) — 117/117 tests passing*
+*Next step: /gsd-plan-phase 10*
