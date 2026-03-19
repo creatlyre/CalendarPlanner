@@ -38,6 +38,16 @@ Plans:
 - [ ] 09-01-PLAN.md - Add language switch UI and request/session persistence mechanics
 - [ ] 09-02-PLAN.md - Expand integration and view tests for default locale and switch behavior
 
+### Phase 10: Verify parser works with Polish language after localization
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 8, Phase 9
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 10 to break down)
+
 ---
 
 *Roadmap updated for v1.1 on 2026-03-19*

@@ -6,7 +6,7 @@ current_phase: 08
 status: planned
 last_updated: "2026-03-19T19:10:00.000Z"
 progress:
-  total_phases: 9
+  total_phases: 10
   completed_phases: 7
   total_plans: 0
   completed_plans: 0
@@ -41,3 +41,4 @@ See: .planning/PROJECT.md
 
 - Phase 8 repurposed for localization foundation and Polish default rollout
 - Phase 9 added for English switching, persistence, and test coverage
+- Phase 10 added: Verify parser works with Polish language after localization (depends on phases 8 and 9)
