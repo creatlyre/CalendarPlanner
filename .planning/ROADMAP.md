@@ -23,7 +23,8 @@
 
 ### v2.1 Privacy, Reminders & Multi-Year Budget
 
-- [x] **Phase 18: Event Privacy** - Validate & harden visibility toggle, filtering, sync retraction, and lock icon (completed 2026-03-20)
+- [x] **Phase 18: Event Privacy** - Validate & harden visibility toggle, filtering, sync retraction, and lock icon
+ (completed 2026-03-20)
 - [ ] **Phase 19: Reminder UI** - Wire reminder controls to existing backend in event forms
 - [ ] **Phase 20: Multi-Year Budget** - Fix data integrity (carry-forward, year-scoping) and enable year navigation
 - [ ] **Phase 21: Year-over-Year Comparison** - Side-by-side annual totals with delta indicators
@@ -54,7 +55,10 @@ Plans:
   2. User can add and remove custom reminders (up to 5) in the event form
   3. Event form shows helper text explaining reminders sync to Google Calendar
   4. Configured reminders sync to Google Calendar and trigger notifications on the user's phone
-**Plans**: TBD
+**Plans:** 1 plan
+
+Plans:
+- [ ] 19-01-PLAN.md — i18n keys, HTML reminder sections, JavaScript chip UI and submit wiring
 
 ### Phase 20: Multi-Year Budget
 **Goal**: Users can browse budget data for any past year in the overview dashboard
