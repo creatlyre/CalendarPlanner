@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Privacy, Reminders & Multi-Year Budget
 status: executing
-stopped_at: Completed 18-01-PLAN.md
+stopped_at: Completed 18-02-PLAN.md
 last_updated: "2026-03-20T20:36:42.143Z"
 last_activity: 2026-03-20
 progress:
   total_phases: 4
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 1
+  completed_plans: 2
 ---
 
 # Session State
@@ -20,17 +20,17 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-20)
 
 **Core value:** A shared calendar both partners can edit that stays in sync with Google Calendar.
-**Current focus:** Phase 18 — Event Privacy
+**Current focus:** Phase 19 — Reminder UI (next)
 
 ## Position
 
 **Milestone:** v2.1 Privacy, Reminders & Multi-Year Budget
 Phase: 18 of 21 (Event Privacy)
-Plan: 1 of 2 in current phase
-Status: Executing
+Plan: 2 of 2 in current phase ✅
+Status: Phase Complete
 Last activity: 2026-03-20
 
-[░░░░░░░░░░░░░░░░░░░░] 0/4 phases
+[█████░░░░░░░░░░░░░░░] 1/4 phases
 
 ## Performance Metrics
 
@@ -49,6 +49,7 @@ Last activity: 2026-03-20
 ## Accumulated Context
 
 | Phase 18 P01 | 3min | 2 tasks | 3 files |
+| Phase 18 P02 | 3min | 2 tasks | 2 files |
 
 ### Decisions
 
@@ -65,12 +66,11 @@ None yet.
 ### Blockers/Concerns
 
 - Carry-forward balance computation strategy needs validation during Phase 20 planning
-- Sync retraction (shared→private deleting from partner's GCal) not currently implemented — must ship WITH visibility toggle
 
 ## Session Continuity
 
-Last session: 2026-03-20T20:36:42.140Z
-Stopped at: Completed 18-01-PLAN.md
+Last session: 2026-03-20T20:41:00.000Z
+Stopped at: Completed 18-02-PLAN.md
 Resume file: None
 
 ## Session Log

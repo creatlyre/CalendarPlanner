@@ -37,9 +37,9 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | PRIV-01 | Phase 18 | Complete |
-| PRIV-02 | Phase 18 | Pending |
+| PRIV-02 | Phase 18 | Complete |
 | PRIV-03 | Phase 18 | Complete |
-| PRIV-04 | Phase 18 | Pending |
+| PRIV-04 | Phase 18 | Complete |
 | REM-01 | Phase 19 | Pending |
 | REM-02 | Phase 19 | Pending |
 | REM-03 | Phase 19 | Pending |
