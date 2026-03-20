@@ -22,6 +22,7 @@ class InMemoryStore:
             "calendars": [],
             "calendar_invitations": [],
             "events": [],
+            "budget_settings": [],
         }
 
     @staticmethod
@@ -124,6 +125,8 @@ class InMemoryStore:
             table = "calendar_invitations"
         elif item.__class__.__name__ == "Event":
             table = "events"
+        elif item.__class__.__name__ == "BudgetSettings":
+            table = "budget_settings"
         else:
             raise ValueError(f"Unsupported model for add(): {item.__class__.__name__}")
 
@@ -145,6 +148,8 @@ class InMemoryStore:
             table = "calendar_invitations"
         elif _item.__class__.__name__ == "Event":
             table = "events"
+        elif _item.__class__.__name__ == "BudgetSettings":
+            table = "budget_settings"
         else:
             return None
 

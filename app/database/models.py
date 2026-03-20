@@ -72,3 +72,16 @@ class Event:
         if self.reminder_minutes is not None:
             return [self.reminder_minutes]
         return []
+
+
+@dataclass
+class BudgetSettings:
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    calendar_id: str = ""
+    rate_1: float = 0.0
+    rate_2: float = 0.0
+    rate_3: float = 0.0
+    monthly_costs: float = 0.0
+    initial_balance: float = 0.0
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
