@@ -86,3 +86,28 @@ class BudgetSettings:
     initial_balance: float = 0.0
     created_at: datetime | None = None
     updated_at: datetime | None = None
+
+
+@dataclass
+class MonthlyHours:
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    calendar_id: str = ""
+    year: int = 0
+    month: int = 0
+    rate_1_hours: float | None = None
+    rate_2_hours: float | None = None
+    rate_3_hours: float | None = None
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+@dataclass
+class AdditionalEarning:
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    calendar_id: str = ""
+    year: int = 0
+    month: int = 0
+    name: str = ""
+    amount: float = 0.0
+    created_at: datetime | None = None
+    updated_at: datetime | None = None

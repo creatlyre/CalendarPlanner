@@ -23,6 +23,8 @@ class InMemoryStore:
             "calendar_invitations": [],
             "events": [],
             "budget_settings": [],
+            "monthly_hours": [],
+            "additional_earnings": [],
         }
 
     @staticmethod
@@ -113,6 +115,15 @@ class InMemoryStore:
     def count(self, table: str, filters: dict[str, str], auth_token: str | None = None) -> int:
         return len(self._apply_filters(self.tables.get(table, []), filters))
 
+    def delete(self, table: str, filters: dict[str, str], auth_token: str | None = None) -> int:
+        rows = self.tables.get(table, [])
+        original_len = len(rows)
+        self.tables[table] = [
+            r for r in rows
+            if not all(self._matches(r, k, v) for k, v in filters.items())
+        ]
+        return original_len - len(self.tables[table])
+
     def add(self, item: Any) -> None:
         if not is_dataclass(item):
             raise TypeError("Only dataclass models are supported in test store")
@@ -127,6 +138,10 @@ class InMemoryStore:
             table = "events"
         elif item.__class__.__name__ == "BudgetSettings":
             table = "budget_settings"
+        elif item.__class__.__name__ == "MonthlyHours":
+            table = "monthly_hours"
+        elif item.__class__.__name__ == "AdditionalEarning":
+            table = "additional_earnings"
         else:
             raise ValueError(f"Unsupported model for add(): {item.__class__.__name__}")
 
@@ -150,6 +165,10 @@ class InMemoryStore:
             table = "events"
         elif _item.__class__.__name__ == "BudgetSettings":
             table = "budget_settings"
+        elif _item.__class__.__name__ == "MonthlyHours":
+            table = "monthly_hours"
+        elif _item.__class__.__name__ == "AdditionalEarning":
+            table = "additional_earnings"
         else:
             return None
 

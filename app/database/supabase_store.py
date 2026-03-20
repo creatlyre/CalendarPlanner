@@ -218,3 +218,24 @@ class SupabaseStore:
             except ValueError:
                 return len(response.json())
         return len(response.json())
+
+    def delete(self, table: str, filters: Dict[str, str], auth_token: str | None = None) -> int:
+        url = f"{self.base_url}/rest/v1/{table}"
+        with httpx.Client(timeout=20.0) as client:
+            response = client.delete(
+                url,
+                params=filters,
+                headers=self._headers(auth_token=auth_token, content_type_json=False, prefer="return=representation"),
+            )
+        if response.status_code >= 400:
+            raise SupabaseStoreError(
+                "delete",
+                table,
+                response.status_code,
+                response.text,
+                request_id=response.headers.get("x-request-id"),
+                auth_context=self._auth_context(auth_token),
+                filters=filters,
+            )
+        data = response.json()
+        return len(data) if isinstance(data, list) else (1 if data else 0)
