@@ -1,5 +1,35 @@
 # Milestones
 
+## v1.1 Localization and Language Switching (Shipped: 2026-03-20)
+
+**Phases completed:** 4 phases, 10 plans, 0 tasks
+
+**Key accomplishments:**
+
+- Built i18n foundation with `resolve_locale()`, `translate()`, and Jinja template integration — Polish as default locale across all views.
+- Added language switcher UI (Polish/English) with cookie and localStorage persistence.
+- Enabled locale-aware NLP and OCR parsing with Polish keyword dictionaries and bilingual fallback.
+- Implemented day-click quick-entry for rapid event creation with auto-calculated end-time (+1h).
+- Added multi-reminder support to Event model with Google Calendar sync payload generation.
+- Comprehensive test coverage: 145 tests passing across auth, events, views, NLP, sync, and integration.
+
+**Stats:**
+
+- 60 files changed
+- 5,014 insertions, 479 deletions
+- Timeline: 2026-03-19 to 2026-03-20 (2 days)
+- 47 commits
+
+**Git range:** ebe4787 -> 4026efa
+
+**Known gaps:**
+
+- Phases 08, 09, 10 missing formal VERIFICATION.md files (process gaps only — all tests green)
+- Phase 9 SUMMARY frontmatter `requirements_completed` empty (should list I18N-02, I18N-03, I18N-06)
+- Reminder UI not exposed in quick-entry form (backend supports it, deferred to v2 REM-02)
+
+---
+
 ## v1.0 milestone (Shipped: 2026-03-19)
 
 **Delivered:** Household shared-calendar MVP with Google auth, event CRUD/recurrence, Google sync, NLP/OCR quick-add, and final UI/UX polish.
