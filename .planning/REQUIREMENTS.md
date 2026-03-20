@@ -1,4 +1,4 @@
-﻿# Requirements: CalendarPlanner
+# Requirements: CalendarPlanner
 
 **Defined:** 2026-03-18
 **Core Value:** A shared calendar both partners can edit that stays in sync with Google Calendar, so the family schedule is always current everywhere - on the web and on their phones.
