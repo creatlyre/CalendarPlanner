@@ -285,6 +285,13 @@ class GoogleSyncService:
             )
             return 0, 1
 
+        # Skip private events not owned by importing user
+        import_visibility = self._extract_cp_visibility(google_event)
+        import_ext = google_event.get("extendedProperties") or {}
+        import_owner = (import_ext.get("private") or {}).get("cp_owner_id")
+        if import_visibility == "private" and import_owner and import_owner != user_id:
+            return 0, 0
+
         inserted = self.db.insert(
             "events",
             {
@@ -328,6 +335,9 @@ class GoogleSyncService:
 
     def sync_event_for_household(self, event: Event, deleted: bool = False) -> SyncResult:
         users = self._sync_recipients(event)
+        all_household = self._household_users(event.calendar_id)
+        recipient_ids = {u.id for u in users}
+        non_recipients = [u for u in all_household if u.id not in recipient_ids]
         synced_users = 0
         synced_events = 0
         errors: list[str] = []
@@ -358,6 +368,22 @@ class GoogleSyncService:
             except Exception as exc:
                 errors.append(f"{user.email}: {exc}")
 
+        # Retract from non-recipients (shared→private removes from partner's GCal)
+        if not deleted:
+            for user in non_recipients:
+                try:
+                    creds = self._credentials_for_user(user)
+                    if not creds:
+                        continue
+                    service = self._google_service(creds)
+                    cal_id = self._ensure_user_calendar(service, user)
+                    existing = self._find_google_event(service, cal_id, event.id)
+                    if existing:
+                        service.events().delete(calendarId=cal_id, eventId=existing["id"]).execute()
+                        synced_events += 1
+                except Exception as exc:
+                    errors.append(f"{user.email}: {exc}")
+
         if hasattr(event, "google_sync_at"):
             event.google_sync_at = datetime.utcnow()
             self.db.update(
@@ -369,7 +395,7 @@ class GoogleSyncService:
 
     def export_month(self, user: User, year: int, month: int) -> SyncResult:
         service = EventService(EventRepository(self.db))
-        events = service.list_month_expanded(user.calendar_id, year, month)
+        events = service.list_month_expanded(user.calendar_id, year, month, requesting_user_id=user.id)
 
         total_users = 0
         total_events = 0
