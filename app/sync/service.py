@@ -122,21 +122,15 @@ class GoogleSyncService:
         return ids
 
     def _event_body(self, event: Event) -> dict:
-        reminder_minutes = getattr(event, "reminder_minutes", None)
-        if reminder_minutes is None:
-            reminder_minutes = self.settings.GOOGLE_EVENT_REMINDER_MINUTES
+        reminder_list = event.effective_reminders
 
         reminders: dict[str, object]
-        try:
-            minutes_int = int(reminder_minutes)
-        except (TypeError, ValueError):
-            minutes_int = -1
-
-        if minutes_int > 0:
+        if reminder_list:
             reminders = {
                 "useDefault": False,
                 "overrides": [
-                    {"method": "popup", "minutes": minutes_int}
+                    {"method": "popup", "minutes": minutes}
+                    for minutes in reminder_list
                 ],
             }
         else:
