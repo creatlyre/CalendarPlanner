@@ -81,7 +81,7 @@ All phase behaviors have automated verification.
 
 ---
 
-## Validation Audit 2026-03-20
+## Validation Audit 2026-03-20 (initial)
 
 | Metric | Count |
 |--------|-------|
@@ -90,3 +90,19 @@ All phase behaviors have automated verification.
 | Escalated | 0 |
 
 Reconstructed from phase artifacts (State B — no prior VALIDATION.md). All 3 requirements (I18N-02, I18N-03, I18N-06) have automated test coverage. 5 dedicated locale integration tests all pass.
+
+## Validation Audit 2026-03-20 (re-audit for milestone v1.1)
+
+| Metric | Count |
+|--------|-------|
+| Gaps found | 0 |
+| Resolved | 0 |
+| Escalated | 0 |
+
+Re-audited during `/gsd-audit-milestone v1.1`. State A (existing VALIDATION.md).
+
+**Cross-reference:**
+- I18N-02: `test_switch_locale_from_polish_to_english` — PASS
+- I18N-03: `test_locale_cookie_persists_across_reload` — PASS
+- I18N-06: 5 integration tests (`default_locale`, `switch_locale`, `locale_cookie`, `english_locale`, `query_param`) — all PASS
+- Full suite: 145/145 green, 0 regressions
