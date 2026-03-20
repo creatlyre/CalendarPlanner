@@ -7,6 +7,7 @@ from fastapi.exceptions import HTTPException
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+from starlette.middleware.base import BaseHTTPMiddleware
 
 from app.auth.dependencies import get_current_user
 from app.auth.routes import router as auth_router
@@ -35,6 +36,17 @@ app = FastAPI(
 templates = Jinja2Templates(directory="app/templates")
 
 app.mount("/static", StaticFiles(directory="public"), name="static")
+
+
+class StaticCacheMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        response = await call_next(request)
+        if request.url.path.startswith("/static/"):
+            response.headers["Cache-Control"] = "public, max-age=604800"
+        return response
+
+
+app.add_middleware(StaticCacheMiddleware)
 app.add_middleware(SessionValidationMiddleware)
 app.include_router(auth_router)
 app.include_router(users_router)

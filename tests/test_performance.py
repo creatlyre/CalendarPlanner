@@ -1,5 +1,9 @@
-"""PERF-01 and PERF-02: Performance optimization validation tests."""
+"""PERF-01, PERF-02, and PERF-03: Performance optimization validation tests."""
 import pathlib
+
+from fastapi.testclient import TestClient
+
+from main import app
 
 
 class TestNoCDN:
@@ -65,3 +69,23 @@ class TestConnectionPooling:
         # Cleanup
         s1._client.close()
         store_module._shared_client = None
+
+
+class TestCacheControlHeaders:
+    """PERF-03: Static CSS file served with Cache-Control headers."""
+
+    def test_static_css_has_cache_control(self):
+        """Verify /static/css/style.css response includes Cache-Control header."""
+        client = TestClient(app)
+        resp = client.get("/static/css/style.css")
+        assert resp.status_code == 200
+        assert "Cache-Control" in resp.headers
+        assert "public" in resp.headers["Cache-Control"]
+        assert "max-age=604800" in resp.headers["Cache-Control"]
+
+    def test_non_static_route_no_cache_header(self):
+        """Verify Cache-Control is NOT added to non-static routes."""
+        client = TestClient(app)
+        resp = client.get("/", follow_redirects=False)
+        cache = resp.headers.get("Cache-Control", "")
+        assert "max-age=604800" not in cache
