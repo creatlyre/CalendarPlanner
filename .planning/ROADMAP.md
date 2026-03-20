@@ -12,7 +12,8 @@
  (completed 2026-03-20)
 - [x] **Phase 13: Income Calculation Engine** — Monthly hours entry per rate, gross/net computation, additional household earnings
  (completed 2026-03-20)
-- [ ] **Phase 14: Expense Management** — Recurring and one-time expense CRUD with auto-application
+- [x] **Phase 14: Expense Management** — Recurring and one-time expense CRUD with auto-application
+ (completed 2026-03-20)
 - [ ] **Phase 15: Year Overview Dashboard** — 12-month financial table with running balance and live recalculation
 
 ## Phase Details
@@ -80,7 +81,7 @@ Plans:
 |-------|---------------|--------|-----------|
 | 12. Budget Data Foundation & Settings UI | 3/3 | Complete    | 2026-03-20 |
 | 13. Income Calculation Engine | 0/? | Complete    | 2026-03-20 |
-| 14. Expense Management | 0/? | Not started | - |
+| 14. Expense Management | 3/3 | Complete    | 2026-03-20 |
 | 15. Year Overview Dashboard | 0/? | Not started | - |
 
 ---

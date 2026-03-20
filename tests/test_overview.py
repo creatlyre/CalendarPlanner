@@ -1,0 +1,184 @@
+"""Integration tests for year overview dashboard (Phase 15)."""
+import uuid
+
+import pytest
+
+from app.database.models import BudgetSettings
+
+
+def _seed_settings(test_db, calendar_id, rate_1=100, rate_2=50, rate_3=0, zus=1000, acc=200, balance=10000):
+    s = BudgetSettings(
+        id=str(uuid.uuid4()),
+        calendar_id=calendar_id,
+        rate_1=rate_1,
+        rate_2=rate_2,
+        rate_3=rate_3,
+        zus_costs=zus,
+        accounting_costs=acc,
+        initial_balance=balance,
+    )
+    test_db.add(s)
+    return s
+
+
+class TestOverviewCalculation:
+    """YOV-01, YOV-02: Year overview calculation tests."""
+
+    def test_overview_returns_12_months(self, authenticated_client, test_db, test_user_a):
+        _seed_settings(test_db, test_user_a.calendar_id)
+        res = authenticated_client.get("/api/budget/overview?year=2026")
+        assert res.status_code == 200
+        data = res.json()["data"]
+        assert data["year"] == 2026
+        assert len(data["months"]) == 12
+
+    def test_overview_net_income_calculation(self, authenticated_client, test_db, test_user_a):
+        """YOV-02: Net = (rate*hours)*0.88 - costs for each rate."""
+        _seed_settings(test_db, test_user_a.calendar_id)
+        # rate_1=100, rate_2=50, rate_3=0, default hours=160
+        # net = (100*160)*0.88 + (50*160)*0.88 + (0*160)*0.88 - (1000+200)
+        # = 14080 + 7040 + 0 - 1200 = 19920
+        res = authenticated_client.get("/api/budget/overview?year=2026")
+        data = res.json()["data"]
+        assert data["months"][0]["net"] == 19920.0
+
+    def test_overview_monthly_balance_formula(self, authenticated_client, test_db, test_user_a):
+        """YOV-02: +/- = Net + Additional - Recurring Expenses - One-time Expenses."""
+        _seed_settings(test_db, test_user_a.calendar_id)
+        cid = test_user_a.calendar_id
+        # Add recurring expense and one-time expense
+        authenticated_client.post(
+            "/api/budget/expenses",
+            json={"year": 2026, "month": 0, "name": "Rent", "amount": 5000, "recurring": True},
+        )
+        authenticated_client.post(
+            "/api/budget/expenses",
+            json={"year": 2026, "month": 1, "name": "Insurance", "amount": 1200},
+        )
+        # Add additional earning for month 1
+        authenticated_client.post(
+            "/api/budget/income/earnings",
+            json={"year": 2026, "month": 1, "name": "Bonus", "amount": 3000},
+        )
+        res = authenticated_client.get("/api/budget/overview?year=2026")
+        m1 = res.json()["data"]["months"][0]
+        # balance = net(19920) + additional(3000) - recurring(5000) - onetime(1200) = 16720
+        assert m1["monthly_balance"] == 16720.0
+        # Month 2: no additional, no one-time
+        m2 = res.json()["data"]["months"][1]
+        assert m2["monthly_balance"] == 19920.0 - 5000.0  # 14920
+
+    def test_overview_with_recurring_earnings(self, authenticated_client, test_db, test_user_a):
+        """Recurring earnings (month=0) added to every month."""
+        _seed_settings(test_db, test_user_a.calendar_id)
+        authenticated_client.post(
+            "/api/budget/income/earnings",
+            json={"year": 2026, "month": 0, "name": "Partner salary", "amount": 4000},
+        )
+        res = authenticated_client.get("/api/budget/overview?year=2026")
+        # Every month should have 4000 in additional_earnings
+        for m in res.json()["data"]["months"]:
+            assert m["additional_earnings"] == 4000.0
+
+
+class TestOverviewRunningBalance:
+    """YOV-03, YOV-04: Running balance starting from initial_balance."""
+
+    def test_january_starts_from_initial_balance(self, authenticated_client, test_db, test_user_a):
+        """YOV-04: Jan account = initial_balance + Jan balance."""
+        _seed_settings(test_db, test_user_a.calendar_id, rate_1=100, rate_2=0, rate_3=0, zus=0, acc=0, balance=50000)
+        res = authenticated_client.get("/api/budget/overview?year=2026")
+        data = res.json()["data"]
+        assert data["initial_balance"] == 50000.0
+        jan = data["months"][0]
+        # net = (100*160)*0.88 = 14080, no expenses
+        assert jan["account_balance"] == 50000.0 + jan["monthly_balance"]
+
+    def test_running_balance_accumulates(self, authenticated_client, test_db, test_user_a):
+        """YOV-03: Each month accumulates from previous."""
+        _seed_settings(test_db, test_user_a.calendar_id, rate_1=100, rate_2=0, rate_3=0, zus=0, acc=0, balance=50000)
+        res = authenticated_client.get("/api/budget/overview?year=2026")
+        data = res.json()["data"]
+        running = data["initial_balance"]
+        for m in data["months"]:
+            running += m["monthly_balance"]
+            assert abs(m["account_balance"] - running) < 0.01
+
+    def test_running_balance_with_expenses(self, authenticated_client, test_db, test_user_a):
+        """Mixed recurring + one-time expenses show correct running total."""
+        _seed_settings(test_db, test_user_a.calendar_id, rate_1=100, rate_2=0, rate_3=0, zus=0, acc=0, balance=50000)
+        authenticated_client.post(
+            "/api/budget/expenses",
+            json={"year": 2026, "month": 0, "name": "Fixed", "amount": 2000, "recurring": True},
+        )
+        authenticated_client.post(
+            "/api/budget/expenses",
+            json={"year": 2026, "month": 6, "name": "Vacation", "amount": 10000},
+        )
+        res = authenticated_client.get("/api/budget/overview?year=2026")
+        data = res.json()["data"]
+        running = data["initial_balance"]
+        for m in data["months"]:
+            running += m["monthly_balance"]
+            assert abs(m["account_balance"] - running) < 0.01
+        # June should have bigger dip
+        june_bal = data["months"][5]["monthly_balance"]
+        may_bal = data["months"][4]["monthly_balance"]
+        assert june_bal < may_bal  # vacation makes June worse
+
+
+class TestOverviewAutoRecalculate:
+    """YOV-05: Recalculates on data change (API-level, no caching)."""
+
+    def test_overview_updates_after_adding_expense(self, authenticated_client, test_db, test_user_a):
+        _seed_settings(test_db, test_user_a.calendar_id, rate_1=100, rate_2=0, rate_3=0, zus=0, acc=0, balance=0)
+        res1 = authenticated_client.get("/api/budget/overview?year=2026")
+        jan1 = res1.json()["data"]["months"][0]["monthly_balance"]
+
+        authenticated_client.post(
+            "/api/budget/expenses",
+            json={"year": 2026, "month": 1, "name": "New expense", "amount": 500},
+        )
+        res2 = authenticated_client.get("/api/budget/overview?year=2026")
+        jan2 = res2.json()["data"]["months"][0]["monthly_balance"]
+        assert jan2 == jan1 - 500
+
+    def test_overview_updates_after_changing_hours(self, authenticated_client, test_db, test_user_a):
+        _seed_settings(test_db, test_user_a.calendar_id, rate_1=100, rate_2=0, rate_3=0, zus=0, acc=0, balance=0)
+        res1 = authenticated_client.get("/api/budget/overview?year=2026")
+        jan1_net = res1.json()["data"]["months"][0]["net"]
+
+        # Change hours to 80 for January
+        authenticated_client.put(
+            "/api/budget/income/hours",
+            json={"year": 2026, "month": 1, "rate_1_hours": 80},
+        )
+        res2 = authenticated_client.get("/api/budget/overview?year=2026")
+        jan2_net = res2.json()["data"]["months"][0]["net"]
+        assert jan2_net < jan1_net  # Less hours = less income
+
+
+class TestOverviewPage:
+    """Page rendering tests."""
+
+    def test_overview_page_renders(self, authenticated_client):
+        res = authenticated_client.get("/budget/overview")
+        assert res.status_code == 200
+        html = res.text
+        assert "overview-content" in html
+        assert "overview-body" in html
+
+    def test_overview_page_has_sidebar(self, authenticated_client):
+        res = authenticated_client.get("/budget/overview")
+        html = res.text
+        assert "/budget/settings" in html
+        assert "/budget/income" in html
+        assert "/budget/expenses" in html
+
+    def test_overview_requires_auth(self, test_client):
+        res = test_client.get("/budget/overview", follow_redirects=False)
+        assert res.status_code in (302, 303, 401)
+
+    def test_overview_api_requires_auth(self, test_client):
+        res = test_client.get("/api/budget/overview?year=2026")
+        assert res.status_code in (302, 303, 401)

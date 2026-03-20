@@ -256,5 +256,15 @@
   "budget.expenses_bulk_parsed": "Sparsowano",
   "budget.expenses_bulk_skipped": "Pominięto",
   "budget.expenses_bulk_added": "Dodano wydatki",
-  "budget.expenses_bulk_edit": "Edytuj"
+  "budget.expenses_bulk_edit": "Edytuj",
+  "budget.overview_page_title": "Przegl\u0105d roczny",
+  "budget.overview_net_income": "Doch\u00f3d netto",
+  "budget.overview_additional": "Dodatkowe przychody",
+  "budget.overview_recurring_exp": "Wydatki sta\u0142e",
+  "budget.overview_onetime_exp": "Wydatki jednorazowe",
+  "budget.overview_monthly_balance": "+/- miesi\u0105c",
+  "budget.overview_account_balance": "Stan konta",
+  "budget.overview_initial_balance": "Saldo pocz\u0105tkowe",
+  "budget.overview_no_settings": "Najpierw skonfiguruj ustawienia bud\u017cetu",
+  "budget.overview_yearly_total": "Razem rok"
 }

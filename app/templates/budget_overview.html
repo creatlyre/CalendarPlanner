@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('budget.overview_page_title') }} - {{ t('app.name') }}{% endblock %}
+
+{% block content %}
+<div class="flex flex-col lg:flex-row gap-6">
+
+  <!-- Sidebar -->
+  <nav class="w-full lg:w-48 flex-shrink-0">
+    <div class="glass rounded-2xl p-4">
+      <div class="flex lg:flex-col gap-2">
+        <a href="/budget/settings" class="px-4 py-3 text-sm font-medium rounded-xl block hover:bg-white/5 transition-colors">
+          {{ t('budget.sidebar_settings') }}
+        </a>
+        <a href="/budget/income" class="px-4 py-3 text-sm font-medium rounded-xl block hover:bg-white/5 transition-colors">
+          {{ t('budget.sidebar_income') }}
+        </a>
+        <a href="/budget/expenses" class="px-4 py-3 text-sm font-medium rounded-xl block hover:bg-white/5 transition-colors">
+          {{ t('budget.sidebar_expenses') }}
+        </a>
+        <!-- Active: Overview -->
+        <div class="px-4 py-3 text-sm font-medium rounded-xl" style="background: rgba(99,102,241,0.22); color: rgba(165,180,252,1);">
+          {{ t('budget.sidebar_overview') }}
+        </div>
+        <a href="/" class="glass-btn-secondary rounded-xl px-4 py-3 text-sm font-medium block text-center lg:mt-4">
+          {{ t('budget.back') }}
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <div class="flex-1 overflow-x-auto">
+    <!-- No settings warning -->
+    <div id="no-settings" class="hidden glass rounded-2xl p-6 mb-6 text-center">
+      <h3 class="text-lg font-semibold mb-2">⚠</h3>
+      <p class="text-sm opacity-70">{{ t('budget.overview_no_settings') }}</p>
+      <a href="/budget/settings" class="glass-btn-primary rounded-xl px-4 py-2 mt-4 inline-block text-sm">{{ t('budget.sidebar_settings') }}</a>
+    </div>
+
+    <!-- Loading skeleton -->
+    <div id="skeleton-loader">
+      <div class="glass rounded-2xl p-6">
+        <div class="animate-pulse bg-white/5 h-8 w-48 rounded mb-4 mx-auto"></div>
+        <div class="space-y-2">
+          {% for i in range(6) %}
+          <div class="animate-pulse bg-white/5 h-8 rounded"></div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Main overview content -->
+    <div id="overview-content" class="hidden">
+      <!-- Year picker -->
+      <div class="flex items-center justify-center gap-4 mb-6">
+        <button id="year-prev" class="glass-btn-secondary rounded-xl px-3 py-2 text-sm font-medium">←</button>
+        <span id="year-display" class="text-xl font-bold"></span>
+        <button id="year-next" class="glass-btn-secondary rounded-xl px-3 py-2 text-sm font-medium">→</button>
+      </div>
+
+      <!-- Initial balance display -->
+      <div class="text-xs opacity-60 text-center mb-3">
+        {{ t('budget.overview_initial_balance') }}: <span id="initial-balance" class="font-medium">0.00</span> {{ t('budget.currency') }}
+      </div>
+
+      <!-- Overview table -->
+      <div class="glass rounded-xl p-4">
+        <table class="w-full text-sm" id="overview-table">
+          <thead>
+            <tr class="text-xs opacity-60 border-b border-white/10">
+              <th class="text-left py-2 px-2 font-medium">{{ t('budget.expenses_month') }}</th>
+              <th class="text-right py-2 px-2 font-medium">{{ t('budget.overview_net_income') }}</th>
+              <th class="text-right py-2 px-2 font-medium">{{ t('budget.overview_additional') }}</th>
+              <th class="text-right py-2 px-2 font-medium">{{ t('budget.overview_recurring_exp') }}</th>
+              <th class="text-right py-2 px-2 font-medium">{{ t('budget.overview_onetime_exp') }}</th>
+              <th class="text-right py-2 px-2 font-medium">{{ t('budget.overview_monthly_balance') }}</th>
+              <th class="text-right py-2 px-2 font-medium">{{ t('budget.overview_account_balance') }}</th>
+            </tr>
+          </thead>
+          <tbody id="overview-body"></tbody>
+          <tfoot>
+            <tr class="border-t-2 border-white/20 font-semibold text-sm">
+              <td class="py-2 px-2">{{ t('budget.overview_yearly_total') }}</td>
+              <td class="text-right py-2 px-2" id="total-net">0.00</td>
+              <td class="text-right py-2 px-2" id="total-additional">0.00</td>
+              <td class="text-right py-2 px-2" id="total-recurring">0.00</td>
+              <td class="text-right py-2 px-2" id="total-onetime">0.00</td>
+              <td class="text-right py-2 px-2" id="total-balance">0.00</td>
+              <td class="text-right py-2 px-2"></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const monthNames = [
+    '{{ t("budget.income_month_jan") }}', '{{ t("budget.income_month_feb") }}',
+    '{{ t("budget.income_month_mar") }}', '{{ t("budget.income_month_apr") }}',
+    '{{ t("budget.income_month_may") }}', '{{ t("budget.income_month_jun") }}',
+    '{{ t("budget.income_month_jul") }}', '{{ t("budget.income_month_aug") }}',
+    '{{ t("budget.income_month_sep") }}', '{{ t("budget.income_month_oct") }}',
+    '{{ t("budget.income_month_nov") }}', '{{ t("budget.income_month_dec") }}'
+  ];
+
+  const currency = '{{ t("budget.currency") }}';
+  let currentYear = new Date().getFullYear();
+
+  function fmt(n) {
+    const s = Math.abs(n).toFixed(2);
+    const parts = s.split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    return (n < 0 ? '-' : '') + parts.join('.');
+  }
+
+  function colorClass(val) {
+    if (val > 0) return 'color: #4ade80;'; // green
+    if (val < 0) return 'color: #f87171;'; // red
+    return '';
+  }
+
+  async function loadSettings() {
+    const res = await fetch('/api/budget/settings');
+    const json = await res.json();
+    return json.data;
+  }
+
+  async function loadOverview() {
+    const res = await fetch('/api/budget/overview?year=' + currentYear);
+    const json = await res.json();
+    return json.data;
+  }
+
+  function render(data) {
+    const tbody = document.getElementById('overview-body');
+    document.getElementById('initial-balance').textContent = fmt(data.initial_balance);
+
+    let totNet = 0, totAdd = 0, totRec = 0, totOt = 0, totBal = 0;
+
+    tbody.innerHTML = data.months.map(m => {
+      totNet += m.net;
+      totAdd += m.additional_earnings;
+      totRec += m.recurring_expenses;
+      totOt += m.onetime_expenses;
+      totBal += m.monthly_balance;
+
+      return `<tr class="border-b border-white/5 hover:bg-white/3">
+        <td class="py-1.5 px-2 font-medium">${monthNames[m.month - 1]}</td>
+        <td class="py-1.5 px-2 text-right">${fmt(m.net)}</td>
+        <td class="py-1.5 px-2 text-right">${fmt(m.additional_earnings)}</td>
+        <td class="py-1.5 px-2 text-right">${fmt(m.recurring_expenses)}</td>
+        <td class="py-1.5 px-2 text-right">${fmt(m.onetime_expenses)}</td>
+        <td class="py-1.5 px-2 text-right font-medium" style="${colorClass(m.monthly_balance)}">${fmt(m.monthly_balance)}</td>
+        <td class="py-1.5 px-2 text-right font-medium" style="${colorClass(m.account_balance)}">${fmt(m.account_balance)}</td>
+      </tr>`;
+    }).join('');
+
+    document.getElementById('total-net').textContent = fmt(totNet);
+    document.getElementById('total-additional').textContent = fmt(totAdd);
+    document.getElementById('total-recurring').textContent = fmt(totRec);
+    document.getElementById('total-onetime').textContent = fmt(totOt);
+    const totalBalEl = document.getElementById('total-balance');
+    totalBalEl.textContent = fmt(totBal);
+    totalBalEl.style = colorClass(totBal);
+  }
+
+  // Year navigation
+  document.getElementById('year-prev').addEventListener('click', () => { currentYear--; reload(); });
+  document.getElementById('year-next').addEventListener('click', () => { currentYear++; reload(); });
+
+  async function reload() {
+    document.getElementById('year-display').textContent = currentYear;
+    const data = await loadOverview();
+    render(data);
+  }
+
+  async function init() {
+    document.getElementById('year-display').textContent = currentYear;
+    try {
+      const settings = await loadSettings();
+      if (!settings) {
+        document.getElementById('skeleton-loader').classList.add('hidden');
+        document.getElementById('no-settings').classList.remove('hidden');
+        return;
+      }
+      const data = await loadOverview();
+      document.getElementById('skeleton-loader').classList.add('hidden');
+      document.getElementById('overview-content').classList.remove('hidden');
+      render(data);
+    } catch(e) {
+      console.error('Failed to load overview', e);
+      document.getElementById('skeleton-loader').classList.add('hidden');
+    }
+  }
+
+  init();
+})();
+</script>
+{% endblock %}
