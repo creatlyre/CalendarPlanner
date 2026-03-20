@@ -1,26 +1,29 @@
 # Milestones
 
-## v3.0 Overview Detail & Performance (Shipped: 2026-03-20)
+## v2.0 Budget Tracker (Shipped: 2026-03-20)
 
-**Phases completed:** 2 phases (16-17), 4 plans
+**Phases completed:** 6 phases (12-17), 14 plans
 
 **Key accomplishments:**
 
-- Accordion month detail in year overview — click any month row to expand inline one-time expense breakdown with full CRUD (add, edit, delete)
-- Replaced Tailwind CDN play script (~300KB runtime) with prebuilt static CSS (34KB minified)
-- Added httpx connection pooling in SupabaseStore (shared singleton client)
-- FastAPI StaticFiles mount for serving CSS with caching headers
-- 6 new integration tests for month detail CRUD
-- 222 tests passing across all subsystems
+- Budget settings with 3 hourly rates, ZUS/accounting costs, and initial bank balance
+- Income calculation engine with gross/net per month, additional household earnings
+- Recurring and one-time expense management with CRUD
+- 12-month year overview with running account balance
+- Accordion month detail — click any month to expand inline one-time expense CRUD
+- Prebuilt Tailwind CSS (34KB) replacing CDN runtime dependency (~300KB)
+- httpx connection pooling and Cache-Control headers on static assets
+- 230 tests passing across all subsystems
 
 **Stats:**
 
-- 11 files changed
-- 598 insertions, 298 deletions
+- 23 files changed (Phases 16-17 alone: 1,627 insertions, 321 deletions)
 - Timeline: 2026-03-20 (1 day)
-- 10 commits
+- 12 commits
 
-**Git range:** v2.0 -> v3.0
+**Git range:** v1.1 -> v2.0
+
+---
 
 ## v1.1 Localization and Language Switching (Shipped: 2026-03-20)
 

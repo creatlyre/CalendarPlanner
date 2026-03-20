@@ -8,26 +8,16 @@ A shared household calendar web application that lets two people (e.g., partners
 
 A shared calendar both partners can edit that stays in sync with Google Calendar, so the family schedule is always current everywhere — on the web and on their phones.
 
-## Current Milestone: v2.0 Budget Tracker
-
-**Goal:** Add household budget tracking with income calculation from hourly rates, expense management, and 12-month financial overview.
-
-**Target features:**
-- Income settings with 3 hourly rates, per-month hours, and tax/cost deductions
-- Additional household earnings (partner salary, child bonuses)
-- Recurring and one-time expense tracking
-- 12-month year overview with running account balance
-- Settings UI integrated into existing app navigation
-
 ## Current State
 
-- v1.1 shipped on 2026-03-20.
+- v2.0 shipped on 2026-03-20.
+- Full household budget tracker: income calculation from 3 hourly rates, expense management, 12-month year overview with running balance.
+- Accordion month detail in year overview with inline CRUD for one-time expenses.
+- Performance optimized: prebuilt Tailwind CSS (34KB, no CDN), httpx connection pooling, Cache-Control headers on static assets.
 - Full Polish/English localization with language switcher, persisted preference, and locale-aware NLP/OCR parsing.
-- Day-click quick-entry for rapid event creation with auto-calculated end times.
-- Google Calendar reminder payload support (backend ready, UI deferred).
-- 145 tests passing across auth, events, calendar views, NLP, sync, and integration.
-- 8,164 LOC across Python, HTML templates, and JSON locale files.
-- Planning artifacts for v1.0 archived under `.planning/milestones/`.
+- 230 tests passing across auth, events, calendar, NLP, sync, budget, and performance.
+- ~8,900 LOC across Python, HTML templates, and JSON locale files.
+- Planning artifacts for v1.0, v1.1 archived under `.planning/milestones/`.
 
 ## Requirements
 
@@ -47,19 +37,25 @@ A shared calendar both partners can edit that stays in sync with Google Calendar
 - ✓ NLP and OCR parsing with Polish phrases and diacritics — v1.1
 - ✓ Day-click quick-entry for rapid event creation (auto end-time +1h) — v1.1
 - ✓ Google Calendar reminder payload support (backend/sync) — v1.1
+- ✓ Budget settings with 3 hourly rates, flat ZUS/accounting costs, initial balance — v2.0
+- ✓ Income calculation engine with gross/net per month, additional household earnings — v2.0
+- ✓ Recurring and one-time expense management with CRUD — v2.0
+- ✓ 12-month year overview with running account balance — v2.0
+- ✓ Budget localization (Polish required, English via existing i18n) — v2.0
+- ✓ Accordion month detail with inline one-time expense CRUD — v2.0
+- ✓ Prebuilt Tailwind CSS replacing CDN dependency (34KB vs ~300KB) — v2.0
+- ✓ httpx connection pooling in SupabaseStore — v2.0
+- ✓ Cache-Control headers on static assets (7-day cache) — v2.0
 
 ### Active
 
-See REQUIREMENTS.md v2.0 section for full Budget Tracker requirements.
+(No active requirements — next milestone not yet defined)
 
-**Target features:**
-- Budget Tracker settings: 3 hourly rates, monthly hours per rate, ZUS + accounting cost deduction
-- Net earnings calculation with 0.88 tax multiplier and flat cost deduction
-- Additional household earnings (partner salary, ZUS child bonuses) per month
-- Recurring monthly expenses and one-time expenses tracking
-- 12-month year overview: monthly balance, running account total
-- Initial bank account balance setting
-- Current year scope (future years deferred)
+### Out of Scope additions from v2.0/v3.0
+
+- Multi-year budget tracking — current year only
+- Excel import for past budget data — optional convenience
+- Budget-to-calendar event integration — independent features
 
 ### Out of Scope
 
@@ -101,10 +97,14 @@ See REQUIREMENTS.md v2.0 section for full Budget Tracker requirements.
 | Day-click quick-entry vs full form | Parallel entry modes for speed vs control | ✓ Implemented |
 | Backend-only reminder support | Ship reminder sync now, UI later when needed | ✓ Implemented |
 
-| Budget Tracker as new feature module | New user need: household financial planning alongside calendar | Starting v2.0 |
-| Current year only for budget | Simplest scope; future years deferred | v2.0 decision |
-| Polish required, English optional (i18n) | Follow existing i18n if low effort; Polish-only acceptable | v2.0 decision |
-| Flat ZUS + accounting costs | Same every month, configured once in settings | v2.0 decision |
+| Budget Tracker as new feature module | New user need: household financial planning alongside calendar | ✓ Shipped v2.0 |
+| Current year only for budget | Simplest scope; future years deferred | ✓ v2.0 decision |
+| Polish required, English optional (i18n) | Follow existing i18n if low effort; Polish-only acceptable | ✓ v2.0 decision |
+| Flat ZUS + accounting costs | Same every month, configured once in settings | ✓ v2.0 decision |
+| Accordion month detail for overview | Users need one-time expense breakdown per month | ✓ Shipped v2.0 |
+| Prebuilt CSS over CDN | Eliminate runtime dependency, reduce payload 10x | ✓ Shipped v2.0 |
+| Singleton httpx client | Reduce connection overhead across requests | ✓ Shipped v2.0 |
+| Cache-Control on static assets | Faster repeat page loads | ✓ Shipped v2.0 |
 
 ---
-*Last updated: 2026-03-20 after starting v2.0 Budget Tracker milestone*
+*Last updated: 2026-03-20 after v2.0 milestone completion*

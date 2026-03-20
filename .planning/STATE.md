@@ -1,14 +1,14 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.0
-milestone_name: "Overview Detail & Performance"
-status: complete
+milestone: v2.0
+milestone_name: "Budget Tracker"
+status: completed
 last_updated: "2026-03-20"
 progress:
   total_phases: 6
   completed_phases: 6
-  total_plans: 13
-  completed_plans: 13
+  total_plans: 14
+  completed_plans: 14
 ---
 
 # Session State
@@ -18,13 +18,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-20)
 
 **Core value:** A shared calendar both partners can edit that stays in sync with Google Calendar.
-**Current focus:** Milestone v3.0 complete — all phases shipped
+**Current focus:** v2.0 milestone complete — planning next milestone
 
 ## Position
 
-**Milestone:** v3.0 Overview Detail & Performance
-**Status:** Complete
-**Tests:** 222 passing
+**Milestone:** v2.0 Budget Tracker — SHIPPED
+**Tests:** 230 passing
 
 [████████████████████] 6/6 phases
 

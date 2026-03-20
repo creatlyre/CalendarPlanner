@@ -19,7 +19,7 @@
           {{ t('budget.sidebar_expenses') }}
         </a>
         <!-- Active: Overview -->
-        <div class="px-4 py-3 text-sm font-medium rounded-xl" style="background: rgba(99,102,241,0.22); color: rgba(165,180,252,1);">
+        <div class="px-4 py-3 text-sm font-medium rounded-xl nav-active">
           {{ t('budget.sidebar_overview') }}
         </div>
         <a href="/" class="glass-btn-secondary rounded-xl px-4 py-3 text-sm font-medium block text-center lg:mt-4">
@@ -33,7 +33,7 @@
   <div class="flex-1 overflow-x-auto">
     <!-- No settings warning -->
     <div id="no-settings" class="hidden glass rounded-2xl p-6 mb-6 text-center">
-      <h3 class="text-lg font-semibold mb-2">⚠</h3>
+      <h3 class="text-section-title mb-2"><span aria-hidden="true">⚠</span></h3>
       <p class="text-sm opacity-70">{{ t('budget.overview_no_settings') }}</p>
       <a href="/budget/settings" class="glass-btn-primary rounded-xl px-4 py-2 mt-4 inline-block text-sm">{{ t('budget.sidebar_settings') }}</a>
     </div>
@@ -51,12 +51,12 @@
     </div>
 
     <!-- Main overview content -->
-    <div id="overview-content" class="hidden">
+    <div id="overview-content" class="hidden stagger-children">
       <!-- Year picker -->
       <div class="flex items-center justify-center gap-4 mb-6">
-        <button id="year-prev" class="glass-btn-secondary rounded-xl px-3 py-2 text-sm font-medium">←</button>
+        <button id="year-prev" class="glass-btn-secondary rounded-xl px-4 py-2.5 text-sm font-medium min-h-[44px] min-w-[44px]">←</button>
         <span id="year-display" class="text-xl font-bold"></span>
-        <button id="year-next" class="glass-btn-secondary rounded-xl px-3 py-2 text-sm font-medium">→</button>
+        <button id="year-next" class="glass-btn-secondary rounded-xl px-4 py-2.5 text-sm font-medium min-h-[44px] min-w-[44px]">→</button>
       </div>
 
       <!-- Initial balance display -->
@@ -66,9 +66,10 @@
 
       <!-- Overview table -->
       <div class="glass rounded-xl p-4">
+        <div class="table-responsive">
         <table class="w-full text-sm" id="overview-table">
           <thead>
-            <tr class="text-xs opacity-60 border-b border-white/10">
+            <tr class="text-xs opacity-70 border-b border-white/10">
               <th class="text-left py-2 px-2 font-medium">{{ t('budget.expenses_month') }}</th>
               <th class="text-right py-2 px-2 font-medium">{{ t('budget.overview_net_income') }}</th>
               <th class="text-right py-2 px-2 font-medium">{{ t('budget.overview_additional') }}</th>
@@ -91,6 +92,7 @@
             </tr>
           </tfoot>
         </table>
+        </div>
       </div>
     </div>
   </div>
