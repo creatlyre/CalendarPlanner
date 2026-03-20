@@ -82,7 +82,7 @@ All phase behaviors have automated verification.
 
 ---
 
-## Validation Audit 2026-03-20
+## Validation Audit 2026-03-20 (initial)
 
 | Metric | Count |
 |--------|-------|
@@ -91,3 +91,19 @@ All phase behaviors have automated verification.
 | Escalated | 0 |
 
 Reconstructed from phase artifacts (State B — no prior VALIDATION.md). All 3 requirements (I18N-01, I18N-04, I18N-05) have automated test coverage. 72 tests pass across relevant test files.
+
+## Validation Audit 2026-03-20 (re-audit for milestone v1.1)
+
+| Metric | Count |
+|--------|-------|
+| Gaps found | 0 |
+| Resolved | 0 |
+| Escalated | 0 |
+
+Re-audited during `/gsd-audit-milestone v1.1`. State A (existing VALIDATION.md).
+
+**Cross-reference:**
+- I18N-01: `test_default_locale_is_polish` — asserts `lang="pl"` and Polish labels (Kalendarz, Wyloguj, Synchronizacja Google) — PASS
+- I18N-04: `test_default_locale_is_polish` (Polish) + `test_switch_locale_from_polish_to_english` (English) — PASS
+- I18N-05: `lang` attribute check + `Intl.DateTimeFormat` uses `locale_bcp47` (pl-PL) in calendar.html — PASS
+- Full suite: 72 passed (test_calendar_views + test_auth + test_events_api), 0 regressions
