@@ -266,5 +266,21 @@
   "budget.overview_account_balance": "Stan konta",
   "budget.overview_initial_balance": "Saldo pocz\u0105tkowe",
   "budget.overview_no_settings": "Najpierw skonfiguruj ustawienia bud\u017cetu",
-  "budget.overview_yearly_total": "Razem rok"
+  "budget.overview_yearly_total": "Razem rok",
+  "calendar.add_expense": "Wydatek",
+  "calendar.expense_title": "Dodaj wydatek jednorazowy",
+  "calendar.expense_name": "Nazwa",
+  "calendar.expense_amount": "Kwota",
+  "calendar.expense_month": "Miesi\u0105c",
+  "calendar.expense_add": "Dodaj",
+  "calendar.expense_cancel": "Anuluj",
+  "calendar.expense_added": "Wydatek dodany",
+  "calendar.expense_bulk": "Wklej wiele",
+  "calendar.expense_bulk_title": "Wklej wydatki jednorazowe",
+  "calendar.expense_bulk_placeholder": "nazwa[TAB]kwota[TAB]miesi\u0105c (po wierszu)",
+  "calendar.expense_bulk_parse": "Parsuj",
+  "calendar.expense_bulk_confirm": "Dodaj wszystkie",
+  "calendar.expense_bulk_cancel": "Anuluj",
+  "calendar.expense_bulk_parsed": "Sparsowano",
+  "calendar.expense_bulk_added": "Dodano wydatki"
 }

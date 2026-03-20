@@ -197,10 +197,10 @@ def test_budget_settings_page_has_form_fields(authenticated_client):
 
 
 def test_budget_settings_nav_link_on_home(authenticated_client):
-    """Home page nav bar contains budget settings link."""
+    """Home page nav bar contains budget link (points to overview)."""
     response = authenticated_client.get("/")
     assert response.status_code == 200
-    assert "/budget/settings" in response.text
+    assert "/budget/overview" in response.text
 
 
 def test_budget_settings_page_unauthenticated(test_client):

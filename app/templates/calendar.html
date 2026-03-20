@@ -30,6 +30,11 @@
                     class="glass-btn-primary rounded-xl px-3 py-1.5 text-sm font-medium">
                     &#9889; {{ t('calendar.quick_add') }}
                 </button>
+                <button id="expense-open-btn"
+                        type="button"
+                    class="glass-btn-info rounded-xl px-3 py-1.5 text-sm font-medium">
+                    &#128176; {{ t('calendar.add_expense') }}
+                </button>
               </div>
             </div>
             <p class="text-sm text-white/70">{{ t('calendar.entry_help') }}</p>
@@ -37,6 +42,40 @@
 
       {% include "partials/event_entry_modal.html" %}
         {% include "partials/quick_add_modal.html" %}
+
+        <!-- Expense quick-add modal -->
+        <div id="expense-modal" class="glass rounded-2xl p-4 hidden">
+          <h3 class="text-lg font-semibold text-white mb-3">{{ t('calendar.expense_title') }}</h3>
+          <div id="expense-single-form">
+            <div class="flex flex-col gap-2 mb-3">
+              <input type="text" id="exp-name" placeholder="{{ t('calendar.expense_name') }}" class="glass-input rounded-lg px-3 py-1.5 text-sm">
+              <div class="flex gap-2">
+                <input type="number" step="0.01" min="0.01" id="exp-amount" placeholder="{{ t('calendar.expense_amount') }}" class="glass-input flex-1 rounded-lg px-3 py-1.5 text-sm">
+                <input type="number" min="1" max="12" id="exp-month" class="glass-input w-16 rounded-lg px-3 py-1.5 text-sm" placeholder="{{ t('calendar.expense_month') }}">
+              </div>
+            </div>
+            <div class="flex gap-2">
+              <button id="exp-add-btn" class="glass-btn-primary rounded-lg px-3 py-1.5 text-xs">{{ t('calendar.expense_add') }}</button>
+              <button id="exp-bulk-toggle" class="glass-btn-info rounded-lg px-3 py-1.5 text-xs">&#128203; {{ t('calendar.expense_bulk') }}</button>
+              <button id="exp-close-btn" class="glass-btn-secondary rounded-lg px-3 py-1.5 text-xs">{{ t('calendar.expense_cancel') }}</button>
+            </div>
+          </div>
+          <!-- Bulk paste sub-form -->
+          <div id="expense-bulk-form" class="hidden">
+            <h4 class="text-sm font-medium mb-2">{{ t('calendar.expense_bulk_title') }}</h4>
+            <textarea id="exp-bulk-text" rows="6" class="glass-input w-full rounded-lg px-3 py-2 text-xs font-mono mb-2" placeholder="{{ t('calendar.expense_bulk_placeholder') }}"></textarea>
+            <div id="exp-bulk-preview" class="hidden mb-2 max-h-32 overflow-y-auto">
+              <p id="exp-bulk-count" class="text-xs font-medium mb-1"></p>
+              <table class="w-full text-xs"><thead><tr class="border-b border-white/10"><th class="text-left py-0.5 px-1">{{ t('calendar.expense_month') }}</th><th class="text-left py-0.5 px-1">{{ t('calendar.expense_name') }}</th><th class="text-right py-0.5 px-1">{{ t('calendar.expense_amount') }}</th></tr></thead><tbody id="exp-bulk-body"></tbody></table>
+            </div>
+            <div class="flex gap-2">
+              <button id="exp-bulk-parse" class="glass-btn-info rounded-lg px-3 py-1.5 text-xs">{{ t('calendar.expense_bulk_parse') }}</button>
+              <button id="exp-bulk-confirm" class="glass-btn-primary rounded-lg px-3 py-1.5 text-xs hidden">{{ t('calendar.expense_bulk_confirm') }}</button>
+              <button id="exp-bulk-back" class="glass-btn-secondary rounded-lg px-3 py-1.5 text-xs">{{ t('calendar.expense_cancel') }}</button>
+            </div>
+          </div>
+          <p id="exp-toast" class="hidden mt-2 text-xs font-medium" style="color: #4ade80;"></p>
+        </div>
 
         <div class="glass rounded-2xl p-4">
             <h3 class="mb-2 text-lg font-semibold text-white">{{ t('calendar.household') }}</h3>
@@ -1426,6 +1465,127 @@ loadSyncStatus();
     if (e.target === qaModal && !_saveInFlight) {
       closeModal();
     }
+  });
+}());
+</script>
+
+<script>
+/* ── Expense quick-add from calendar ── */
+(function() {
+  const modal = document.getElementById('expense-modal');
+  const singleForm = document.getElementById('expense-single-form');
+  const bulkForm = document.getElementById('expense-bulk-form');
+  const toast = document.getElementById('exp-toast');
+
+  function showExpToast(msg) {
+    toast.textContent = '✓ ' + msg;
+    toast.classList.remove('hidden');
+    setTimeout(() => toast.classList.add('hidden'), 2500);
+  }
+
+  // Open / close
+  document.getElementById('expense-open-btn').addEventListener('click', () => {
+    modal.classList.toggle('hidden');
+    if (!modal.classList.contains('hidden')) {
+      const m = document.getElementById('exp-month');
+      if (!m.value) m.value = new Date().getMonth() + 1;
+      document.getElementById('exp-name').focus();
+    }
+  });
+  document.getElementById('exp-close-btn').addEventListener('click', () => modal.classList.add('hidden'));
+
+  // Toggle to bulk
+  document.getElementById('exp-bulk-toggle').addEventListener('click', () => {
+    singleForm.classList.add('hidden');
+    bulkForm.classList.remove('hidden');
+  });
+  document.getElementById('exp-bulk-back').addEventListener('click', () => {
+    bulkForm.classList.add('hidden');
+    singleForm.classList.remove('hidden');
+    document.getElementById('exp-bulk-preview').classList.add('hidden');
+    document.getElementById('exp-bulk-confirm').classList.add('hidden');
+  });
+
+  // Single add
+  document.getElementById('exp-add-btn').addEventListener('click', async () => {
+    const name = document.getElementById('exp-name').value.trim();
+    const amount = parseFloat(document.getElementById('exp-amount').value);
+    const month = parseInt(document.getElementById('exp-month').value);
+    if (!name || !amount || amount <= 0 || !month || month < 1 || month > 12) return;
+
+    const res = await fetch('/api/budget/expenses', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ year: currentYear, month, name, amount, recurring: false })
+    });
+    if (res.ok) {
+      showExpToast({{ t('calendar.expense_added')|tojson }});
+      document.getElementById('exp-name').value = '';
+      document.getElementById('exp-amount').value = '';
+      document.getElementById('exp-name').focus();
+    }
+  });
+
+  // Bulk paste parsing
+  let bulkParsed = [];
+
+  document.getElementById('exp-bulk-parse').addEventListener('click', () => {
+    const text = document.getElementById('exp-bulk-text').value;
+    bulkParsed = [];
+    const lines = text.split('\n').map(l => l.trim()).filter(l => l);
+    for (const line of lines) {
+      const parts = line.split('\t').map(p => p.trim());
+      if (parts.length >= 3) {
+        const name = parts[0];
+        const amount = parseFloat(parts[1]);
+        const month = parseInt(parts[2]);
+        if (name && !isNaN(amount) && amount > 0 && month >= 1 && month <= 12) {
+          bulkParsed.push({ name, amount, month });
+        }
+      } else if (parts.length === 2) {
+        // name + amount, use current month
+        const name = parts[0];
+        const amount = parseFloat(parts[1]);
+        if (name && !isNaN(amount) && amount > 0) {
+          bulkParsed.push({ name, amount, month: new Date().getMonth() + 1 });
+        }
+      }
+    }
+
+    if (bulkParsed.length > 0) {
+      document.getElementById('exp-bulk-count').textContent = {{ t('calendar.expense_bulk_parsed')|tojson }} + ': ' + bulkParsed.length;
+      document.getElementById('exp-bulk-body').innerHTML = bulkParsed.map(e =>
+        `<tr><td class="py-0.5 px-1">${e.month}</td><td class="py-0.5 px-1">${e.name}</td><td class="py-0.5 px-1 text-right">${e.amount.toFixed(2)}</td></tr>`
+      ).join('');
+      document.getElementById('exp-bulk-preview').classList.remove('hidden');
+      document.getElementById('exp-bulk-confirm').classList.remove('hidden');
+    }
+  });
+
+  document.getElementById('exp-bulk-confirm').addEventListener('click', async () => {
+    if (bulkParsed.length === 0) return;
+    const expenses = bulkParsed.map(e => ({ year: currentYear, month: e.month, name: e.name, amount: e.amount, recurring: false }));
+    const res = await fetch('/api/budget/expenses/bulk', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ expenses })
+    });
+    if (res.ok) {
+      showExpToast({{ t('calendar.expense_bulk_added')|tojson }} + ': ' + bulkParsed.length);
+      document.getElementById('exp-bulk-text').value = '';
+      document.getElementById('exp-bulk-preview').classList.add('hidden');
+      document.getElementById('exp-bulk-confirm').classList.add('hidden');
+      bulkParsed = [];
+      bulkForm.classList.add('hidden');
+      singleForm.classList.remove('hidden');
+    }
+  });
+
+  // Enter to submit single form
+  ['exp-name', 'exp-amount', 'exp-month'].forEach(id => {
+    document.getElementById(id).addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') { e.preventDefault(); document.getElementById('exp-add-btn').click(); }
+    });
   });
 }());
 </script>
