@@ -15,6 +15,7 @@ from app.middleware.auth_middleware import SessionValidationMiddleware
 from app.budget.routes import router as budget_router
 from app.budget.views import router as budget_views_router
 from app.budget.income_routes import router as income_router
+from app.budget.income_views import router as income_views_router
 from app.sync.routes import router as sync_router
 from app.users.routes import router as users_router
 from app.views.calendar_routes import router as calendar_router
@@ -37,6 +38,7 @@ app.include_router(sync_router)
 app.include_router(budget_router)
 app.include_router(budget_views_router)
 app.include_router(income_router)
+app.include_router(income_views_router)
 
 
 @app.get("/", response_class=HTMLResponse)

@@ -1,0 +1,367 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('budget.income_page_title') }} - {{ t('app.name') }}{% endblock %}
+
+{% block content %}
+<div class="flex flex-col lg:flex-row gap-6">
+
+  <!-- Sidebar -->
+  <nav class="w-full lg:w-48 flex-shrink-0">
+    <div class="glass rounded-2xl p-4">
+      <div class="flex lg:flex-col gap-2">
+        <a href="/budget/settings" class="px-4 py-3 text-sm font-medium rounded-xl block hover:bg-white/5 transition-colors">
+          {{ t('budget.sidebar_settings') }}
+        </a>
+        <!-- Active: Income -->
+        <div class="px-4 py-3 text-sm font-medium rounded-xl" style="background: rgba(99,102,241,0.22); color: rgba(165,180,252,1);">
+          {{ t('budget.sidebar_income') }}
+        </div>
+        <div class="px-4 py-3 text-sm font-medium rounded-xl opacity-40 cursor-not-allowed">
+          {{ t('budget.sidebar_expenses') }}
+        </div>
+        <div class="px-4 py-3 text-sm font-medium rounded-xl opacity-40 cursor-not-allowed">
+          {{ t('budget.sidebar_overview') }}
+        </div>
+        <a href="/" class="glass-btn-secondary rounded-xl px-4 py-3 text-sm font-medium block text-center lg:mt-4">
+          {{ t('budget.back') }}
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <div class="flex-1">
+    <!-- Toast -->
+    <div id="toast" class="hidden rounded-xl px-4 py-3 mb-4 text-sm font-medium" style="background: rgba(34,197,94,0.18); color: #4ade80;"></div>
+
+    <!-- No settings warning -->
+    <div id="no-settings" class="hidden glass rounded-2xl p-6 mb-6 text-center">
+      <h3 class="text-lg font-semibold mb-2">⚠</h3>
+      <p class="text-sm opacity-70">{{ t('budget.income_no_settings') }}</p>
+      <a href="/budget/settings" class="glass-btn-primary rounded-xl px-4 py-2 mt-4 inline-block text-sm">{{ t('budget.sidebar_settings') }}</a>
+    </div>
+
+    <!-- Loading skeleton -->
+    <div id="skeleton-loader">
+      <div class="glass rounded-2xl p-6 mb-6">
+        <div class="animate-pulse bg-white/5 h-8 w-48 rounded mb-4 mx-auto"></div>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          {% for i in range(6) %}
+          <div class="glass rounded-xl p-4">
+            <div class="animate-pulse bg-white/5 h-5 w-24 rounded mb-3"></div>
+            <div class="space-y-2">
+              <div class="animate-pulse bg-white/5 h-8 rounded-xl"></div>
+              <div class="animate-pulse bg-white/5 h-8 rounded-xl"></div>
+              <div class="animate-pulse bg-white/5 h-8 rounded-xl"></div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Main income content (hidden until loaded) -->
+    <div id="income-content" class="hidden">
+      <!-- Year picker -->
+      <div class="flex items-center justify-center gap-4 mb-6">
+        <button id="year-prev" class="glass-btn-secondary rounded-xl px-3 py-2 text-sm font-medium">←</button>
+        <span id="year-display" class="text-xl font-bold"></span>
+        <button id="year-next" class="glass-btn-secondary rounded-xl px-3 py-2 text-sm font-medium">→</button>
+      </div>
+
+      <!-- 12-month grid -->
+      <div id="months-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const monthKeys = [
+    '{{ t("budget.income_month_jan") }}', '{{ t("budget.income_month_feb") }}',
+    '{{ t("budget.income_month_mar") }}', '{{ t("budget.income_month_apr") }}',
+    '{{ t("budget.income_month_may") }}', '{{ t("budget.income_month_jun") }}',
+    '{{ t("budget.income_month_jul") }}', '{{ t("budget.income_month_aug") }}',
+    '{{ t("budget.income_month_sep") }}', '{{ t("budget.income_month_oct") }}',
+    '{{ t("budget.income_month_nov") }}', '{{ t("budget.income_month_dec") }}'
+  ];
+
+  const labels = {
+    rate1: '{{ t("budget.income_rate_1_hours") }}',
+    rate2: '{{ t("budget.income_rate_2_hours") }}',
+    rate3: '{{ t("budget.income_rate_3_hours") }}',
+    gross: '{{ t("budget.income_gross_label") }}',
+    net: '{{ t("budget.income_net_label") }}',
+    additional: '{{ t("budget.income_additional_label") }}',
+    addEarning: '{{ t("budget.income_add_earning") }}',
+    earningName: '{{ t("budget.income_earning_name") }}',
+    earningAmount: '{{ t("budget.income_earning_amount") }}',
+    currency: '{{ t("budget.currency") }}',
+    savedHours: '{{ t("budget.income_save_success") }}',
+    earningAdded: '{{ t("budget.income_earning_added") }}',
+    earningDeleted: '{{ t("budget.income_earning_deleted") }}',
+    save: '{{ t("budget.save") }}'
+  };
+
+  let currentYear = new Date().getFullYear();
+  let settings = null;
+  let monthsData = [];
+  let saveTimers = {};
+
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = '✓ ' + msg;
+    el.classList.remove('hidden');
+    setTimeout(() => el.classList.add('hidden'), 2500);
+  }
+
+  async function loadSettings() {
+    const res = await fetch('/api/budget/settings');
+    const json = await res.json();
+    settings = json.data;
+  }
+
+  async function loadIncome() {
+    const res = await fetch('/api/budget/income?year=' + currentYear);
+    const json = await res.json();
+    monthsData = json.data.months;
+  }
+
+  function getHours(val) {
+    return (val === null || val === undefined || val === '') ? 160 : parseFloat(val);
+  }
+
+  function calcGross(m) {
+    if (!settings) return 0;
+    const h1 = getHours(m.rate_1_hours), h2 = getHours(m.rate_2_hours), h3 = getHours(m.rate_3_hours);
+    return settings.rate_1 * h1 + settings.rate_2 * h2 + settings.rate_3 * h3;
+  }
+
+  function calcNet(m) {
+    if (!settings) return 0;
+    const h1 = getHours(m.rate_1_hours), h2 = getHours(m.rate_2_hours), h3 = getHours(m.rate_3_hours);
+    return (settings.rate_1 * h1) * 0.88 + (settings.rate_2 * h2) * 0.88 + (settings.rate_3 * h3) * 0.88 - (settings.zus_costs + settings.accounting_costs);
+  }
+
+  function renderMonths() {
+    const grid = document.getElementById('months-grid');
+    grid.innerHTML = '';
+
+    for (let i = 0; i < 12; i++) {
+      const m = monthsData[i];
+      const gross = calcGross(m);
+      const net = calcNet(m);
+
+      const card = document.createElement('div');
+      card.className = 'glass rounded-xl p-4';
+      card.innerHTML = `
+        <h3 class="text-sm font-semibold mb-3">${monthKeys[i]}</h3>
+        <div class="space-y-2">
+          <div>
+            <label class="text-xs opacity-60">${labels.rate1}</label>
+            <input type="number" step="0.5" min="0" placeholder="160"
+              class="glass-input w-full rounded-lg px-3 py-1.5 text-sm"
+              data-month="${m.month}" data-rate="1"
+              value="${m.rate_1_hours !== null && m.rate_1_hours !== undefined ? m.rate_1_hours : ''}">
+          </div>
+          <div>
+            <label class="text-xs opacity-60">${labels.rate2}</label>
+            <input type="number" step="0.5" min="0" placeholder="160"
+              class="glass-input w-full rounded-lg px-3 py-1.5 text-sm"
+              data-month="${m.month}" data-rate="2"
+              value="${m.rate_2_hours !== null && m.rate_2_hours !== undefined ? m.rate_2_hours : ''}">
+          </div>
+          <div>
+            <label class="text-xs opacity-60">${labels.rate3}</label>
+            <input type="number" step="0.5" min="0" placeholder="160"
+              class="glass-input w-full rounded-lg px-3 py-1.5 text-sm"
+              data-month="${m.month}" data-rate="3"
+              value="${m.rate_3_hours !== null && m.rate_3_hours !== undefined ? m.rate_3_hours : ''}">
+          </div>
+          <div class="pt-2 border-t border-white/10 text-sm">
+            <div class="flex justify-between"><span class="opacity-60">${labels.gross}</span><span id="gross-${m.month}" class="font-medium">${gross.toFixed(2)} ${labels.currency}</span></div>
+            <div class="flex justify-between mt-1"><span class="opacity-60">${labels.net}</span><span id="net-${m.month}" class="font-medium">${net.toFixed(2)} ${labels.currency}</span></div>
+          </div>
+          <div class="pt-2 border-t border-white/10">
+            <div class="flex justify-between items-center mb-2">
+              <span class="text-xs opacity-60">${labels.additional}</span>
+              <button class="glass-btn-info rounded-lg px-2 py-0.5 text-xs add-earning-btn" data-month="${m.month}">${labels.addEarning}</button>
+            </div>
+            <div id="earnings-${m.month}" class="space-y-1">
+              ${(m.additional_earnings || []).map(e => earningRow(e, m.month)).join('')}
+            </div>
+            <div id="earning-form-${m.month}" class="hidden mt-2 space-y-1">
+              <input type="text" placeholder="${labels.earningName}" class="glass-input w-full rounded-lg px-2 py-1 text-xs earning-name-input" data-month="${m.month}">
+              <div class="flex gap-1">
+                <input type="number" step="0.01" min="0.01" placeholder="${labels.earningAmount}" class="glass-input flex-1 rounded-lg px-2 py-1 text-xs earning-amount-input" data-month="${m.month}">
+                <button class="glass-btn-primary rounded-lg px-2 py-1 text-xs save-earning-btn" data-month="${m.month}">${labels.save}</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      grid.appendChild(card);
+    }
+
+    attachEvents();
+  }
+
+  function earningRow(e, month) {
+    return `<div class="flex justify-between items-center text-xs" data-earning-id="${e.id}">
+      <span>${e.name} — ${e.amount.toFixed(2)} ${labels.currency}</span>
+      <button class="glass-btn-danger rounded px-1.5 py-0.5 text-xs delete-earning-btn" data-id="${e.id}" data-month="${month}">✕</button>
+    </div>`;
+  }
+
+  function attachEvents() {
+    // Hour inputs — save on change with debounce
+    document.querySelectorAll('input[data-rate]').forEach(input => {
+      input.addEventListener('change', function() {
+        const month = parseInt(this.dataset.month);
+        scheduleHoursSave(month);
+        updateDisplay(month);
+      });
+    });
+
+    // Add earning buttons
+    document.querySelectorAll('.add-earning-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        const month = this.dataset.month;
+        document.getElementById('earning-form-' + month).classList.toggle('hidden');
+      });
+    });
+
+    // Save earning buttons
+    document.querySelectorAll('.save-earning-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        saveEarning(parseInt(this.dataset.month));
+      });
+    });
+
+    // Delete earning buttons
+    document.querySelectorAll('.delete-earning-btn').forEach(btn => {
+      btn.addEventListener('click', function() {
+        deleteEarning(this.dataset.id, parseInt(this.dataset.month));
+      });
+    });
+  }
+
+  function updateDisplay(month) {
+    const idx = month - 1;
+    const m = monthsData[idx];
+    // Read current input values
+    const r1Input = document.querySelector(`input[data-month="${month}"][data-rate="1"]`);
+    const r2Input = document.querySelector(`input[data-month="${month}"][data-rate="2"]`);
+    const r3Input = document.querySelector(`input[data-month="${month}"][data-rate="3"]`);
+
+    const updated = {
+      ...m,
+      rate_1_hours: r1Input.value === '' ? null : parseFloat(r1Input.value),
+      rate_2_hours: r2Input.value === '' ? null : parseFloat(r2Input.value),
+      rate_3_hours: r3Input.value === '' ? null : parseFloat(r3Input.value)
+    };
+
+    // Update local data
+    monthsData[idx] = updated;
+
+    const gross = calcGross(updated);
+    const net = calcNet(updated);
+    document.getElementById('gross-' + month).textContent = gross.toFixed(2) + ' ' + labels.currency;
+    document.getElementById('net-' + month).textContent = net.toFixed(2) + ' ' + labels.currency;
+  }
+
+  function scheduleHoursSave(month) {
+    if (saveTimers[month]) clearTimeout(saveTimers[month]);
+    saveTimers[month] = setTimeout(() => saveHours(month), 500);
+  }
+
+  async function saveHours(month) {
+    const idx = month - 1;
+    const m = monthsData[idx];
+    await fetch('/api/budget/income/hours', {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        year: currentYear,
+        month: month,
+        rate_1_hours: m.rate_1_hours,
+        rate_2_hours: m.rate_2_hours,
+        rate_3_hours: m.rate_3_hours
+      })
+    });
+    showToast(labels.savedHours);
+  }
+
+  async function saveEarning(month) {
+    const nameEl = document.querySelector(`.earning-name-input[data-month="${month}"]`);
+    const amountEl = document.querySelector(`.earning-amount-input[data-month="${month}"]`);
+    const name = nameEl.value.trim();
+    const amount = parseFloat(amountEl.value);
+    if (!name || !amount || amount <= 0) return;
+
+    const res = await fetch('/api/budget/income/earnings', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ year: currentYear, month, name, amount })
+    });
+    const json = await res.json();
+    if (res.ok) {
+      const idx = month - 1;
+      monthsData[idx].additional_earnings.push(json.data);
+      // Append to DOM
+      const container = document.getElementById('earnings-' + month);
+      container.insertAdjacentHTML('beforeend', earningRow(json.data, month));
+      // Re-attach delete events for new row
+      container.querySelector(`[data-earning-id="${json.data.id}"] .delete-earning-btn`).addEventListener('click', function() {
+        deleteEarning(this.dataset.id, parseInt(this.dataset.month));
+      });
+      nameEl.value = '';
+      amountEl.value = '';
+      document.getElementById('earning-form-' + month).classList.add('hidden');
+      showToast(labels.earningAdded);
+    }
+  }
+
+  async function deleteEarning(id, month) {
+    const res = await fetch('/api/budget/income/earnings/' + id, { method: 'DELETE' });
+    if (res.ok) {
+      const idx = month - 1;
+      monthsData[idx].additional_earnings = monthsData[idx].additional_earnings.filter(e => e.id !== id);
+      const row = document.querySelector(`[data-earning-id="${id}"]`);
+      if (row) row.remove();
+      showToast(labels.earningDeleted);
+    }
+  }
+
+  // Year navigation
+  document.getElementById('year-prev').addEventListener('click', () => { currentYear--; reload(); });
+  document.getElementById('year-next').addEventListener('click', () => { currentYear++; reload(); });
+
+  async function reload() {
+    document.getElementById('year-display').textContent = currentYear;
+    await loadIncome();
+    renderMonths();
+  }
+
+  // Initial load
+  async function init() {
+    try {
+      await loadSettings();
+      if (!settings) {
+        document.getElementById('skeleton-loader').classList.add('hidden');
+        document.getElementById('no-settings').classList.remove('hidden');
+        return;
+      }
+      await loadIncome();
+      document.getElementById('skeleton-loader').classList.add('hidden');
+      document.getElementById('income-content').classList.remove('hidden');
+      document.getElementById('year-display').textContent = currentYear;
+      renderMonths();
+    } catch (err) {
+      console.error('Income page init error:', err);
+    }
+  }
+  init();
+})();
+</script>
+{% endblock %}
