@@ -111,3 +111,16 @@ class AdditionalEarning:
     amount: float = 0.0
     created_at: datetime | None = None
     updated_at: datetime | None = None
+
+
+@dataclass
+class Expense:
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    calendar_id: str = ""
+    year: int = 0
+    month: int = 0  # 0 = recurring, 1-12 = specific month
+    name: str = ""
+    amount: float = 0.0
+    recurring: bool = False
+    created_at: datetime | None = None
+    updated_at: datetime | None = None

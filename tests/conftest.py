@@ -25,6 +25,7 @@ class InMemoryStore:
             "budget_settings": [],
             "monthly_hours": [],
             "additional_earnings": [],
+            "expenses": [],
         }
 
     @staticmethod

@@ -227,5 +227,22 @@
   "budget.income_earning_deleted": "Przychód usunięty",
   "budget.income_recurring_label": "Stałe przychody (co miesiąc)",
   "budget.income_recurring_add": "+ Dodaj stały przychód",
-  "budget.income_recurring_empty": "Brak stałych przychodów — dodaj np. pensję partnerki, vale, 500+"
+  "budget.income_recurring_empty": "Brak stałych przychodów — dodaj np. pensję partnerki, vale, 500+",
+  "budget.expenses_page_title": "Wydatki",
+  "budget.expenses_recurring_title": "Wydatki stałe",
+  "budget.expenses_onetime_title": "Wydatki jednorazowe",
+  "budget.expenses_add": "Dodaj",
+  "budget.expenses_name": "Nazwa",
+  "budget.expenses_amount": "Kwota",
+  "budget.expenses_month": "Miesiąc",
+  "budget.expenses_empty_recurring": "Brak wydatków stałych",
+  "budget.expenses_empty_onetime": "Brak wydatków jednorazowych",
+  "budget.expenses_added": "Wydatek dodany",
+  "budget.expenses_updated": "Wydatek zaktualizowany",
+  "budget.expenses_deleted": "Wydatek usunięty",
+  "budget.expenses_filter_all": "Wszystkie",
+  "budget.expenses_sort_month": "Miesiąc",
+  "budget.expenses_sort_name": "Nazwa",
+  "budget.expenses_sort_amount": "Kwota",
+  "budget.expenses_total": "Suma"
 }

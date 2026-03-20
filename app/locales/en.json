@@ -227,5 +227,22 @@
   "budget.income_earning_deleted": "Earning deleted",
   "budget.income_recurring_label": "Stable income (every month)",
   "budget.income_recurring_add": "+ Add stable income",
-  "budget.income_recurring_empty": "No stable income — add e.g. partner salary, vouchers, child benefits"
+  "budget.income_recurring_empty": "No stable income — add e.g. partner salary, vouchers, child benefits",
+  "budget.expenses_page_title": "Expenses",
+  "budget.expenses_recurring_title": "Recurring expenses",
+  "budget.expenses_onetime_title": "One-time expenses",
+  "budget.expenses_add": "Add",
+  "budget.expenses_name": "Name",
+  "budget.expenses_amount": "Amount",
+  "budget.expenses_month": "Month",
+  "budget.expenses_empty_recurring": "No recurring expenses",
+  "budget.expenses_empty_onetime": "No one-time expenses",
+  "budget.expenses_added": "Expense added",
+  "budget.expenses_updated": "Expense updated",
+  "budget.expenses_deleted": "Expense deleted",
+  "budget.expenses_filter_all": "All",
+  "budget.expenses_sort_month": "Month",
+  "budget.expenses_sort_name": "Name",
+  "budget.expenses_sort_amount": "Amount",
+  "budget.expenses_total": "Total"
 }

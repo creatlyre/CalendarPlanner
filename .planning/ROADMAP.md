@@ -8,8 +8,10 @@
 
 ## Phases
 
-- [x] **Phase 12: Budget Data Foundation & Settings UI** — Database models, settings page for rates/costs/balance, nav integration, i18n setup (completed 2026-03-20)
-- [ ] **Phase 13: Income Calculation Engine** — Monthly hours entry per rate, gross/net computation, additional household earnings
+- [x] **Phase 12: Budget Data Foundation & Settings UI** — Database models, settings page for rates/costs/balance, nav integration, i18n setup
+ (completed 2026-03-20)
+- [x] **Phase 13: Income Calculation Engine** — Monthly hours entry per rate, gross/net computation, additional household earnings
+ (completed 2026-03-20)
 - [ ] **Phase 14: Expense Management** — Recurring and one-time expense CRUD with auto-application
 - [ ] **Phase 15: Year Overview Dashboard** — 12-month financial table with running balance and live recalculation
 
@@ -40,17 +42,27 @@ Plans:
   2. User sees calculated gross income (Rate1×Time1 + Rate2×Time2 + Rate3×Time3) for each month
   3. User sees calculated net pension ((each rate×hours)×0.88 minus flat costs) for each month
   4. User can add multiple additional earnings entries (partner salary, ZUS child bonuses) per month with name and amount
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 13-01-PLAN.md — Income data layer (models, schemas, repos, service, API, i18n)
+- [ ] 13-02-PLAN.md — Income page UI (12-month grid, calculations, sidebar)
+- [ ] 13-03-PLAN.md — Integration tests + human verification
 
 ### Phase 14: Expense Management
-**Goal**: Users can track recurring monthly expenses and one-time expenses that feed into the monthly financial picture
+**Goal**: Users can manage recurring monthly expenses and one-time expenses via a compact Excel-style table interface with inline editing, filtering, and sorting
 **Depends on**: Phase 12 (budget infrastructure/models)
 **Requirements**: EXP-01, EXP-02, EXP-03, EXP-04
 **Success Criteria** (what must be TRUE):
   1. User can add, edit, and delete recurring monthly expenses with name and amount
   2. User can add, edit, and delete one-time expenses with name, amount, and target month
   3. Recurring expense totals are automatically applied to every month's calculations without manual entry
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 14-01-PLAN.md — Expense data layer (model, schemas, repo, service, API, i18n)
+- [ ] 14-02-PLAN.md — Expenses page UI (compact table rows, inline edit, filtering, sorting, sidebar)
+- [ ] 14-03-PLAN.md — Integration tests + human verification
 
 ### Phase 15: Year Overview Dashboard
 **Goal**: Users see a 12-month financial dashboard showing income, expenses, monthly balance, and running account total
@@ -67,7 +79,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|---------------|--------|-----------|
 | 12. Budget Data Foundation & Settings UI | 3/3 | Complete    | 2026-03-20 |
-| 13. Income Calculation Engine | 0/? | Not started | - |
+| 13. Income Calculation Engine | 0/? | Complete    | 2026-03-20 |
 | 14. Expense Management | 0/? | Not started | - |
 | 15. Year Overview Dashboard | 0/? | Not started | - |
 

@@ -1,0 +1,439 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('budget.expenses_page_title') }} - {{ t('app.name') }}{% endblock %}
+
+{% block content %}
+<div class="flex flex-col lg:flex-row gap-6">
+
+  <!-- Sidebar -->
+  <nav class="w-full lg:w-48 flex-shrink-0">
+    <div class="glass rounded-2xl p-4">
+      <div class="flex lg:flex-col gap-2">
+        <a href="/budget/settings" class="px-4 py-3 text-sm font-medium rounded-xl block hover:bg-white/5 transition-colors">
+          {{ t('budget.sidebar_settings') }}
+        </a>
+        <a href="/budget/income" class="px-4 py-3 text-sm font-medium rounded-xl block hover:bg-white/5 transition-colors">
+          {{ t('budget.sidebar_income') }}
+        </a>
+        <!-- Active: Expenses -->
+        <div class="px-4 py-3 text-sm font-medium rounded-xl" style="background: rgba(99,102,241,0.22); color: rgba(165,180,252,1);">
+          {{ t('budget.sidebar_expenses') }}
+        </div>
+        <div class="px-4 py-3 text-sm font-medium rounded-xl opacity-40 cursor-not-allowed">
+          {{ t('budget.sidebar_overview') }}
+        </div>
+        <a href="/" class="glass-btn-secondary rounded-xl px-4 py-3 text-sm font-medium block text-center lg:mt-4">
+          {{ t('budget.back') }}
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <div class="flex-1">
+    <!-- Toast -->
+    <div id="toast" class="hidden rounded-xl px-4 py-3 mb-4 text-sm font-medium" style="background: rgba(34,197,94,0.18); color: #4ade80;"></div>
+
+    <!-- Loading skeleton -->
+    <div id="skeleton-loader">
+      <div class="glass rounded-2xl p-6 mb-6">
+        <div class="animate-pulse bg-white/5 h-8 w-48 rounded mb-4 mx-auto"></div>
+        <div class="space-y-2">
+          {% for i in range(5) %}
+          <div class="animate-pulse bg-white/5 h-6 rounded"></div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Main content (hidden until loaded) -->
+    <div id="expenses-content" class="hidden">
+      <!-- Year picker -->
+      <div class="flex items-center justify-center gap-4 mb-6">
+        <button id="year-prev" class="glass-btn-secondary rounded-xl px-3 py-2 text-sm font-medium">←</button>
+        <span id="year-display" class="text-xl font-bold"></span>
+        <button id="year-next" class="glass-btn-secondary rounded-xl px-3 py-2 text-sm font-medium">→</button>
+      </div>
+
+      <!-- Recurring expenses section -->
+      <div class="glass rounded-xl p-4 mb-6">
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="text-sm font-semibold">{{ t('budget.expenses_recurring_title') }}</h3>
+        </div>
+        <!-- Recurring table -->
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-xs opacity-50 border-b border-white/10">
+              <th class="text-left py-1 px-2 font-medium">{{ t('budget.expenses_name') }}</th>
+              <th class="text-right py-1 px-2 font-medium w-32">{{ t('budget.expenses_amount') }} ({{ t('budget.currency') }})</th>
+              <th class="text-right py-1 px-2 font-medium w-16"></th>
+            </tr>
+          </thead>
+          <tbody id="recurring-body"></tbody>
+          <tfoot>
+            <tr id="recurring-total-row" class="border-t border-white/10 font-semibold">
+              <td class="py-1 px-2">{{ t('budget.expenses_total') }}</td>
+              <td class="text-right py-1 px-2" id="recurring-total">0.00</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+        <div id="recurring-empty" class="text-xs opacity-50 text-center py-2 hidden">{{ t('budget.expenses_empty_recurring') }}</div>
+        <!-- Recurring add form -->
+        <div class="flex gap-2 mt-2 items-center">
+          <input type="text" id="rec-name" placeholder="{{ t('budget.expenses_name') }}" class="glass-input flex-1 rounded-lg px-2 py-1 text-xs">
+          <input type="number" step="0.01" min="0.01" id="rec-amount" placeholder="{{ t('budget.expenses_amount') }}" class="glass-input w-28 rounded-lg px-2 py-1 text-xs">
+          <button id="rec-add-btn" class="glass-btn-primary rounded-lg px-3 py-1 text-xs">{{ t('budget.expenses_add') }}</button>
+        </div>
+      </div>
+
+      <!-- One-time expenses section -->
+      <div class="glass rounded-xl p-4">
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="text-sm font-semibold">{{ t('budget.expenses_onetime_title') }}</h3>
+        </div>
+        <!-- Filter & Sort bar -->
+        <div class="flex flex-wrap gap-3 mb-3 items-center text-xs">
+          <div class="flex items-center gap-1">
+            <label class="opacity-60">{{ t('budget.expenses_month') }}:</label>
+            <select id="filter-month" class="glass-input rounded-lg px-2 py-1 text-xs">
+              <option value="0">{{ t('budget.expenses_filter_all') }}</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-1">
+            <label class="opacity-60">Sort:</label>
+            <select id="sort-field" class="glass-input rounded-lg px-2 py-1 text-xs">
+              <option value="month">{{ t('budget.expenses_sort_month') }}</option>
+              <option value="name">{{ t('budget.expenses_sort_name') }}</option>
+              <option value="amount">{{ t('budget.expenses_sort_amount') }}</option>
+            </select>
+          </div>
+        </div>
+        <!-- One-time table -->
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-xs opacity-50 border-b border-white/10">
+              <th class="text-left py-1 px-2 font-medium w-16">{{ t('budget.expenses_month') }}</th>
+              <th class="text-left py-1 px-2 font-medium">{{ t('budget.expenses_name') }}</th>
+              <th class="text-right py-1 px-2 font-medium w-32">{{ t('budget.expenses_amount') }} ({{ t('budget.currency') }})</th>
+              <th class="text-right py-1 px-2 font-medium w-16"></th>
+            </tr>
+          </thead>
+          <tbody id="onetime-body"></tbody>
+          <tfoot>
+            <tr id="onetime-total-row" class="border-t border-white/10 font-semibold">
+              <td class="py-1 px-2"></td>
+              <td class="py-1 px-2">{{ t('budget.expenses_total') }}</td>
+              <td class="text-right py-1 px-2" id="onetime-total">0.00</td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+        <div id="onetime-empty" class="text-xs opacity-50 text-center py-2 hidden">{{ t('budget.expenses_empty_onetime') }}</div>
+        <!-- One-time add form -->
+        <div class="flex gap-2 mt-2 items-center">
+          <input type="number" min="1" max="12" id="ot-month" placeholder="{{ t('budget.expenses_month') }}" class="glass-input w-16 rounded-lg px-2 py-1 text-xs">
+          <input type="text" id="ot-name" placeholder="{{ t('budget.expenses_name') }}" class="glass-input flex-1 rounded-lg px-2 py-1 text-xs">
+          <input type="number" step="0.01" min="0.01" id="ot-amount" placeholder="{{ t('budget.expenses_amount') }}" class="glass-input w-28 rounded-lg px-2 py-1 text-xs">
+          <button id="ot-add-btn" class="glass-btn-primary rounded-lg px-3 py-1 text-xs">{{ t('budget.expenses_add') }}</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const monthNames = [
+    '{{ t("budget.income_month_jan") }}', '{{ t("budget.income_month_feb") }}',
+    '{{ t("budget.income_month_mar") }}', '{{ t("budget.income_month_apr") }}',
+    '{{ t("budget.income_month_may") }}', '{{ t("budget.income_month_jun") }}',
+    '{{ t("budget.income_month_jul") }}', '{{ t("budget.income_month_aug") }}',
+    '{{ t("budget.income_month_sep") }}', '{{ t("budget.income_month_oct") }}',
+    '{{ t("budget.income_month_nov") }}', '{{ t("budget.income_month_dec") }}'
+  ];
+
+  const labels = {
+    currency: '{{ t("budget.currency") }}',
+    added: '{{ t("budget.expenses_added") }}',
+    updated: '{{ t("budget.expenses_updated") }}',
+    deleted: '{{ t("budget.expenses_deleted") }}',
+    emptyRecurring: '{{ t("budget.expenses_empty_recurring") }}',
+    emptyOnetime: '{{ t("budget.expenses_empty_onetime") }}',
+    filterAll: '{{ t("budget.expenses_filter_all") }}'
+  };
+
+  let currentYear = new Date().getFullYear();
+  let recurringData = [];
+  let onetimeData = [];
+  let filterMonth = 0; // 0 = all
+  let sortField = 'month';
+
+  function showToast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = '✓ ' + msg;
+    el.classList.remove('hidden');
+    setTimeout(() => el.classList.add('hidden'), 2500);
+  }
+
+  // Populate month filter dropdown
+  function populateMonthFilter() {
+    const sel = document.getElementById('filter-month');
+    sel.innerHTML = '<option value="0">' + labels.filterAll + '</option>';
+    for (let i = 0; i < 12; i++) {
+      sel.innerHTML += '<option value="' + (i+1) + '">' + (i+1) + ' - ' + monthNames[i] + '</option>';
+    }
+  }
+
+  async function loadExpenses() {
+    const res = await fetch('/api/budget/expenses?year=' + currentYear);
+    const json = await res.json();
+    recurringData = json.data.recurring_expenses || [];
+    onetimeData = json.data.onetime_expenses || [];
+  }
+
+  function renderRecurring() {
+    const tbody = document.getElementById('recurring-body');
+    const emptyEl = document.getElementById('recurring-empty');
+    const totalEl = document.getElementById('recurring-total');
+
+    if (recurringData.length === 0) {
+      tbody.innerHTML = '';
+      emptyEl.classList.remove('hidden');
+      totalEl.textContent = '0.00';
+      return;
+    }
+    emptyEl.classList.add('hidden');
+
+    let total = 0;
+    tbody.innerHTML = recurringData.map(e => {
+      total += e.amount;
+      return `<tr class="border-b border-white/5" data-id="${e.id}">
+        <td class="py-1 px-2 editable-name cursor-pointer hover:bg-white/5" data-id="${e.id}" data-field="name">${e.name}</td>
+        <td class="py-1 px-2 text-right editable-amount cursor-pointer hover:bg-white/5" data-id="${e.id}" data-field="amount">${e.amount.toFixed(2)}</td>
+        <td class="py-1 px-2 text-right"><button class="glass-btn-danger rounded px-1.5 py-0.5 text-xs del-btn" data-id="${e.id}" data-recurring="1">✕</button></td>
+      </tr>`;
+    }).join('');
+    totalEl.textContent = total.toFixed(2);
+
+    attachRowEvents(tbody);
+  }
+
+  function getFilteredSorted() {
+    let items = [...onetimeData];
+    if (filterMonth > 0) {
+      items = items.filter(e => e.month === filterMonth);
+    }
+    items.sort((a, b) => {
+      if (sortField === 'month') return a.month - b.month;
+      if (sortField === 'name') return a.name.localeCompare(b.name);
+      if (sortField === 'amount') return a.amount - b.amount;
+      return 0;
+    });
+    return items;
+  }
+
+  function renderOnetime() {
+    const tbody = document.getElementById('onetime-body');
+    const emptyEl = document.getElementById('onetime-empty');
+    const totalEl = document.getElementById('onetime-total');
+    const items = getFilteredSorted();
+
+    if (items.length === 0) {
+      tbody.innerHTML = '';
+      emptyEl.classList.remove('hidden');
+      totalEl.textContent = '0.00';
+      return;
+    }
+    emptyEl.classList.add('hidden');
+
+    let total = 0;
+    tbody.innerHTML = items.map(e => {
+      total += e.amount;
+      return `<tr class="border-b border-white/5" data-id="${e.id}">
+        <td class="py-1 px-2 text-xs opacity-70">${e.month} - ${monthNames[e.month - 1]}</td>
+        <td class="py-1 px-2 editable-name cursor-pointer hover:bg-white/5" data-id="${e.id}" data-field="name">${e.name}</td>
+        <td class="py-1 px-2 text-right editable-amount cursor-pointer hover:bg-white/5" data-id="${e.id}" data-field="amount">${e.amount.toFixed(2)}</td>
+        <td class="py-1 px-2 text-right"><button class="glass-btn-danger rounded px-1.5 py-0.5 text-xs del-btn" data-id="${e.id}" data-recurring="0">✕</button></td>
+      </tr>`;
+    }).join('');
+    totalEl.textContent = total.toFixed(2);
+
+    attachRowEvents(tbody);
+  }
+
+  function attachRowEvents(tbody) {
+    // Delete buttons
+    tbody.querySelectorAll('.del-btn').forEach(btn => {
+      btn.addEventListener('click', () => deleteExpense(btn.dataset.id, btn.dataset.recurring === '1'));
+    });
+    // Inline edit — name cells
+    tbody.querySelectorAll('.editable-name').forEach(cell => {
+      cell.addEventListener('click', () => startEdit(cell, 'name'));
+    });
+    // Inline edit — amount cells
+    tbody.querySelectorAll('.editable-amount').forEach(cell => {
+      cell.addEventListener('click', () => startEdit(cell, 'amount'));
+    });
+  }
+
+  function startEdit(cell, field) {
+    if (cell.querySelector('input')) return; // already editing
+    const id = cell.dataset.id;
+    const oldValue = cell.textContent.trim();
+    const inputType = field === 'amount' ? 'number' : 'text';
+    const inputValue = field === 'amount' ? parseFloat(oldValue) : oldValue;
+
+    cell.innerHTML = '';
+    const input = document.createElement('input');
+    input.type = inputType;
+    if (field === 'amount') { input.step = '0.01'; input.min = '0.01'; }
+    input.value = inputValue;
+    input.className = 'glass-input w-full rounded px-1 py-0.5 text-xs';
+    cell.appendChild(input);
+    input.focus();
+    input.select();
+
+    function save() {
+      const newValue = field === 'amount' ? parseFloat(input.value) : input.value.trim();
+      if (!newValue || (field === 'amount' && (isNaN(newValue) || newValue <= 0))) {
+        cell.textContent = oldValue;
+        return;
+      }
+      if (String(newValue) === String(inputValue)) {
+        cell.textContent = oldValue;
+        return;
+      }
+      const payload = {};
+      payload[field] = newValue;
+      updateExpense(id, payload);
+      cell.textContent = field === 'amount' ? newValue.toFixed(2) : newValue;
+      // Update local data
+      const allData = [...recurringData, ...onetimeData];
+      const item = allData.find(e => e.id === id);
+      if (item) item[field] = newValue;
+      // Update totals
+      updateTotals();
+    }
+
+    input.addEventListener('blur', save);
+    input.addEventListener('keydown', (ev) => {
+      if (ev.key === 'Enter') { ev.preventDefault(); input.blur(); }
+      if (ev.key === 'Escape') { cell.textContent = oldValue; }
+    });
+  }
+
+  function updateTotals() {
+    const recTotal = recurringData.reduce((s, e) => s + e.amount, 0);
+    document.getElementById('recurring-total').textContent = recTotal.toFixed(2);
+    const otItems = getFilteredSorted();
+    const otTotal = otItems.reduce((s, e) => s + e.amount, 0);
+    document.getElementById('onetime-total').textContent = otTotal.toFixed(2);
+  }
+
+  async function addExpense(recurring) {
+    let name, amount, month;
+    if (recurring) {
+      name = document.getElementById('rec-name').value.trim();
+      amount = parseFloat(document.getElementById('rec-amount').value);
+      month = 0;
+    } else {
+      month = parseInt(document.getElementById('ot-month').value);
+      name = document.getElementById('ot-name').value.trim();
+      amount = parseFloat(document.getElementById('ot-amount').value);
+    }
+
+    if (!name || !amount || amount <= 0) return;
+    if (!recurring && (!month || month < 1 || month > 12)) return;
+
+    const res = await fetch('/api/budget/expenses', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ year: currentYear, month: month, name: name, amount: amount, recurring: recurring })
+    });
+    const json = await res.json();
+    if (res.ok) {
+      if (recurring) {
+        recurringData.push(json.data);
+        renderRecurring();
+        document.getElementById('rec-name').value = '';
+        document.getElementById('rec-amount').value = '';
+      } else {
+        onetimeData.push(json.data);
+        renderOnetime();
+        document.getElementById('ot-month').value = '';
+        document.getElementById('ot-name').value = '';
+        document.getElementById('ot-amount').value = '';
+      }
+      showToast(labels.added);
+    }
+  }
+
+  async function updateExpense(id, data) {
+    const res = await fetch('/api/budget/expenses/' + id, {
+      method: 'PUT',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data)
+    });
+    if (res.ok) {
+      showToast(labels.updated);
+    }
+  }
+
+  async function deleteExpense(id, isRecurring) {
+    const res = await fetch('/api/budget/expenses/' + id, { method: 'DELETE' });
+    if (res.ok) {
+      if (isRecurring) {
+        recurringData = recurringData.filter(e => e.id !== id);
+        renderRecurring();
+      } else {
+        onetimeData = onetimeData.filter(e => e.id !== id);
+        renderOnetime();
+      }
+      showToast(labels.deleted);
+    }
+  }
+
+  // Event listeners
+  document.getElementById('rec-add-btn').addEventListener('click', () => addExpense(true));
+  document.getElementById('ot-add-btn').addEventListener('click', () => addExpense(false));
+
+  document.getElementById('filter-month').addEventListener('change', function() {
+    filterMonth = parseInt(this.value);
+    renderOnetime();
+  });
+  document.getElementById('sort-field').addEventListener('change', function() {
+    sortField = this.value;
+    renderOnetime();
+  });
+
+  // Year navigation
+  document.getElementById('year-prev').addEventListener('click', () => { currentYear--; reload(); });
+  document.getElementById('year-next').addEventListener('click', () => { currentYear++; reload(); });
+
+  async function reload() {
+    document.getElementById('year-display').textContent = currentYear;
+    await loadExpenses();
+    renderRecurring();
+    renderOnetime();
+  }
+
+  // Initial load
+  async function init() {
+    populateMonthFilter();
+    document.getElementById('year-display').textContent = currentYear;
+    try {
+      await loadExpenses();
+    } catch(e) {
+      console.error('Failed to load expenses', e);
+    }
+    document.getElementById('skeleton-loader').classList.add('hidden');
+    document.getElementById('expenses-content').classList.remove('hidden');
+    renderRecurring();
+    renderOnetime();
+  }
+
+  init();
+})();
+</script>
+{% endblock %}
