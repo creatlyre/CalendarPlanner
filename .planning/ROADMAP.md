@@ -16,6 +16,8 @@
  (completed 2026-03-20)
 - [x] **Phase 15: Year Overview Dashboard** — 12-month financial table with running balance and live recalculation
  (completed 2026-03-20)
+- [x] **Phase 16: Overview month detail - clickable months showing one-time expense breakdown** — Accordion UI with inline CRUD
+ (completed 2026-03-20)
 
 ## Phase Details
 
@@ -98,8 +100,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 16-01-PLAN.md — Overview API extension + accordion UI with CRUD detail
-- [ ] 16-02-PLAN.md — Integration tests + human verification
+- [x] 16-01-PLAN.md — Overview API extension + accordion UI with CRUD detail
+- [x] 16-02-PLAN.md — Integration tests + human verification
 
 ### Phase 17: Performance optimization - faster page loads and API responses
 
