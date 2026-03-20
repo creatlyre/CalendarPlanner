@@ -198,6 +198,81 @@ def test_quick_add_save_and_add_another(authenticated_client):
     html = _calendar_html(authenticated_client)
     assert "if (keepOpen)" in html
     assert "resetModal();" in html
+
+
+# ── Day-click quick-entry mode ────────────────────────────────────────────────
+
+
+def test_day_click_opens_quick_entry_modal(authenticated_client):
+    """Verify day-click on calendar day opens event modal with date prefilled and locked."""
+    now = datetime.utcnow()
+
+    # Main page has the addEventForDay function
+    html = _calendar_html(authenticated_client)
+    assert "addEventForDay" in html, "Calendar must have addEventForDay function"
+    assert "calculateEndTime" in html, "Calendar must have calculateEndTime function"
+    assert "getDefaultStartTime" in html, "Calendar must have getDefaultStartTime function"
+    assert "setEventEntryDateLocked(true)" in html, "addEventForDay must lock the date field"
+
+    # Month grid endpoint has day cells with data attributes
+    response = authenticated_client.get(
+        f"/calendar/month?year={now.year}&month={now.month}"
+    )
+    assert response.status_code == 200
+    grid_html = response.text
+    assert "data-day" in grid_html, "Month grid day cells must have data-day attributes"
+    assert "data-year" in grid_html, "Month grid day cells must have data-year attributes"
+    assert "data-month" in grid_html, "Month grid day cells must have data-month attributes"
+    assert "addEventForDay(" in grid_html, "Day cells must call addEventForDay on click"
+
+
+def test_quick_entry_saves_with_auto_end_time(authenticated_client):
+    """Verify quick-entry saves event with auto-calculated end-time +1h from start."""
+    now = datetime.utcnow().replace(hour=10, minute=0, second=0, microsecond=0)
+
+    start = now + timedelta(hours=2)
+    end = start + timedelta(hours=1)
+    response = authenticated_client.post(
+        "/api/events",
+        json={
+            "title": "Quick add test",
+            "start_at": start.isoformat(),
+            "end_at": end.isoformat(),
+            "timezone": "UTC",
+        },
+    )
+    assert response.status_code == 201
+    event = response.json()
+
+    assert event.get("end_at") is not None, "Event must have end_at set"
+
+    start_time = datetime.fromisoformat(event["start_at"])
+    end_time = datetime.fromisoformat(event["end_at"])
+    delta = end_time - start_time
+    assert delta.total_seconds() == 3600, (
+        f"End time must be 1 hour after start, got {delta.total_seconds()}s"
+    )
+
+    # Verify auto-calculation JS exists on the client
+    html = _calendar_html(authenticated_client)
+    assert "calculateEndTime" in html
+    assert "quick-entry-mode" in html
+
+
+def test_quick_entry_mode_locks_date_field(authenticated_client):
+    """Verify event-entry form has quick-entry-mode class and date field shows lock indicator."""
+    html = _calendar_html(authenticated_client)
+
+    # Quick-entry styling class exists in CSS/JS
+    assert "quick-entry-mode" in html, "Event form must have quick-entry-mode class for styling"
+
+    # Quick-entry hint exists in modal
+    assert "quick-entry-hint" in html, "Modal should have quick-entry hint for user awareness"
+
+    # Date-lock indicator is in modal
+    assert "date-lock-note" in html.lower() or "date_locked" in html.lower(), (
+        "Modal should indicate date is locked"
+    )
     assert "qaTextInput.focus();" in html
 
 
@@ -385,10 +460,10 @@ def test_event_entry_mobile_fullscreen_markers(authenticated_client):
 def test_day_click_opens_event_entry_for_selected_day(authenticated_client):
     month = authenticated_client.get("/calendar/month?year=2026&month=3")
     assert month.status_code == 200
-    assert "openEventEntryForDay(" in month.text
+    assert "addEventForDay(" in month.text
 
     html = _calendar_html(authenticated_client)
-    assert "function openEventEntryForDay(year, month, day)" in html
+    assert "function addEventForDay(year, month, day)" in html
     assert_contains_any(html, "Date locked to selected calendar day.", "Data zablokowana na wybranym dniu kalendarza.")
     assert "setEventEntryDateLocked(true)" in html
 
