@@ -46,6 +46,7 @@ Plans:
 **Requirements**: I18N-07
 **Depends on:** Phase 8, Phase 9
 **Plans:** 2/2 plans complete
+**Status:** ✅ COMPLETE
 
 Plans:
 - [x] 10-01-PLAN.md - Add locale-aware NLP/OCR parsing contracts for Polish text and diacritics — Complete
@@ -57,18 +58,18 @@ Plans:
 **Requirements**: TBD
 **Depends on:** Phase 10
 **Plans:** 3/3 plans complete
-**Status:** 📋 Planned
+**Status:** ✅ COMPLETE (2026-03-20)
 
 Plans:
-- [ ] 11-01-PLAN.md — Fast day-click manual entry UI with form prefill, date locking, and auto-calculated end-time (Wave 1)
-- [ ] 11-02-PLAN.md — Event model reminder support (backward-compatible), schema updates, and Google sync payload generation (Wave 2)
-- [ ] 11-03-PLAN.md — End-to-end integration tests (day-click → sync → Google) and regression verification (Wave 3)
+- [x] 11-01-PLAN.md — Fast day-click manual entry UI with form prefill, date locking, and auto-calculated end-time (Wave 1)
+- [x] 11-02-PLAN.md — Event model reminder support (backward-compatible), schema updates, and Google sync payload generation (Wave 2)
+- [x] 11-03-PLAN.md — End-to-end integration tests (day-click → sync → Google) and regression verification (Wave 3)
 
 ---
 
 *Roadmap updated for v1.1 on 2026-03-20*
-*Phase 8: ✅ Complete and committed (2a4dd7c)*
-*Phase 9: ✅ Complete and committed (553369f) — 117/117 tests passing*
-*Phase 10: ✅ Planned (ready for execution)*
-*Phase 11: 📋 Planned (3 plans created, ready for execution) — `/gsd-execute-phase 11`*
-*Next step: Execute Phase 10 or Phase 11*
+*Phase 8: ✅ Complete*
+*Phase 9: ✅ Complete*
+*Phase 10: ✅ Complete*
+*Phase 11: ✅ Complete (2026-03-20) — 145/145 tests passing*
+*All phases complete — milestone ready for completion*
