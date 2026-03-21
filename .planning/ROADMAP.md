@@ -25,8 +25,10 @@
 
 - [x] **Phase 18: Event Privacy** - Validate & harden visibility toggle, filtering, sync retraction, and lock icon
  (completed 2026-03-20)
-- [x] **Phase 19: Reminder UI** - Wire reminder controls to existing backend in event forms (completed 2026-03-20)
+- [x] **Phase 19: Reminder UI** - Wire reminder controls to existing backend in event forms
+ (completed 2026-03-20)
 - [ ] **Phase 20: Multi-Year Budget** - Fix data integrity (carry-forward, year-scoping) and enable year navigation
+ (0/2 plans)
 - [ ] **Phase 21: Year-over-Year Comparison** - Side-by-side annual totals with delta indicators
 
 ## Phase Details
@@ -68,7 +70,11 @@ Plans:
   1. User can navigate to any past year's budget overview using year arrows
   2. Years with no budget data show a graceful empty state, not errors or misleading zeros
   3. Past year data displays correctly in the existing overview layout
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 20-01-PLAN.md — Backend carry-forward computation, year bounds, multi-year tests
+- [ ] 20-02-PLAN.md — Frontend year nav bounds, carry-forward display, i18n keys
 
 ### Phase 21: Year-over-Year Comparison
 **Goal**: Users can compare budget performance across years at a glance
@@ -78,7 +84,10 @@ Plans:
   1. User can view side-by-side annual totals (income, expenses, balance) for selected year vs previous year
   2. Comparison handles years with partial or no data gracefully
   3. Summary is accessible from the budget overview page
-**Plans**: TBD
+**Plans:** 1 plan
+
+Plans:
+- [ ] 21-01-PLAN.md — YoY comparison API endpoint, UI card, i18n, tests
 
 ## Progress
 
