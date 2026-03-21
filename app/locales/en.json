@@ -317,5 +317,21 @@
   "budget.yoy_recurring_exp": "Recurring Expenses",
   "budget.yoy_onetime_exp": "One-time Expenses",
   "budget.yoy_total_balance": "Net Balance",
-  "budget.yoy_final_balance": "Final Account Balance"
+  "budget.yoy_final_balance": "Final Account Balance",
+  "budget.sidebar_import": "📥 Import",
+  "budget.import_page_title": "Import Historical Data",
+  "budget.import_year_label": "Target Year",
+  "budget.import_hours_title": "Income Hours",
+  "budget.import_hours_desc": "Paste TSV: Month | Rate 1 Hours | Rate 2 Hours | Rate 3 Hours",
+  "budget.import_onetime_title": "One-time Expenses",
+  "budget.import_onetime_desc": "Paste TSV: Name | Amount | Month",
+  "budget.import_recurring_title": "Recurring Monthly Expenses",
+  "budget.import_recurring_desc": "Paste TSV: Name | Amount",
+  "budget.import_preview": "Preview",
+  "budget.import_save_hours": "Save Hours",
+  "budget.import_save_expenses": "Save Expenses",
+  "budget.import_success": "Successfully imported {count} items",
+  "budget.import_error": "Import failed",
+  "budget.import_no_data": "No data to import. Paste data into the textarea first.",
+  "budget.import_view_overview": "View in Overview"
 }

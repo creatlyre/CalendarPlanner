@@ -317,5 +317,21 @@
   "budget.yoy_recurring_exp": "Wydatki stałe",
   "budget.yoy_onetime_exp": "Wydatki jednorazowe",
   "budget.yoy_total_balance": "Bilans netto",
-  "budget.yoy_final_balance": "Końcowe saldo konta"
+  "budget.yoy_final_balance": "Końcowe saldo konta",
+  "budget.sidebar_import": "📥 Import",
+  "budget.import_page_title": "Import danych historycznych",
+  "budget.import_year_label": "Rok docelowy",
+  "budget.import_hours_title": "Godziny pracy",
+  "budget.import_hours_desc": "Wklej TSV: Miesiąc | Godziny stawka 1 | Godziny stawka 2 | Godziny stawka 3",
+  "budget.import_onetime_title": "Wydatki jednorazowe",
+  "budget.import_onetime_desc": "Wklej TSV: Nazwa | Kwota | Miesiąc",
+  "budget.import_recurring_title": "Wydatki stałe miesięczne",
+  "budget.import_recurring_desc": "Wklej TSV: Nazwa | Kwota",
+  "budget.import_preview": "Podgląd",
+  "budget.import_save_hours": "Zapisz godziny",
+  "budget.import_save_expenses": "Zapisz wydatki",
+  "budget.import_success": "Pomyślnie zaimportowano {count} pozycji",
+  "budget.import_error": "Import nie powiódł się",
+  "budget.import_no_data": "Brak danych do importu. Najpierw wklej dane w pole tekstowe.",
+  "budget.import_view_overview": "Zobacz w Przeglądzie"
 }

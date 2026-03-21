@@ -2,6 +2,8 @@
 
 {% block title %}{{ t('budget.income_page_title') }} - {{ t('app.name') }}{% endblock %}
 
+{% block page_heading %}{{ t('budget.income_page_title') }}{% endblock %}
+
 {% block content %}
 <div class="flex flex-col lg:flex-row gap-6">
 
@@ -9,18 +11,21 @@
   <nav class="w-full lg:w-48 flex-shrink-0">
     <div class="glass rounded-2xl p-4">
       <div class="flex lg:flex-col gap-2">
-        <a href="/budget/settings" class="px-4 py-3 text-sm font-medium rounded-xl block hover:bg-white/5 transition-colors">
+        <a href="/budget/settings" class="px-4 py-3 text-sm font-medium rounded-xl block hover:bg-white/5 transition-colors min-h-[44px] flex items-center">
           {{ t('budget.sidebar_settings') }}
         </a>
         <!-- Active: Income -->
-        <div class="px-4 py-3 text-sm font-medium rounded-xl nav-active">
+        <div class="px-4 py-3 text-sm font-medium rounded-xl nav-active min-h-[44px] flex items-center" aria-current="page">
           {{ t('budget.sidebar_income') }}
         </div>
-        <a href="/budget/expenses" class="px-4 py-3 text-sm font-medium rounded-xl block hover:bg-white/5 transition-colors">
+        <a href="/budget/expenses" class="px-4 py-3 text-sm font-medium rounded-xl block hover:bg-white/5 transition-colors min-h-[44px] flex items-center">
           {{ t('budget.sidebar_expenses') }}
         </a>
-        <a href="/budget/overview" class="px-4 py-3 text-sm font-medium rounded-xl block hover:bg-white/5 transition-colors">
+        <a href="/budget/overview" class="px-4 py-3 text-sm font-medium rounded-xl block hover:bg-white/5 transition-colors min-h-[44px] flex items-center">
           {{ t('budget.sidebar_overview') }}
+        </a>
+        <a href="/budget/import" class="px-4 py-3 text-sm font-medium rounded-xl block hover:bg-white/5 transition-colors min-h-[44px] flex items-center">
+          {{ t('budget.sidebar_import') }}
         </a>
         <a href="/" class="glass-btn-secondary rounded-xl px-4 py-3 text-sm font-medium block text-center lg:mt-4">
           {{ t('budget.back') }}
@@ -32,7 +37,7 @@
   <!-- Main content -->
   <div class="flex-1">
     <!-- Toast -->
-    <div id="toast" class="hidden rounded-xl px-4 py-3 mb-4 text-sm font-medium toast-success"></div>
+    <div id="toast" class="hidden rounded-xl px-4 py-3 mb-4 text-sm font-medium toast-success" role="status" aria-live="polite"></div>
 
     <!-- No settings warning -->
     <div id="no-settings" class="hidden glass rounded-2xl p-6 mb-6 text-center">
@@ -64,9 +69,9 @@
     <div id="income-content" class="hidden stagger-children">
       <!-- Year picker -->
       <div class="flex items-center justify-center gap-4 mb-6">
-        <button id="year-prev" class="glass-btn-secondary rounded-xl px-4 py-2.5 text-sm font-medium min-h-[44px] min-w-[44px]">←</button>
+        <button id="year-prev" class="glass-btn-secondary rounded-xl px-4 py-2.5 text-sm font-medium min-h-[44px] min-w-[44px]" aria-label="Previous year">←</button>
         <span id="year-display" class="text-xl font-bold"></span>
-        <button id="year-next" class="glass-btn-secondary rounded-xl px-4 py-2.5 text-sm font-medium min-h-[44px] min-w-[44px]">→</button>
+        <button id="year-next" class="glass-btn-secondary rounded-xl px-4 py-2.5 text-sm font-medium min-h-[44px] min-w-[44px]" aria-label="Next year">→</button>
       </div>
 
       <!-- Recurring / stable earnings -->
@@ -133,7 +138,7 @@
     const el = document.getElementById('toast');
     el.textContent = '✓ ' + msg;
     el.classList.remove('hidden');
-    setTimeout(() => el.classList.add('hidden'), 2500);
+    setTimeout(() => el.classList.add('hidden'), 3000);
   }
 
   async function loadSettings() {
@@ -180,22 +185,25 @@
         <h3 class="text-sm font-semibold mb-3">${monthKeys[i]}</h3>
         <div class="space-y-2">
           <div>
-            <label class="text-xs opacity-60">${labels.rate1}</label>
+            <label for="rate1-${m.month}" class="text-xs opacity-60">${labels.rate1}</label>
             <input type="number" step="0.5" min="0" placeholder="160"
+              id="rate1-${m.month}"
               class="glass-input w-full rounded-lg px-3 py-1.5 text-sm"
               data-month="${m.month}" data-rate="1"
               value="${m.rate_1_hours !== null && m.rate_1_hours !== undefined ? m.rate_1_hours : ''}">
           </div>
           <div>
-            <label class="text-xs opacity-60">${labels.rate2}</label>
+            <label for="rate2-${m.month}" class="text-xs opacity-60">${labels.rate2}</label>
             <input type="number" step="0.5" min="0" placeholder="160"
+              id="rate2-${m.month}"
               class="glass-input w-full rounded-lg px-3 py-1.5 text-sm"
               data-month="${m.month}" data-rate="2"
               value="${m.rate_2_hours !== null && m.rate_2_hours !== undefined ? m.rate_2_hours : ''}">
           </div>
           <div>
-            <label class="text-xs opacity-60">${labels.rate3}</label>
+            <label for="rate3-${m.month}" class="text-xs opacity-60">${labels.rate3}</label>
             <input type="number" step="0.5" min="0" placeholder="160"
+              id="rate3-${m.month}"
               class="glass-input w-full rounded-lg px-3 py-1.5 text-sm"
               data-month="${m.month}" data-rate="3"
               value="${m.rate_3_hours !== null && m.rate_3_hours !== undefined ? m.rate_3_hours : ''}">
@@ -232,7 +240,7 @@
   function earningRow(e, month) {
     return `<div class="flex justify-between items-center text-xs" data-earning-id="${e.id}">
       <span>${e.name} — ${e.amount.toFixed(2)} ${labels.currency}</span>
-      <button class="glass-btn-danger rounded px-1.5 py-0.5 text-xs delete-earning-btn" data-id="${e.id}" data-month="${month}">✕</button>
+      <button class="glass-btn-danger rounded px-1.5 py-0.5 text-xs delete-earning-btn" data-id="${e.id}" data-month="${month}" aria-label="Delete ${e.name}">✕</button>
     </div>`;
   }
 

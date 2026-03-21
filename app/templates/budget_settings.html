@@ -2,6 +2,8 @@
 
 {% block title %}{{ t('budget.page_title') }} - {{ t('app.name') }}{% endblock %}
 
+{% block page_heading %}{{ t('budget.page_title') }}{% endblock %}
+
 {% block content %}
 <div class="flex flex-col lg:flex-row gap-6">
 
@@ -10,18 +12,21 @@
     <div class="glass rounded-2xl p-4">
       <div class="flex lg:flex-col gap-2">
         <!-- Active: Settings -->
-        <div class="px-4 py-3 text-sm font-medium rounded-xl nav-active">
+        <div class="px-4 py-3 text-sm font-medium rounded-xl nav-active min-h-[44px] flex items-center" aria-current="page">
           {{ t('budget.sidebar_settings') }}
         </div>
         <!-- Future: disabled -->
-        <a href="/budget/income" class="px-4 py-3 text-sm font-medium rounded-xl block hover:bg-white/5 transition-colors">
+        <a href="/budget/income" class="px-4 py-3 text-sm font-medium rounded-xl block hover:bg-white/5 transition-colors min-h-[44px] flex items-center">
           {{ t('budget.sidebar_income') }}
         </a>
-        <a href="/budget/expenses" class="px-4 py-3 text-sm font-medium rounded-xl block hover:bg-white/5 transition-colors">
+        <a href="/budget/expenses" class="px-4 py-3 text-sm font-medium rounded-xl block hover:bg-white/5 transition-colors min-h-[44px] flex items-center">
           {{ t('budget.sidebar_expenses') }}
         </a>
-        <a href="/budget/overview" class="px-4 py-3 text-sm font-medium rounded-xl block hover:bg-white/5 transition-colors">
+        <a href="/budget/overview" class="px-4 py-3 text-sm font-medium rounded-xl block hover:bg-white/5 transition-colors min-h-[44px] flex items-center">
           {{ t('budget.sidebar_overview') }}
+        </a>
+        <a href="/budget/import" class="px-4 py-3 text-sm font-medium rounded-xl block hover:bg-white/5 transition-colors min-h-[44px] flex items-center">
+          {{ t('budget.sidebar_import') }}
         </a>
         <a href="/" class="glass-btn-secondary rounded-xl px-4 py-3 text-sm font-medium block text-center lg:mt-4">
           {{ t('budget.back') }}
@@ -33,9 +38,12 @@
   <!-- Main content -->
   <div class="flex-1">
     <!-- Success toast -->
-    <div id="save-success" class="hidden rounded-xl px-4 py-3 mb-4 text-sm font-medium toast-success">
-      ✓ {{ t('budget.save_success') }}
+    <div id="save-success" class="hidden rounded-xl px-4 py-3 mb-4 text-sm font-medium toast-success" role="status" aria-live="polite">
+      &#10003; {{ t('budget.save_success') }}
     </div>
+
+    <!-- Error toast -->
+    <div id="save-error" class="hidden rounded-xl px-4 py-3 mb-4 text-sm font-medium toast-error" role="alert" aria-live="assertive"></div>
 
     <!-- Empty state -->
     <div id="empty-state" class="hidden glass rounded-2xl p-6 mb-6 text-center">
@@ -175,8 +183,9 @@
   const saveText = {{ t('budget.save') | tojson }};
   const errPositive = {{ t('budget.validation_positive') | tojson }};
   const errRequired = {{ t('budget.validation_required') | tojson }};
-
+  const errSaveFailed = "Save failed. Please try again.";
   function getInput(id) { return document.getElementById(id); }
+  const errorToast = document.getElementById('save-error');
   function getError(id) { return document.getElementById(id + '_error'); }
 
   function showError(id, msg) {
@@ -296,6 +305,9 @@
     .catch(function() {
       saveBtn.disabled = false;
       saveBtn.textContent = saveText;
+      errorToast.textContent = errSaveFailed;
+      errorToast.classList.remove('hidden');
+      setTimeout(function() { errorToast.classList.add('hidden'); }, 5000);
     });
   });
 })();

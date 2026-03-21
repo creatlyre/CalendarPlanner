@@ -2,6 +2,8 @@
 
 {% block title %}{{ t('budget.expenses_page_title') }} - {{ t('app.name') }}{% endblock %}
 
+{% block page_heading %}{{ t('budget.expenses_page_title') }}{% endblock %}
+
 {% block content %}
 <div class="flex flex-col lg:flex-row gap-6">
 
@@ -9,18 +11,21 @@
   <nav class="w-full lg:w-48 flex-shrink-0">
     <div class="glass rounded-2xl p-4">
       <div class="flex lg:flex-col gap-2">
-        <a href="/budget/settings" class="px-4 py-3 text-sm font-medium rounded-xl block hover:bg-white/5 transition-colors">
+        <a href="/budget/settings" class="px-4 py-3 text-sm font-medium rounded-xl block hover:bg-white/5 transition-colors min-h-[44px] flex items-center">
           {{ t('budget.sidebar_settings') }}
         </a>
-        <a href="/budget/income" class="px-4 py-3 text-sm font-medium rounded-xl block hover:bg-white/5 transition-colors">
+        <a href="/budget/income" class="px-4 py-3 text-sm font-medium rounded-xl block hover:bg-white/5 transition-colors min-h-[44px] flex items-center">
           {{ t('budget.sidebar_income') }}
         </a>
         <!-- Active: Expenses -->
-        <div class="px-4 py-3 text-sm font-medium rounded-xl nav-active">
+        <div class="px-4 py-3 text-sm font-medium rounded-xl nav-active min-h-[44px] flex items-center" aria-current="page">
           {{ t('budget.sidebar_expenses') }}
         </div>
-        <a href="/budget/overview" class="px-4 py-3 text-sm font-medium rounded-xl block hover:bg-white/5 transition-colors">
+        <a href="/budget/overview" class="px-4 py-3 text-sm font-medium rounded-xl block hover:bg-white/5 transition-colors min-h-[44px] flex items-center">
           {{ t('budget.sidebar_overview') }}
+        </a>
+        <a href="/budget/import" class="px-4 py-3 text-sm font-medium rounded-xl block hover:bg-white/5 transition-colors min-h-[44px] flex items-center">
+          {{ t('budget.sidebar_import') }}
         </a>
         <a href="/" class="glass-btn-secondary rounded-xl px-4 py-3 text-sm font-medium block text-center lg:mt-4">
           {{ t('budget.back') }}
@@ -32,7 +37,7 @@
   <!-- Main content -->
   <div class="flex-1">
     <!-- Toast -->
-    <div id="toast" class="hidden rounded-xl px-4 py-3 mb-4 text-sm font-medium toast-success"></div>
+    <div id="toast" class="hidden rounded-xl px-4 py-3 mb-4 text-sm font-medium toast-success" role="status" aria-live="polite"></div>
 
     <!-- Loading skeleton -->
     <div id="skeleton-loader">
@@ -50,9 +55,9 @@
     <div id="expenses-content" class="hidden stagger-children">
       <!-- Year picker -->
       <div class="flex items-center justify-center gap-4 mb-6">
-        <button id="year-prev" class="glass-btn-secondary rounded-xl px-4 py-2.5 text-sm font-medium min-h-[44px] min-w-[44px]">←</button>
+        <button id="year-prev" class="glass-btn-secondary rounded-xl px-4 py-2.5 text-sm font-medium min-h-[44px] min-w-[44px]" aria-label="Previous year">←</button>
         <span id="year-display" class="text-xl font-bold"></span>
-        <button id="year-next" class="glass-btn-secondary rounded-xl px-4 py-2.5 text-sm font-medium min-h-[44px] min-w-[44px]">→</button>
+        <button id="year-next" class="glass-btn-secondary rounded-xl px-4 py-2.5 text-sm font-medium min-h-[44px] min-w-[44px]" aria-label="Next year">→</button>
       </div>
 
       <!-- Recurring expenses section -->
@@ -81,7 +86,7 @@
           </tfoot>
         </table>
         </div>
-        <div id="recurring-empty" class="empty-state text-caption hidden"><span class="empty-state-icon">📋</span><br>{{ t('budget.expenses_empty_recurring') }}</div>
+        <div id="recurring-empty" class="empty-state text-caption hidden">{{ t('budget.expenses_empty_recurring') }}</div>
         <!-- Recurring add form -->
         <div class="flex flex-wrap gap-2 mt-2 items-center">
           <input type="text" id="rec-name" placeholder="{{ t('budget.expenses_name') }}" class="glass-input flex-1 rounded-lg px-3 py-2 text-sm">
@@ -135,7 +140,7 @@
           </tfoot>
         </table>
         </div>
-        <div id="onetime-empty" class="empty-state text-caption hidden"><span class="empty-state-icon">🧾</span><br>{{ t('budget.expenses_empty_onetime') }}</div>
+        <div id="onetime-empty" class="empty-state text-caption hidden">{{ t('budget.expenses_empty_onetime') }}</div>
         <!-- One-time add form -->
         <div class="flex flex-wrap gap-2 mt-2 items-center">
           <input type="number" min="1" max="12" id="ot-month" placeholder="{{ t('budget.expenses_month') }}" class="glass-input w-20 rounded-lg px-3 py-2 text-sm">
@@ -216,7 +221,7 @@
     const el = document.getElementById('toast');
     el.textContent = '✓ ' + msg;
     el.classList.remove('hidden');
-    setTimeout(() => el.classList.add('hidden'), 2500);
+    setTimeout(() => el.classList.add('hidden'), 3000);
   }
 
   // Populate month filter dropdown
@@ -254,7 +259,7 @@
       return `<tr class="border-b border-white/5" data-id="${e.id}">
         <td class="py-1 px-2 editable-name cursor-pointer hover:bg-white/5" data-id="${e.id}" data-field="name">${e.name}</td>
         <td class="py-1 px-2 text-right editable-amount cursor-pointer hover:bg-white/5" data-id="${e.id}" data-field="amount">${e.amount.toFixed(2)}</td>
-        <td class="py-1 px-2 text-right"><button class="glass-btn-danger rounded px-1.5 py-0.5 text-xs del-btn" data-id="${e.id}" data-recurring="1">✕</button></td>
+        <td class="py-1 px-2 text-right"><button class="glass-btn-danger rounded px-1.5 py-0.5 text-xs del-btn" data-id="${e.id}" data-recurring="1" aria-label="Delete ${e.name}">✕</button></td>
       </tr>`;
     }).join('');
     totalEl.textContent = total.toFixed(2);
@@ -303,7 +308,7 @@
         <td class="py-1 px-2 text-xs opacity-70">${e.month} - ${monthNames[e.month - 1]}</td>
         <td class="py-1 px-2 editable-name cursor-pointer hover:bg-white/5" data-id="${e.id}" data-field="name">${e.name}</td>
         <td class="py-1 px-2 text-right editable-amount cursor-pointer hover:bg-white/5" data-id="${e.id}" data-field="amount">${e.amount.toFixed(2)}</td>
-        <td class="py-1 px-2 text-right"><button class="glass-btn-danger rounded px-1.5 py-0.5 text-xs del-btn" data-id="${e.id}" data-recurring="0">✕</button></td>
+        <td class="py-1 px-2 text-right"><button class="glass-btn-danger rounded px-1.5 py-0.5 text-xs del-btn" data-id="${e.id}" data-recurring="0" aria-label="Delete ${e.name}">✕</button></td>
       </tr>`;
     }).join('');
     totalEl.textContent = total.toFixed(2);

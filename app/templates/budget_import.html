@@ -1,0 +1,264 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('budget.import_page_title') }} - {{ t('app.name') }}{% endblock %}
+
+{% block page_heading %}{{ t('budget.import_page_title') }}{% endblock %}
+
+{% block content %}
+<div class="flex flex-col lg:flex-row gap-6">
+
+  <!-- Sidebar -->
+  <nav class="w-full lg:w-48 flex-shrink-0">
+    <div class="glass rounded-2xl p-4">
+      <div class="flex lg:flex-col gap-2">
+        <a href="/budget/settings" class="px-4 py-3 text-sm font-medium rounded-xl block hover:bg-white/5 transition-colors min-h-[44px] flex items-center">
+          {{ t('budget.sidebar_settings') }}
+        </a>
+        <a href="/budget/income" class="px-4 py-3 text-sm font-medium rounded-xl block hover:bg-white/5 transition-colors min-h-[44px] flex items-center">
+          {{ t('budget.sidebar_income') }}
+        </a>
+        <a href="/budget/expenses" class="px-4 py-3 text-sm font-medium rounded-xl block hover:bg-white/5 transition-colors min-h-[44px] flex items-center">
+          {{ t('budget.sidebar_expenses') }}
+        </a>
+        <a href="/budget/overview" class="px-4 py-3 text-sm font-medium rounded-xl block hover:bg-white/5 transition-colors min-h-[44px] flex items-center">
+          {{ t('budget.sidebar_overview') }}
+        </a>
+        <!-- Active: Import -->
+        <div class="px-4 py-3 text-sm font-medium rounded-xl nav-active min-h-[44px] flex items-center" aria-current="page">
+          {{ t('budget.sidebar_import') }}
+        </div>
+        <a href="/" class="glass-btn-secondary rounded-xl px-4 py-3 text-sm font-medium block text-center lg:mt-4">
+          {{ t('budget.back') }}
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main content -->
+  <div class="flex-1">
+    <!-- Toast -->
+    <div id="toast" class="hidden rounded-xl px-4 py-3 mb-4 text-sm font-medium" role="status" aria-live="polite"></div>
+
+    <!-- Year picker -->
+    <div class="flex items-center justify-center gap-4 mb-6">
+      <button id="year-prev" class="glass-btn-secondary rounded-xl px-4 py-2.5 text-sm font-medium min-h-[44px] min-w-[44px]" aria-label="Previous year">←</button>
+      <span id="year-display" class="text-xl font-bold"></span>
+      <button id="year-next" class="glass-btn-secondary rounded-xl px-4 py-2.5 text-sm font-medium min-h-[44px] min-w-[44px]" aria-label="Next year">→</button>
+    </div>
+
+    <!-- Income Hours Section -->
+    <div class="glass rounded-2xl p-6 mb-6">
+      <h2 class="text-lg font-semibold mb-2">{{ t('budget.import_hours_title') }}</h2>
+      <p class="text-sm opacity-70 mb-3">{{ t('budget.import_hours_desc') }}</p>
+      <textarea id="hours-input" class="w-full glass rounded-xl p-3 font-mono text-sm min-h-[200px] bg-white/5 border border-white/10 focus:border-indigo-400 focus:outline-none resize-y" placeholder="1&#9;0&#9;0&#9;0&#10;2&#9;0&#9;0&#9;0&#10;3&#9;160&#9;144&#9;124&#10;...&#10;12&#9;160&#9;144&#9;124"></textarea>
+      <div class="flex gap-3 mt-3">
+        <button onclick="previewHours()" class="glass-btn-secondary rounded-xl px-4 py-2.5 text-sm font-medium min-h-[44px]">{{ t('budget.import_preview') }}</button>
+        <button onclick="saveHours()" class="glass-btn-primary rounded-xl px-4 py-2.5 text-sm font-medium min-h-[44px]">{{ t('budget.import_save_hours') }}</button>
+      </div>
+      <div id="hours-preview" class="mt-4 hidden"></div>
+    </div>
+
+    <!-- One-time Expenses Section -->
+    <div class="glass rounded-2xl p-6 mb-6">
+      <h2 class="text-lg font-semibold mb-2">{{ t('budget.import_onetime_title') }}</h2>
+      <p class="text-sm opacity-70 mb-3">{{ t('budget.import_onetime_desc') }}</p>
+      <textarea id="onetime-input" class="w-full glass rounded-xl p-3 font-mono text-sm min-h-[200px] bg-white/5 border border-white/10 focus:border-indigo-400 focus:outline-none resize-y" placeholder="Laptop&#9;3500&#9;3&#10;Vacation&#9;2000&#9;7"></textarea>
+      <div class="flex gap-3 mt-3">
+        <button onclick="previewOnetime()" class="glass-btn-secondary rounded-xl px-4 py-2.5 text-sm font-medium min-h-[44px]">{{ t('budget.import_preview') }}</button>
+        <button onclick="saveOnetime()" class="glass-btn-primary rounded-xl px-4 py-2.5 text-sm font-medium min-h-[44px]">{{ t('budget.import_save_expenses') }}</button>
+      </div>
+      <div id="onetime-preview" class="mt-4 hidden"></div>
+    </div>
+
+    <!-- Recurring Expenses Section -->
+    <div class="glass rounded-2xl p-6 mb-6">
+      <h2 class="text-lg font-semibold mb-2">{{ t('budget.import_recurring_title') }}</h2>
+      <p class="text-sm opacity-70 mb-3">{{ t('budget.import_recurring_desc') }}</p>
+      <textarea id="recurring-input" class="w-full glass rounded-xl p-3 font-mono text-sm min-h-[200px] bg-white/5 border border-white/10 focus:border-indigo-400 focus:outline-none resize-y" placeholder="Rent&#9;2500&#10;Internet&#9;100"></textarea>
+      <div class="flex gap-3 mt-3">
+        <button onclick="previewRecurring()" class="glass-btn-secondary rounded-xl px-4 py-2.5 text-sm font-medium min-h-[44px]">{{ t('budget.import_preview') }}</button>
+        <button onclick="saveRecurring()" class="glass-btn-primary rounded-xl px-4 py-2.5 text-sm font-medium min-h-[44px]">{{ t('budget.import_save_expenses') }}</button>
+      </div>
+      <div id="recurring-preview" class="mt-4 hidden"></div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+  const currentYear = new Date().getFullYear();
+  let selectedYear = currentYear - 1;
+
+  const yearDisplay = document.getElementById('year-display');
+  const yearPrev = document.getElementById('year-prev');
+  const yearNext = document.getElementById('year-next');
+
+  function updateYearDisplay() {
+    yearDisplay.textContent = selectedYear;
+  }
+
+  yearPrev.addEventListener('click', () => { selectedYear--; updateYearDisplay(); });
+  yearNext.addEventListener('click', () => { selectedYear++; updateYearDisplay(); });
+  updateYearDisplay();
+
+  function showToast(message, success) {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = success
+      ? 'rounded-xl px-4 py-3 mb-4 text-sm font-medium toast-success'
+      : 'rounded-xl px-4 py-3 mb-4 text-sm font-medium toast-error';
+    toast.classList.remove('hidden');
+    setTimeout(() => toast.classList.add('hidden'), 5000);
+  }
+
+  // --- TSV Parsers ---
+
+  function parseHoursTSV(text) {
+    const lines = text.trim().split('\n').filter(l => l.trim());
+    const entries = [];
+    for (const line of lines) {
+      const cols = line.split('\t');
+      const month = parseInt(cols[0], 10);
+      if (isNaN(month) || month < 1 || month > 12) continue;
+      const r1 = cols[1] !== undefined && cols[1].trim() !== '' ? parseFloat(cols[1]) : null;
+      const r2 = cols[2] !== undefined && cols[2].trim() !== '' ? parseFloat(cols[2]) : null;
+      const r3 = cols[3] !== undefined && cols[3].trim() !== '' ? parseFloat(cols[3]) : null;
+      entries.push({
+        year: selectedYear,
+        month: month,
+        rate_1_hours: isNaN(r1) ? null : r1,
+        rate_2_hours: isNaN(r2) ? null : r2,
+        rate_3_hours: isNaN(r3) ? null : r3,
+      });
+    }
+    return entries;
+  }
+
+  function parseExpenseTSV(text, recurring) {
+    const lines = text.trim().split('\n').filter(l => l.trim());
+    const expenses = [];
+    for (const line of lines) {
+      const cols = line.split('\t');
+      const name = (cols[0] || '').trim();
+      const amount = parseFloat(cols[1]);
+      if (!name || isNaN(amount) || amount <= 0) continue;
+      if (recurring) {
+        expenses.push({ year: selectedYear, month: 0, name, amount, recurring: true });
+      } else {
+        const month = parseInt(cols[2], 10);
+        if (isNaN(month) || month < 1 || month > 12) continue;
+        expenses.push({ year: selectedYear, month, name, amount, recurring: false });
+      }
+    }
+    return expenses;
+  }
+
+  // --- Preview Renderers ---
+
+  function renderHoursPreview(entries) {
+    if (!entries.length) return '<p class="text-sm opacity-50">{{ t("budget.import_no_data") }}</p>';
+    let html = '<div class="table-responsive"><table class="w-full text-sm"><thead><tr class="text-xs opacity-70 border-b border-white/10">';
+    html += '<th class="text-left py-2 px-2">Month</th><th class="text-right py-2 px-2">Rate 1</th><th class="text-right py-2 px-2">Rate 2</th><th class="text-right py-2 px-2">Rate 3</th></tr></thead><tbody>';
+    for (const e of entries) {
+      html += `<tr class="border-b border-white/5"><td class="py-2 px-2">${e.month}</td><td class="text-right py-2 px-2">${e.rate_1_hours ?? '-'}</td><td class="text-right py-2 px-2">${e.rate_2_hours ?? '-'}</td><td class="text-right py-2 px-2">${e.rate_3_hours ?? '-'}</td></tr>`;
+    }
+    html += '</tbody></table></div>';
+    return html;
+  }
+
+  function renderExpensePreview(expenses) {
+    if (!expenses.length) return '<p class="text-sm opacity-50">{{ t("budget.import_no_data") }}</p>';
+    let html = '<div class="table-responsive"><table class="w-full text-sm"><thead><tr class="text-xs opacity-70 border-b border-white/10">';
+    html += '<th class="text-left py-2 px-2">Name</th><th class="text-right py-2 px-2">Amount</th>';
+    if (!expenses[0].recurring) html += '<th class="text-right py-2 px-2">Month</th>';
+    html += '</tr></thead><tbody>';
+    for (const e of expenses) {
+      html += `<tr class="border-b border-white/5"><td class="py-2 px-2">${e.name}</td><td class="text-right py-2 px-2">${e.amount.toFixed(2)}</td>`;
+      if (!e.recurring) html += `<td class="text-right py-2 px-2">${e.month}</td>`;
+      html += '</tr>';
+    }
+    html += '</tbody></table></div>';
+    return html;
+  }
+
+  // --- Preview Actions ---
+
+  window.previewHours = function() {
+    const entries = parseHoursTSV(document.getElementById('hours-input').value);
+    const el = document.getElementById('hours-preview');
+    el.innerHTML = renderHoursPreview(entries);
+    el.classList.remove('hidden');
+  };
+
+  window.previewOnetime = function() {
+    const expenses = parseExpenseTSV(document.getElementById('onetime-input').value, false);
+    const el = document.getElementById('onetime-preview');
+    el.innerHTML = renderExpensePreview(expenses);
+    el.classList.remove('hidden');
+  };
+
+  window.previewRecurring = function() {
+    const expenses = parseExpenseTSV(document.getElementById('recurring-input').value, true);
+    const el = document.getElementById('recurring-preview');
+    el.innerHTML = renderExpensePreview(expenses);
+    el.classList.remove('hidden');
+  };
+
+  // --- Save Actions ---
+
+  window.saveHours = async function() {
+    const entries = parseHoursTSV(document.getElementById('hours-input').value);
+    if (!entries.length) { showToast('{{ t("budget.import_no_data") }}', false); return; }
+    try {
+      const resp = await fetch('/api/budget/income/hours/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ year: selectedYear, entries }),
+      });
+      if (!resp.ok) throw new Error(await resp.text());
+      const data = await resp.json();
+      showToast('{{ t("budget.import_success") }}'.replace('{count}', data.data.length), true);
+    } catch (err) {
+      showToast('{{ t("budget.import_error") }}', false);
+    }
+  };
+
+  window.saveOnetime = async function() {
+    const expenses = parseExpenseTSV(document.getElementById('onetime-input').value, false);
+    if (!expenses.length) { showToast('{{ t("budget.import_no_data") }}', false); return; }
+    try {
+      const resp = await fetch('/api/budget/expenses/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ expenses }),
+      });
+      if (!resp.ok) throw new Error(await resp.text());
+      const data = await resp.json();
+      showToast('{{ t("budget.import_success") }}'.replace('{count}', data.data.length), true);
+    } catch (err) {
+      showToast('{{ t("budget.import_error") }}', false);
+    }
+  };
+
+  window.saveRecurring = async function() {
+    const expenses = parseExpenseTSV(document.getElementById('recurring-input').value, true);
+    if (!expenses.length) { showToast('{{ t("budget.import_no_data") }}', false); return; }
+    try {
+      const resp = await fetch('/api/budget/expenses/bulk', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ expenses }),
+      });
+      if (!resp.ok) throw new Error(await resp.text());
+      const data = await resp.json();
+      showToast('{{ t("budget.import_success") }}'.replace('{count}', data.data.length), true);
+    } catch (err) {
+      showToast('{{ t("budget.import_error") }}', false);
+    }
+  };
+})();
+</script>
+{% endblock %}
