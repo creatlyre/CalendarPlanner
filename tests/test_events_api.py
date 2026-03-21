@@ -470,3 +470,55 @@ def test_other_user_cannot_delete_private_event(test_db, test_user_a, _household
     assert delete.status_code == 404
 
     app.dependency_overrides.clear()
+
+
+# ── Phase 19: Reminder API tests ─────────────────────────────────────────────
+
+
+def test_create_event_with_reminder_list(authenticated_client):
+    """Creating an event with reminder_minutes_list returns the list in response."""
+    now = datetime.utcnow().replace(microsecond=0)
+    payload = _payload("Reminder event", now + timedelta(hours=1), now + timedelta(hours=2))
+    payload["reminder_minutes_list"] = [30, 1440]
+
+    response = authenticated_client.post("/api/events", json=payload)
+    assert response.status_code == 201
+    data = response.json()
+    assert data["reminder_minutes_list"] == [30, 1440]
+
+
+def test_update_event_reminder_list(authenticated_client):
+    """Updating an event's reminder_minutes_list persists the change."""
+    now = datetime.utcnow().replace(microsecond=0)
+    create = authenticated_client.post(
+        "/api/events",
+        json=_payload("Original", now + timedelta(hours=1), now + timedelta(hours=2)),
+    )
+    event_id = create.json()["id"]
+
+    update = authenticated_client.put(
+        f"/api/events/{event_id}",
+        json={"reminder_minutes_list": [15, 60, 2880]},
+    )
+    assert update.status_code == 200
+    assert update.json()["reminder_minutes_list"] == [15, 60, 2880]
+
+
+def test_reminder_list_rejects_negative_value(authenticated_client):
+    """Negative reminder minutes should be rejected with 422."""
+    now = datetime.utcnow().replace(microsecond=0)
+    payload = _payload("Bad reminder", now + timedelta(hours=1), now + timedelta(hours=2))
+    payload["reminder_minutes_list"] = [-5, 30]
+
+    response = authenticated_client.post("/api/events", json=payload)
+    assert response.status_code == 422
+
+
+def test_reminder_list_rejects_over_max_value(authenticated_client):
+    """Reminder minutes exceeding 40320 (4 weeks) should be rejected with 422."""
+    now = datetime.utcnow().replace(microsecond=0)
+    payload = _payload("Overflow reminder", now + timedelta(hours=1), now + timedelta(hours=2))
+    payload["reminder_minutes_list"] = [50000]
+
+    response = authenticated_client.post("/api/events", json=payload)
+    assert response.status_code == 422

@@ -204,10 +204,10 @@ def test_quick_add_save_and_add_another(authenticated_client):
 
 
 def test_day_click_opens_quick_entry_modal(authenticated_client):
-    """Verify day-click on calendar day opens event modal with date prefilled and locked."""
+    """Verify day-click on calendar day loads the day view."""
     now = datetime.utcnow()
 
-    # Main page has the addEventForDay function
+    # Main page has the addEventForDay function (available for programmatic use)
     html = _calendar_html(authenticated_client)
     assert "addEventForDay" in html, "Calendar must have addEventForDay function"
     assert "calculateEndTime" in html, "Calendar must have calculateEndTime function"
@@ -223,7 +223,7 @@ def test_day_click_opens_quick_entry_modal(authenticated_client):
     assert "data-day" in grid_html, "Month grid day cells must have data-day attributes"
     assert "data-year" in grid_html, "Month grid day cells must have data-year attributes"
     assert "data-month" in grid_html, "Month grid day cells must have data-month attributes"
-    assert "addEventForDay(" in grid_html, "Day cells must call addEventForDay on click"
+    assert "loadDay(" in grid_html, "Day cells must call loadDay on click"
 
 
 def test_quick_entry_saves_with_auto_end_time(authenticated_client):
@@ -460,7 +460,7 @@ def test_event_entry_mobile_fullscreen_markers(authenticated_client):
 def test_day_click_opens_event_entry_for_selected_day(authenticated_client):
     month = authenticated_client.get("/calendar/month?year=2026&month=3")
     assert month.status_code == 200
-    assert "addEventForDay(" in month.text
+    assert "loadDay(" in month.text
 
     html = _calendar_html(authenticated_client)
     assert "function addEventForDay(year, month, day)" in html
@@ -679,3 +679,121 @@ def test_sync_export_includes_reminders_backward_compat(
     assert body["reminders"]["useDefault"] is False
     assert len(body["reminders"]["overrides"]) == 1
     assert body["reminders"]["overrides"][0]["minutes"] == 15
+
+
+# ── Phase 18 Nyquist: event privacy template validation ───────────────────────
+
+
+def test_month_grid_lock_icon_for_private_event(authenticated_client):
+    """VIS-03: Private events display 🔒 before title in month grid."""
+    now = datetime.utcnow().replace(microsecond=0)
+    authenticated_client.post(
+        "/api/events",
+        json={
+            "title": "PrivMonthEvt",
+            "start_at": (now + timedelta(hours=1)).isoformat(),
+            "end_at": (now + timedelta(hours=2)).isoformat(),
+            "timezone": "UTC",
+            "visibility": "private",
+        },
+    )
+    html = authenticated_client.get(
+        f"/calendar/month?year={now.year}&month={now.month}"
+    ).text
+    assert "PrivMonthEvt" in html
+    assert "🔒" in html, "Lock icon must appear for private event in month grid"
+
+
+def test_month_grid_no_lock_icon_for_shared_event(authenticated_client):
+    """VIS-03: Shared events do NOT display 🔒 in month grid."""
+    now = datetime.utcnow().replace(microsecond=0)
+    authenticated_client.post(
+        "/api/events",
+        json={
+            "title": "SharedMonthEvt",
+            "start_at": (now + timedelta(hours=1)).isoformat(),
+            "end_at": (now + timedelta(hours=2)).isoformat(),
+            "timezone": "UTC",
+            "visibility": "shared",
+        },
+    )
+    html = authenticated_client.get(
+        f"/calendar/month?year={now.year}&month={now.month}"
+    ).text
+    assert "SharedMonthEvt" in html
+    # Find the event cell text — lock should not appear near the shared event title
+    idx = html.index("SharedMonthEvt")
+    snippet = html[max(0, idx - 80):idx]
+    assert "🔒" not in snippet, "Lock icon must NOT appear for shared events in month grid"
+
+
+def test_day_view_lock_icon_for_private_event(authenticated_client):
+    """VIS-03: Private events display 🔒 before title in day view."""
+    now = datetime.utcnow().replace(microsecond=0)
+    authenticated_client.post(
+        "/api/events",
+        json={
+            "title": "PrivDayEvt",
+            "start_at": (now + timedelta(hours=1)).isoformat(),
+            "end_at": (now + timedelta(hours=2)).isoformat(),
+            "timezone": "UTC",
+            "visibility": "private",
+        },
+    )
+    html = authenticated_client.get(
+        f"/calendar/day?year={now.year}&month={now.month}&day={now.day}"
+    ).text
+    assert "PrivDayEvt" in html
+    assert "🔒" in html, "Lock icon must appear for private event in day view"
+
+
+def test_event_form_visibility_dropdown_present():
+    """VIS-01: Simple event form (event_form.html) has visibility dropdown."""
+    import pathlib
+    html = pathlib.Path("app/templates/partials/event_form.html").read_text(encoding="utf-8")
+    assert 'id="event-visibility"' in html, "event_form.html must have visibility select"
+    assert 'value="shared"' in html
+    assert 'value="private"' in html
+    assert "qa.visibility" in html, "Visibility label must use i18n key"
+
+
+# ── Phase 19: Reminder UI Nyquist validation ──────────────────────────────────
+
+
+def test_reminder_i18n_keys_complete_in_both_locales():
+    """All 11 reminder.* i18n keys must exist in both en.json and pl.json."""
+    import json
+    from pathlib import Path
+
+    locales_dir = Path(__file__).resolve().parent.parent / "app" / "locales"
+    expected_keys = [
+        "reminder.label",
+        "reminder.toggle_on",
+        "reminder.toggle_off",
+        "reminder.add",
+        "reminder.method_popup",
+        "reminder.method_email",
+        "reminder.minutes_placeholder",
+        "reminder.method_label",
+        "reminder.sync_help",
+        "reminder.max_reached",
+        "reminder.remove_label",
+    ]
+
+    for locale_file in ["en.json", "pl.json"]:
+        with open(locales_dir / locale_file, encoding="utf-8") as f:
+            data = json.load(f)
+        for key in expected_keys:
+            assert key in data, f"Missing i18n key '{key}' in {locale_file}"
+            assert data[key].strip(), f"Empty i18n value for '{key}' in {locale_file}"
+
+
+def test_reminder_ui_elements_in_event_entry_modal(authenticated_client):
+    """Rendered calendar page contains all reminder DOM elements in event entry modal."""
+    html = _calendar_html(authenticated_client)
+    assert 'id="event-entry-reminders-toggle"' in html
+    assert 'id="event-entry-reminder-chips"' in html
+    assert 'id="event-entry-reminder-add-btn"' in html
+    assert 'id="event-entry-reminder-counter"' in html
+    assert "renderReminderChips" in html
+    assert "formatReminderMinutes" in html
