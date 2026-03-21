@@ -66,6 +66,13 @@ class MonthlyHoursRepository:
         )
         return _to_monthly_hours(rows[0]) if rows else None
 
+    def get_distinct_years(self, calendar_id: str) -> list[int]:
+        rows = self.db.select(
+            "monthly_hours",
+            {"calendar_id": f"eq.{calendar_id}", "select": "year"},
+        )
+        return sorted(set(int(r.get("year", 0)) for r in rows) - {0})
+
     def upsert(self, calendar_id: str, payload: MonthlyHoursUpdate) -> MonthlyHours:
         existing = self.get_by_calendar_year_month(calendar_id, payload.year, payload.month)
         if existing:
@@ -104,6 +111,13 @@ class AdditionalEarningsRepository:
             {"calendar_id": f"eq.{calendar_id}", "year": f"eq.{year}"},
         )
         return [_to_additional_earning(r) for r in rows]
+
+    def get_distinct_years(self, calendar_id: str) -> list[int]:
+        rows = self.db.select(
+            "additional_earnings",
+            {"calendar_id": f"eq.{calendar_id}", "select": "year"},
+        )
+        return sorted(set(int(r.get("year", 0)) for r in rows) - {0})
 
     def get_by_calendar_year_month(self, calendar_id: str, year: int, month: int) -> list[AdditionalEarning]:
         rows = self.db.select(

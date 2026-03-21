@@ -25,4 +25,5 @@ async def get_overview(year: int, user=Depends(get_current_user), db=Depends(get
         raise HTTPException(status_code=400, detail="No calendar linked")
     service = _service(db)
     data = service.get_year_overview(user.calendar_id, year)
-    return {"data": data}
+    year_bounds = service.get_year_bounds(user.calendar_id)
+    return {"data": data, "year_bounds": year_bounds}

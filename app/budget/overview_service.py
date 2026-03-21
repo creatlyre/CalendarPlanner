@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from datetime import datetime
+
 from app.budget.income_repository import MonthlyHoursRepository, AdditionalEarningsRepository
 from app.budget.expense_repository import ExpenseRepository
 from app.budget.repository import BudgetSettingsRepository
@@ -20,6 +22,49 @@ class OverviewService:
         self.earnings_repo = earnings_repo
         self.expense_repo = expense_repo
 
+    def get_year_bounds(self, calendar_id: str) -> dict:
+        current_year = datetime.now().year
+        expense_years = self.expense_repo.get_distinct_years(calendar_id)
+        hours_years = self.hours_repo.get_distinct_years(calendar_id)
+        earnings_years = self.earnings_repo.get_distinct_years(calendar_id)
+        all_years = sorted(set(expense_years + hours_years + earnings_years))
+        if not all_years:
+            return {"min_year": current_year, "max_year": current_year + 1}
+        return {
+            "min_year": min(all_years),
+            "max_year": max(max(all_years), current_year) + 1,
+        }
+
+    def _year_has_data(self, calendar_id: str, year: int) -> bool:
+        hours = self.hours_repo.get_by_calendar_year(calendar_id, year)
+        if hours:
+            return True
+        earnings = self.earnings_repo.get_by_calendar_year(calendar_id, year)
+        year_specific_earnings = [e for e in earnings if e.month != 0]
+        if year_specific_earnings:
+            return True
+        expenses = self.expense_repo.get_by_calendar_year(calendar_id, year)
+        year_specific_expenses = [e for e in expenses if e.month != 0 and not e.recurring]
+        if year_specific_expenses:
+            return True
+        return False
+
+    def _compute_carry_forward(self, calendar_id: str, year: int, settings) -> dict:
+        bounds = self.get_year_bounds(calendar_id)
+        global_initial = settings.initial_balance if settings else 0
+
+        if year <= bounds["min_year"]:
+            return {"type": "initial", "amount": round(global_initial, 2), "source_year": None}
+
+        prior_year = year - 1
+        prior_has_data = self._year_has_data(calendar_id, prior_year)
+        if not prior_has_data:
+            return {"type": "no_prior_data", "amount": 0, "source_year": prior_year}
+
+        prior_overview = self.get_year_overview(calendar_id, prior_year)
+        dec_balance = prior_overview["months"][11]["account_balance"]
+        return {"type": "carry_forward", "amount": round(dec_balance, 2), "source_year": prior_year}
+
     def get_year_overview(self, calendar_id: str, year: int) -> dict:
         settings = self.settings_repo.get_by_calendar(calendar_id)
         hours_list = self.hours_repo.get_by_calendar_year(calendar_id, year)
@@ -31,7 +76,9 @@ class OverviewService:
         r3 = settings.rate_3 if settings else 0
         zus = settings.zus_costs if settings else 0
         acc = settings.accounting_costs if settings else 0
-        initial_balance = settings.initial_balance if settings else 0
+
+        carry_forward = self._compute_carry_forward(calendar_id, year, settings)
+        effective_initial = carry_forward["amount"]
 
         hours_by_month = {h.month: h for h in hours_list}
 
@@ -57,7 +104,7 @@ class OverviewService:
                     {"id": e.id, "name": e.name, "amount": e.amount}
                 )
 
-        running_balance = initial_balance
+        running_balance = effective_initial
         months = []
 
         for m in range(1, 13):
@@ -86,6 +133,7 @@ class OverviewService:
 
         return {
             "year": year,
-            "initial_balance": round(initial_balance, 2),
+            "initial_balance": round(effective_initial, 2),
+            "carry_forward": carry_forward,
             "months": months,
         }

@@ -284,3 +284,120 @@ class TestMonthDetail:
         assert april["onetime_expenses"] == 200.0
         assert len(april["onetime_items"]) == 1
         assert april["onetime_items"][0]["amount"] == 200.0
+
+
+class TestMultiYearCarryForward:
+    """BUD-01, BUD-02: Carry-forward balance and year navigation bounds."""
+
+    def test_first_year_uses_initial_balance(self, authenticated_client, test_db, test_user_a):
+        """First year with data uses global initial_balance."""
+        _seed_settings(test_db, test_user_a.calendar_id, balance=50000)
+        authenticated_client.put(
+            "/api/budget/income/hours",
+            json={"year": 2026, "month": 1, "rate_1_hours": 160, "rate_2_hours": 160, "rate_3_hours": 160},
+        )
+        res = authenticated_client.get("/api/budget/overview?year=2026")
+        data = res.json()["data"]
+        assert data["carry_forward"]["type"] == "initial"
+        assert data["carry_forward"]["amount"] == 50000.0
+        assert data["carry_forward"]["source_year"] is None
+        assert data["initial_balance"] == 50000.0
+
+    def test_carry_forward_from_prior_year(self, authenticated_client, test_db, test_user_a):
+        """Year after first year carries forward December's account_balance."""
+        _seed_settings(test_db, test_user_a.calendar_id, rate_1=100, rate_2=0, rate_3=0, zus=0, acc=0, balance=10000)
+        authenticated_client.put(
+            "/api/budget/income/hours",
+            json={"year": 2026, "month": 1, "rate_1_hours": 160, "rate_2_hours": 160, "rate_3_hours": 160},
+        )
+        # Get 2026 December balance
+        res_2026 = authenticated_client.get("/api/budget/overview?year=2026")
+        dec_balance_2026 = res_2026.json()["data"]["months"][11]["account_balance"]
+
+        # Seed 2027 data
+        authenticated_client.put(
+            "/api/budget/income/hours",
+            json={"year": 2027, "month": 1, "rate_1_hours": 160, "rate_2_hours": 160, "rate_3_hours": 160},
+        )
+        res_2027 = authenticated_client.get("/api/budget/overview?year=2027")
+        data_2027 = res_2027.json()["data"]
+        assert data_2027["carry_forward"]["type"] == "carry_forward"
+        assert data_2027["carry_forward"]["amount"] == dec_balance_2026
+        assert data_2027["carry_forward"]["source_year"] == 2026
+        assert data_2027["initial_balance"] == dec_balance_2026
+
+    def test_no_prior_year_data_starts_from_zero(self, authenticated_client, test_db, test_user_a):
+        """Year with no prior data starts from 0."""
+        _seed_settings(test_db, test_user_a.calendar_id, balance=50000)
+        authenticated_client.put(
+            "/api/budget/income/hours",
+            json={"year": 2026, "month": 1, "rate_1_hours": 160, "rate_2_hours": 160, "rate_3_hours": 160},
+        )
+        # Request 2028 — 2027 has no data
+        res = authenticated_client.get("/api/budget/overview?year=2028")
+        data = res.json()["data"]
+        assert data["carry_forward"]["type"] == "no_prior_data"
+        assert data["carry_forward"]["amount"] == 0
+        assert data["carry_forward"]["source_year"] == 2027
+
+    def test_empty_year_returns_12_months(self, authenticated_client, test_db, test_user_a):
+        """Empty year renders 12-month structure with no errors."""
+        _seed_settings(test_db, test_user_a.calendar_id, rate_1=0, rate_2=0, rate_3=0, zus=0, acc=0, balance=0)
+        res = authenticated_client.get("/api/budget/overview?year=2099")
+        assert res.status_code == 200
+        data = res.json()["data"]
+        assert len(data["months"]) == 12
+
+    def test_year_bounds_with_data(self, authenticated_client, test_db, test_user_a):
+        """Year bounds reflect actual data range + current year + 1."""
+        _seed_settings(test_db, test_user_a.calendar_id)
+        authenticated_client.put(
+            "/api/budget/income/hours",
+            json={"year": 2025, "month": 6, "rate_1_hours": 160, "rate_2_hours": 160, "rate_3_hours": 160},
+        )
+        authenticated_client.put(
+            "/api/budget/income/hours",
+            json={"year": 2026, "month": 1, "rate_1_hours": 160, "rate_2_hours": 160, "rate_3_hours": 160},
+        )
+        res = authenticated_client.get("/api/budget/overview?year=2026")
+        bounds = res.json()["year_bounds"]
+        assert bounds["min_year"] == 2025
+        assert bounds["max_year"] >= 2027
+
+    def test_year_bounds_no_data(self, authenticated_client, test_db, test_user_a):
+        """No data returns current year as min, current+1 as max."""
+        _seed_settings(test_db, test_user_a.calendar_id)
+        res = authenticated_client.get("/api/budget/overview?year=2026")
+        bounds = res.json()["year_bounds"]
+        assert "min_year" in bounds
+        assert "max_year" in bounds
+        assert bounds["max_year"] == bounds["min_year"] + 1
+
+    def test_api_response_includes_carry_forward_and_bounds(self, authenticated_client, test_db, test_user_a):
+        """API response shape includes carry_forward dict and year_bounds."""
+        _seed_settings(test_db, test_user_a.calendar_id)
+        res = authenticated_client.get("/api/budget/overview?year=2026")
+        json_data = res.json()
+        assert "data" in json_data
+        assert "year_bounds" in json_data
+        assert "carry_forward" in json_data["data"]
+        cf = json_data["data"]["carry_forward"]
+        assert "type" in cf
+        assert "amount" in cf
+        assert "source_year" in cf
+
+
+class TestRecurringExpensesMultiYear:
+    """BUD-03: Recurring expenses appear in every year (current behavior preserved)."""
+
+    def test_recurring_expense_shows_in_different_year(self, authenticated_client, test_db, test_user_a):
+        _seed_settings(test_db, test_user_a.calendar_id, rate_1=100, rate_2=0, rate_3=0, zus=0, acc=0, balance=0)
+        # Create recurring expense in 2026
+        authenticated_client.post(
+            "/api/budget/expenses",
+            json={"year": 2026, "month": 0, "name": "Rent", "amount": 5000, "recurring": True},
+        )
+        # Check it appears in 2027
+        res = authenticated_client.get("/api/budget/overview?year=2027")
+        m1 = res.json()["data"]["months"][0]
+        assert m1["recurring_expenses"] == 5000.0

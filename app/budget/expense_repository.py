@@ -86,6 +86,13 @@ class ExpenseRepository:
         row = self.db.update("expenses", {"id": f"eq.{expense_id}"}, data)
         return _to_expense(row) if row else None
 
+    def get_distinct_years(self, calendar_id: str) -> list[int]:
+        rows = self.db.select(
+            "expenses",
+            {"calendar_id": f"eq.{calendar_id}", "select": "year"},
+        )
+        return sorted(set(int(r.get("year", 0)) for r in rows) - {0})
+
     def delete(self, expense_id: str) -> bool:
         count = self.db.delete("expenses", {"id": f"eq.{expense_id}"})
         return count > 0
