@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Privacy, Reminders & Multi-Year Budget
-status: active
-stopped_at: Phase 22 planned
-last_updated: "2026-03-21T20:00:00.000Z"
+status: completed
+stopped_at: Phase 22 UI-SPEC approved
+last_updated: "2026-03-21T20:13:36.448Z"
 last_activity: 2026-03-21
 progress:
   total_phases: 5
@@ -75,9 +75,9 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-21T19:20:45.511Z
-Stopped at: Phase 21 UI-SPEC approved
-Resume file: .planning/phases/21-year-over-year-comparison/21-UI-SPEC.md
+Last session: 2026-03-21T20:13:36.444Z
+Stopped at: Phase 22 UI-SPEC approved
+Resume file: .planning/phases/22-historical-year-import/22-UI-SPEC.md
 
 ## Session Log
 
