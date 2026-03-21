@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v2.1
 milestone_name: Privacy, Reminders & Multi-Year Budget
 status: completed
-stopped_at: Completed 19-01-PLAN.md
-last_updated: "2026-03-20T21:02:44.923Z"
-last_activity: 2026-03-20
+stopped_at: Phase 21 UI-SPEC approved
+last_updated: "2026-03-21T19:34:02.165Z"
+last_activity: 2026-03-21
 progress:
   total_phases: 4
-  completed_phases: 2
-  total_plans: 3
-  completed_plans: 3
+  completed_phases: 3
+  total_plans: 6
+  completed_plans: 5
 ---
 
 # Session State
@@ -20,7 +20,7 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-20)
 
 **Core value:** A shared calendar both partners can edit that stays in sync with Google Calendar.
-**Current focus:** Phase 19 — Reminder UI
+**Current focus:** Phase 20 — multi-year-budget
 
 ## Position
 
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-03-20)
 Phase: 19 of 21 (Reminder UI)
 Plan: 1 of 1 in current phase ✅
 Status: Phase Complete
-Last activity: 2026-03-20
+Last activity: 2026-03-21
 
 [██████████░░░░░░░░░░] 2/4 phases
 
@@ -71,9 +71,9 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-20T21:02:44.920Z
-Stopped at: Completed 19-01-PLAN.md
-Resume file: None
+Last session: 2026-03-21T19:20:45.511Z
+Stopped at: Phase 21 UI-SPEC approved
+Resume file: .planning/phases/21-year-over-year-comparison/21-UI-SPEC.md
 
 ## Session Log
 
