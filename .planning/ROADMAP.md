@@ -106,7 +106,7 @@ Plans:
 | 19. Reminder UI | 1/1 | Complete   | 2026-03-20 | - |
 | 20. Multi-Year Budget | v2.1 | Complete    | 2026-03-21 | - |
 | 21. Year-over-Year Comparison | 1/1 | Complete    | 2026-03-21 | - |
-| 22. Historical Year Import | 1/1 | Complete   | 2026-03-21 | - |
+| 22. Historical Year Import | 1/1 | Complete    | 2026-03-21 | - |
 
 ### Phase 22: Historical Year Import
 **Goal**: Users can import past-year budget data (income hours/rates, one-time expenses, monthly expenses) to enable accurate year-over-year comparison with different rate structures

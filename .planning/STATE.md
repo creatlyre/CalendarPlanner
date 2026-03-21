@@ -4,13 +4,13 @@ milestone: v2.1
 milestone_name: Privacy, Reminders & Multi-Year Budget
 status: completed
 stopped_at: Phase 22 UI-SPEC approved
-last_updated: "2026-03-21T20:13:36.448Z"
+last_updated: "2026-03-21T20:21:58.238Z"
 last_activity: 2026-03-21
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 7
-  completed_plans: 6
+  completed_plans: 7
 ---
 
 # Session State
@@ -20,7 +20,7 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-20)
 
 **Core value:** A shared calendar both partners can edit that stays in sync with Google Calendar.
-**Current focus:** Phase 22 — Historical Year Import
+**Current focus:** Phase 22 — historical-year-import
 
 ## Position
 
