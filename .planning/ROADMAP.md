@@ -32,7 +32,7 @@
  (0/2 plans)
 - [x] **Phase 21: Year-over-Year Comparison** - Side-by-side annual totals with delta indicators
  (completed 2026-03-21)
-- [ ] **Phase 22: Historical Year Import** - Backward-looking import of past-year income hours/rates, one-time expenses, and monthly expenses
+- [x] **Phase 22: Historical Year Import** - Backward-looking import of past-year income hours/rates, one-time expenses, and monthly expenses (completed 2026-03-21)
 
 ## Phase Details
 
@@ -106,7 +106,7 @@ Plans:
 | 19. Reminder UI | 1/1 | Complete   | 2026-03-20 | - |
 | 20. Multi-Year Budget | v2.1 | Complete    | 2026-03-21 | - |
 | 21. Year-over-Year Comparison | 1/1 | Complete    | 2026-03-21 | - |
-| 22. Historical Year Import | v2.1 | 0/1 | Planned | - |
+| 22. Historical Year Import | 1/1 | Complete   | 2026-03-21 | - |
 
 ### Phase 22: Historical Year Import
 **Goal**: Users can import past-year budget data (income hours/rates, one-time expenses, monthly expenses) to enable accurate year-over-year comparison with different rate structures
@@ -117,7 +117,7 @@ Plans:
   2. User can import monthly recurring expenses for a past year in the same format
   3. User can import income hours per month with multiple hourly rates (Month | Hours Rate 1 | Hours Rate 2 | Hours Rate 3) and the system calculates income from those
   4. Imported past-year data appears correctly in the year-over-year comparison
-**Plans:** 1 plan
+**Plans:** 1/1 plans complete
 
 Plans:
 - [ ] 22-01-PLAN.md — Bulk import API, import page UI, and tests
