@@ -6,7 +6,7 @@ from app.budget.income_repository import MonthlyHoursRepository, AdditionalEarni
 from app.budget.expense_repository import ExpenseRepository
 from app.budget.repository import BudgetSettingsRepository
 from app.database.models import CarryForwardOverride
-from app.database.supabase_store import SupabaseStore
+from app.database.supabase_store import SupabaseStore, SupabaseStoreError
 
 DEFAULT_HOURS = 160.0
 
@@ -16,10 +16,13 @@ class CarryForwardRepository:
         self.db = db
 
     def get(self, calendar_id: str, year: int) -> CarryForwardOverride | None:
-        rows = self.db.select(
-            "carry_forward_overrides",
-            {"calendar_id": f"eq.{calendar_id}", "year": f"eq.{year}", "limit": "1"},
-        )
+        try:
+            rows = self.db.select(
+                "carry_forward_overrides",
+                {"calendar_id": f"eq.{calendar_id}", "year": f"eq.{year}", "limit": "1"},
+            )
+        except SupabaseStoreError:
+            return None
         if not rows:
             return None
         r = rows[0]
