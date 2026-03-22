@@ -147,3 +147,57 @@ def test_imported_expenses_in_yoy(authenticated_client: TestClient, test_db, tes
     months = res.json()["data"]["months"]
     assert months[2]["onetime_expenses"] == 3500.0  # March (index 2)
     assert months[6]["onetime_expenses"] == 2000.0  # July (index 6)
+
+
+# ---------------------------------------------------------------------------
+# Gap-fill: IMP-03 — Recurring expense import integration
+# ---------------------------------------------------------------------------
+
+def test_imported_recurring_expenses_in_overview(authenticated_client: TestClient, test_db, test_user_a):
+    """IMP-03: Imported recurring expenses appear in every month of the overview."""
+    _seed_settings(test_db, test_user_a.calendar_id)
+
+    # Import recurring expenses via bulk endpoint (same flow as import page)
+    res = authenticated_client.post("/api/budget/expenses/bulk", json={
+        "expenses": [
+            {"year": 2024, "month": 0, "name": "Rent", "amount": 2500.0, "recurring": True},
+            {"year": 2024, "month": 0, "name": "Internet", "amount": 100.0, "recurring": True},
+        ]
+    })
+    assert res.status_code == 200
+    assert len(res.json()["data"]) == 2
+
+    # Verify recurring expenses show in overview for each month
+    res = authenticated_client.get("/api/budget/overview?year=2024")
+    assert res.status_code == 200
+    months = res.json()["data"]["months"]
+    for i, month in enumerate(months):
+        assert month["recurring_expenses"] == 2600.0, (
+            f"Month {i + 1}: expected recurring_expenses=2600, got {month['recurring_expenses']}"
+        )
+
+
+# ---------------------------------------------------------------------------
+# Gap-fill: Year validation boundary
+# ---------------------------------------------------------------------------
+
+def test_bulk_hours_invalid_year(authenticated_client: TestClient, test_db, test_user_a):
+    """BulkMonthlyHoursUpdate rejects years outside 2020-2100."""
+    for bad_year in [2019, 2101]:
+        payload = {
+            "year": bad_year,
+            "entries": [{"year": bad_year, "month": 1, "rate_1_hours": 160}],
+        }
+        res = authenticated_client.post("/api/budget/income/hours/bulk", json=payload)
+        assert res.status_code == 422, f"Expected 422 for year={bad_year}, got {res.status_code}"
+
+
+# ---------------------------------------------------------------------------
+# Gap-fill: Import page route accessibility
+# ---------------------------------------------------------------------------
+
+def test_import_page_accessible(authenticated_client: TestClient, test_db, test_user_a):
+    """GET /budget/import returns 200 with the import page."""
+    res = authenticated_client.get("/budget/import")
+    assert res.status_code == 200
+    assert "import" in res.text.lower()
