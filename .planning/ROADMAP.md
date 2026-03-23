@@ -34,9 +34,12 @@
   Plans:
   - [ ] 31-01-PLAN.md — License key system, Docker Compose package
   - [ ] 31-02-PLAN.md — Setup guide, upgrade docs, changelog, license tests
-- [ ] Phase 32: Mobile Distribution Path (PWA + Android Wrapper)
+- [ ] Phase 32: Mobile Distribution Path (PWA + Android Wrapper) (2 plans)
   **Goal:** Installable PWA with manifest, icons, service worker offline shell, install prompt, and Bubblewrap-generated TWA for Android distribution
   **Requirements:** [MOB-01, MOB-02, MOB-03]
+  Plans:
+  - [ ] 32-01-PLAN.md — PWA manifest, icons, service worker, install prompt
+  - [ ] 32-02-PLAN.md — TWA Android wrapper, build docs, native deferral
 - [ ] Phase 33: Go-to-Market, Pricing, and Launch Funnel
 
 </details>
