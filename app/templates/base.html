@@ -27,6 +27,9 @@
             <a href="/calendar" class="glass-btn-secondary rounded-xl px-4 py-2 text-sm font-medium min-h-[44px] inline-flex items-center hidden md:inline-flex {{ 'desktop-nav-active' if request.url.path == '/calendar' else '' }}">{{ t('app.calendar_short') }}</a>
             <a href="/budget/overview" class="glass-btn-secondary rounded-xl px-4 py-2 text-sm font-medium min-h-[44px] inline-flex items-center hidden md:inline-flex {{ 'desktop-nav-active' if '/budget' in request.url.path else '' }}">{{ t('budget.nav_link') }}</a>
             <a href="/shopping" class="glass-btn-secondary rounded-xl px-4 py-2 text-sm font-medium min-h-[44px] inline-flex items-center hidden md:inline-flex {{ 'desktop-nav-active' if request.url.path == '/shopping' else '' }}">{{ t('shopping.nav_link') }}</a>
+            <a href="/billing/settings" class="glass-btn-secondary rounded-xl px-4 py-2 text-sm font-medium min-h-[44px] inline-flex items-center hidden md:inline-flex {{ 'desktop-nav-active' if '/billing' in request.url.path else '' }}">
+                {% if user_plan is defined and user_plan != 'free' %}<span class="inline-block w-2 h-2 rounded-full bg-emerald-400 mr-1.5"></span>{% endif %}{{ t('billing.nav_link') if t('billing.nav_link') != 'billing.nav_link' else 'Plan' }}
+            </a>
             <div class="flex items-center gap-2">
                 <!-- Quick Add (global) -->
                 <button id="qa-global-btn" type="button"
