@@ -13,12 +13,19 @@ from app.budget.expense_schemas import (
 from app.budget.expense_service import ExpenseService
 from app.budget.expense_service import CATEGORY_KEYWORDS
 from app.database.database import get_db
+from app.notifications.repository import NotificationRepository
+from app.notifications.service import NotificationService
+from app.users.repository import UserRepository
 
 router = APIRouter(prefix="/api/budget/expenses", tags=["expenses"])
 
 
 def _service(db) -> ExpenseService:
     return ExpenseService(ExpenseRepository(db))
+
+
+def _notify_svc(db) -> NotificationService:
+    return NotificationService(NotificationRepository(db), UserRepository(db))
 
 
 @router.get("/category-keywords")
@@ -82,6 +89,10 @@ async def create_expense(
         raise HTTPException(status_code=400, detail="No calendar linked")
     service = _service(db)
     expense = service.create_expense(user.calendar_id, payload)
+    try:
+        _notify_svc(db).create_for_partner(user.id, user.calendar_id, "expense_created", "expense", expense.id, expense.name)
+    except Exception:
+        pass
     return {"data": ExpenseResponse.model_validate(expense, from_attributes=True).model_dump()}
 
 
@@ -109,6 +120,10 @@ async def update_expense(
     expense = service.update_expense(expense_id, payload)
     if not expense:
         raise HTTPException(status_code=404, detail="Expense not found")
+    try:
+        _notify_svc(db).create_for_partner(user.id, user.calendar_id, "expense_updated", "expense", expense.id, expense.name)
+    except Exception:
+        pass
     return {"data": ExpenseResponse.model_validate(expense, from_attributes=True).model_dump()}
 
 
@@ -139,4 +154,8 @@ async def delete_expense(
     deleted = service.delete_expense(expense_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Expense not found")
+    try:
+        _notify_svc(db).create_for_partner(user.id, user.calendar_id, "expense_deleted", "expense", None, "")
+    except Exception:
+        pass
     return {"ok": True}

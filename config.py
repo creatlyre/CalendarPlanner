@@ -37,4 +37,11 @@ class Settings(BaseSettings):
     JWT_EXPIRY_HOURS: int = 8
     DB_ENCRYPTION_KEY: str
 
+    SMTP_HOST: str = ""
+    SMTP_PORT: int = 587
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_FROM_ADDRESS: str = ""
+    SMTP_USE_TLS: bool = True
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")

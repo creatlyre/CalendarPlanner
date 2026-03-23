@@ -12,6 +12,8 @@ from app.events.repository import EventRepository
 from app.events.schemas import CategoryCreate, CategoryResponse, EventCreate, EventResponse, EventUpdate
 from app.events.service import EventService
 from app.i18n import resolve_locale, translate
+from app.notifications.repository import NotificationRepository
+from app.notifications.service import NotificationService
 from app.sync.service import GoogleSyncService
 from app.users.repository import UserRepository
 
@@ -57,6 +59,10 @@ class OCRParseResponse(BaseModel):
 
 def _service(db) -> EventService:
     return EventService(EventRepository(db))
+
+
+def _notify_svc(db) -> NotificationService:
+    return NotificationService(NotificationRepository(db), UserRepository(db))
 
 
 def _msg(user_locale: str, key: str, **kwargs) -> str:
@@ -179,6 +185,10 @@ async def create_event(payload: EventCreate, user=Depends(get_current_user), db=
         GoogleSyncService(db).sync_event_for_household(event, deleted=False)
     except Exception:
         pass
+    try:
+        _notify_svc(db).create_for_partner(user.id, user.calendar_id, "event_created", "event", event.id, event.title)
+    except Exception:
+        pass
     return event
 
 
@@ -194,6 +204,10 @@ async def update_event(event_id: str, payload: EventUpdate, user=Depends(get_cur
         GoogleSyncService(db).sync_event_for_household(event, deleted=False)
     except Exception:
         pass
+    try:
+        _notify_svc(db).create_for_partner(user.id, user.calendar_id, "event_updated", "event", event.id, event.title)
+    except Exception:
+        pass
     return event
 
 
@@ -207,6 +221,10 @@ async def delete_event(event_id: str, request: Request, user=Depends(get_current
 
     try:
         GoogleSyncService(db).sync_event_for_household(event, deleted=True)
+    except Exception:
+        pass
+    try:
+        _notify_svc(db).create_for_partner(user.id, user.calendar_id, "event_deleted", "event", event.id, event.title)
     except Exception:
         pass
     return {"message": _msg(resolve_locale(request), "events.deleted")}
