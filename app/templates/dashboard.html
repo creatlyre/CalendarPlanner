@@ -8,10 +8,10 @@
 <div class="glass-elevated rounded-2xl p-5 mb-6">
   <h2 class="text-eyebrow mb-3">{{ t('dashboard.quick_add') }}</h2>
   <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-    <a href="/calendar?open=quick-add" class="glass-btn-primary text-center py-3 rounded-xl inline-flex items-center justify-center gap-2 glass-interactive">
+    <button type="button" onclick="window.qaOpenModal?.()" class="glass-btn-primary text-center py-3 rounded-xl inline-flex items-center justify-center gap-2 glass-interactive w-full">
       <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
       {{ t('dashboard.quick_event') }}
-    </a>
+    </button>
     <a href="/calendar?open=event-entry" class="glass-btn-secondary text-center py-3 rounded-xl inline-flex items-center justify-center gap-2 glass-interactive">
       <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
       {{ t('dashboard.full_event') }}
