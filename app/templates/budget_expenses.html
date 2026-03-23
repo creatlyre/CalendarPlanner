@@ -78,6 +78,7 @@
           <thead>
             <tr class="text-xs opacity-70 border-b border-white/10">
               <th class="text-left py-2 px-2 font-medium">{{ t('budget.expenses_name') }}</th>
+              <th class="text-left py-2 px-2 font-medium w-32">{{ t('budget.expense_category_label') }}</th>
               <th class="text-right py-2 px-2 font-medium w-32">{{ t('budget.expenses_amount') }} ({{ t('budget.currency') }})</th>
               <th class="text-right py-2 px-2 font-medium w-16"></th>
             </tr>
@@ -85,7 +86,7 @@
           <tbody id="recurring-body"></tbody>
           <tfoot>
             <tr id="recurring-total-row" class="border-t border-white/10 font-semibold">
-              <td class="py-2 px-2">{{ t('budget.expenses_total') }}</td>
+              <td class="py-2 px-2" colspan="2">{{ t('budget.expenses_total') }}</td>
               <td class="text-right py-2 px-2" id="recurring-total">0.00</td>
               <td></td>
             </tr>
@@ -97,6 +98,9 @@
         <div class="flex flex-wrap gap-2 mt-2 items-center">
           <input type="text" id="rec-name" placeholder="{{ t('budget.expenses_name') }}" class="glass-input flex-1 rounded-lg px-3 py-2 text-sm">
           <input type="number" step="0.01" min="0.01" id="rec-amount" placeholder="{{ t('budget.expenses_amount') }}" class="glass-input w-28 rounded-lg px-3 py-2 text-sm">
+          <select id="rec-category" class="glass-input w-36 rounded-lg px-3 py-2 text-sm">
+            <option value="">{{ t('budget.expense_category_none') }}</option>
+          </select>
           <button id="rec-add-btn" class="glass-btn-primary rounded-lg px-4 py-2 text-sm min-h-[44px]">{{ t('budget.expenses_add') }}</button>
         </div>
       </div>
@@ -119,6 +123,12 @@
             </select>
           </div>
           <div class="flex items-center gap-1">
+            <label class="opacity-70">{{ t('budget.expense_category_label') }}:</label>
+            <select id="filter-category" class="glass-input rounded-lg px-3 py-2 text-sm">
+              <option value="">{{ t('budget.expense_category_filter_all') }}</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-1">
             <label class="opacity-70">Sort:</label>
             <select id="sort-field" class="glass-input rounded-lg px-3 py-2 text-sm">
               <option value="month">{{ t('budget.expenses_sort_month') }}</option>
@@ -134,6 +144,7 @@
             <tr class="text-xs opacity-70 border-b border-white/10">
               <th class="text-left py-2 px-2 font-medium w-16">{{ t('budget.expenses_month') }}</th>
               <th class="text-left py-2 px-2 font-medium">{{ t('budget.expenses_name') }}</th>
+              <th class="text-left py-2 px-2 font-medium w-32">{{ t('budget.expense_category_label') }}</th>
               <th class="text-right py-2 px-2 font-medium w-32">{{ t('budget.expenses_amount') }} ({{ t('budget.currency') }})</th>
               <th class="text-right py-2 px-2 font-medium w-16"></th>
             </tr>
@@ -142,7 +153,7 @@
           <tfoot>
             <tr id="onetime-total-row" class="border-t border-white/10 font-semibold">
               <td class="py-2 px-2"></td>
-              <td class="py-2 px-2">{{ t('budget.expenses_total') }}</td>
+              <td class="py-2 px-2" colspan="2">{{ t('budget.expenses_total') }}</td>
               <td class="text-right py-2 px-2" id="onetime-total">0.00</td>
               <td></td>
             </tr>
@@ -155,6 +166,9 @@
           <input type="number" min="1" max="12" id="ot-month" placeholder="{{ t('budget.expenses_month') }}" class="glass-input w-20 rounded-lg px-3 py-2 text-sm">
           <input type="text" id="ot-name" placeholder="{{ t('budget.expenses_name') }}" class="glass-input flex-1 rounded-lg px-3 py-2 text-sm">
           <input type="number" step="0.01" id="ot-amount" placeholder="{{ t('budget.expenses_amount') }}" class="glass-input w-28 rounded-lg px-3 py-2 text-sm">
+          <select id="ot-category" class="glass-input w-36 rounded-lg px-3 py-2 text-sm">
+            <option value="">{{ t('budget.expense_category_none') }}</option>
+          </select>
           <button id="ot-add-btn" class="glass-btn-primary rounded-lg px-4 py-2 text-sm min-h-[44px]">{{ t('budget.expenses_add') }}</button>
         </div>
       </div>
@@ -222,14 +236,21 @@
     deleteAllConfirm: '{{ t("budget.expenses_delete_all_confirm") }}',
     deletedAll: '{{ t("budget.expenses_deleted_all") }}',
     recurringLabel: '{{ t("budget.expenses_recurring_title") }}',
-    onetimeLabel: '{{ t("budget.expenses_onetime_title") }}'
+    onetimeLabel: '{{ t("budget.expenses_onetime_title") }}',
+    categoryNone: '{{ t("budget.expense_category_none") }}',
+    categoryFilterAll: '{{ t("budget.expense_category_filter_all") }}',
+    categoryLabel: '{{ t("budget.expense_category_label") }}',
+    categoryUncategorized: '{{ t("budget.expense_category_uncategorized") }}'
   };
 
   let currentYear = new Date().getFullYear();
   let recurringData = [];
   let onetimeData = [];
   let filterMonth = 0; // 0 = all
+  let filterCategory = ''; // '' = all
   let sortField = 'month';
+  let categories = [];
+  let categoryMap = {};
 
   function showToast(msg) {
     const el = document.getElementById('toast');
@@ -245,6 +266,34 @@
     for (let i = 0; i < 12; i++) {
       sel.innerHTML += '<option value="' + (i+1) + '">' + (i+1) + ' - ' + monthNames[i] + '</option>';
     }
+  }
+
+  async function loadCategories() {
+    try {
+      const res = await fetch('/api/budget/expenses/categories');
+      const json = await res.json();
+      categories = json.data || [];
+    } catch(e) {
+      categories = [];
+    }
+    categoryMap = {};
+    categories.forEach(function(c) { categoryMap[c.id] = c; });
+  }
+
+  function populateCategorySelects() {
+    var selects = [document.getElementById('rec-category'), document.getElementById('ot-category'), document.getElementById('filter-category')];
+    selects.forEach(function(sel) {
+      if (!sel) return;
+      var isFilter = sel.id === 'filter-category';
+      var val = sel.value;
+      sel.innerHTML = isFilter
+        ? '<option value="">' + labels.categoryFilterAll + '</option>'
+        : '<option value="">' + labels.categoryNone + '</option>';
+      categories.forEach(function(c) {
+        sel.innerHTML += '<option value="' + c.id + '">' + c.name + '</option>';
+      });
+      sel.value = val;
+    });
   }
 
   async function loadExpenses() {
@@ -273,8 +322,13 @@
     let total = 0;
     tbody.innerHTML = recurringData.map(e => {
       total += e.amount;
+      const cat = categoryMap[e.category_id];
+      const catCell = cat
+        ? '<span class="inline-block w-2 h-2 rounded-full mr-1" style="background:' + cat.color + '"></span>' + cat.name
+        : '<span class="opacity-40">—</span>';
       return `<tr class="border-b border-white/5" data-id="${e.id}">
         <td class="py-1 px-2 editable-name cursor-pointer hover:bg-white/5" data-id="${e.id}" data-field="name">${e.name}</td>
+        <td class="py-1 px-2 text-xs">${catCell}</td>
         <td class="py-1 px-2 text-right editable-amount cursor-pointer hover:bg-white/5" data-id="${e.id}" data-field="amount">${e.amount.toFixed(2)}</td>
         <td class="py-1 px-2 text-right"><button class="glass-btn-danger rounded px-1.5 py-0.5 text-xs del-btn" data-id="${e.id}" data-recurring="1" aria-label="Delete ${e.name}">✕</button></td>
       </tr>`;
@@ -288,6 +342,9 @@
     let items = [...onetimeData];
     if (filterMonth > 0) {
       items = items.filter(e => e.month === filterMonth);
+    }
+    if (filterCategory) {
+      items = items.filter(e => e.category_id === filterCategory);
     }
     items.sort((a, b) => {
       if (sortField === 'month') return a.month - b.month;
@@ -306,7 +363,7 @@
     const delAllBtn = document.getElementById('ot-delete-all-btn');
     const items = getFilteredSorted();
     const totalCount = onetimeData.length;
-    const filtered = filterMonth > 0;
+    const filtered = filterMonth > 0 || filterCategory;
     countEl.textContent = filtered
       ? '(' + items.length + '/' + totalCount + ')'
       : '(' + totalCount + ')';
@@ -324,9 +381,14 @@
     let total = 0;
     tbody.innerHTML = items.map(e => {
       total += e.amount;
+      const cat = categoryMap[e.category_id];
+      const catCell = cat
+        ? '<span class="inline-block w-2 h-2 rounded-full mr-1" style="background:' + cat.color + '"></span>' + cat.name
+        : '<span class="opacity-40">—</span>';
       return `<tr class="border-b border-white/5" data-id="${e.id}">
         <td class="py-1 px-2 text-xs opacity-70">${e.month} - ${monthNames[e.month - 1]}</td>
         <td class="py-1 px-2 editable-name cursor-pointer hover:bg-white/5" data-id="${e.id}" data-field="name">${e.name}</td>
+        <td class="py-1 px-2 text-xs">${catCell}</td>
         <td class="py-1 px-2 text-right editable-amount cursor-pointer hover:bg-white/5" data-id="${e.id}" data-field="amount">${e.amount.toFixed(2)}</td>
         <td class="py-1 px-2 text-right"><button class="glass-btn-danger rounded px-1.5 py-0.5 text-xs del-btn" data-id="${e.id}" data-recurring="0" aria-label="Delete ${e.name}">✕</button></td>
       </tr>`;
@@ -406,25 +468,30 @@
   }
 
   async function addExpense(recurring) {
-    let name, amount, month;
+    let name, amount, month, catId;
     if (recurring) {
       name = document.getElementById('rec-name').value.trim();
       amount = parseFloat(document.getElementById('rec-amount').value);
+      catId = document.getElementById('rec-category').value;
       month = 0;
     } else {
       month = parseInt(document.getElementById('ot-month').value);
       name = document.getElementById('ot-name').value.trim();
       amount = parseFloat(document.getElementById('ot-amount').value);
+      catId = document.getElementById('ot-category').value;
     }
 
     if (!name || !amount) return;
     if (recurring && amount <= 0) return;
     if (!recurring && (!month || month < 1 || month > 12)) return;
 
+    const body = { year: currentYear, month: month, name: name, amount: amount, recurring: recurring };
+    if (catId) body.category_id = catId;
+
     const res = await fetch('/api/budget/expenses', {
       method: 'POST',
       headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ year: currentYear, month: month, name: name, amount: amount, recurring: recurring })
+      body: JSON.stringify(body)
     });
     const json = await res.json();
     if (res.ok) {
@@ -433,12 +500,14 @@
         renderRecurring();
         document.getElementById('rec-name').value = '';
         document.getElementById('rec-amount').value = '';
+        document.getElementById('rec-category').value = '';
       } else {
         onetimeData.push(json.data);
         renderOnetime();
         document.getElementById('ot-month').value = '';
         document.getElementById('ot-name').value = '';
         document.getElementById('ot-amount').value = '';
+        document.getElementById('ot-category').value = '';
       }
       showToast(labels.added);
     }
@@ -664,6 +733,10 @@
     filterMonth = parseInt(this.value);
     renderOnetime();
   });
+  document.getElementById('filter-category').addEventListener('change', function() {
+    filterCategory = this.value;
+    renderOnetime();
+  });
   document.getElementById('sort-field').addEventListener('change', function() {
     sortField = this.value;
     renderOnetime();
@@ -675,6 +748,8 @@
 
   async function reload() {
     document.getElementById('year-display').textContent = currentYear;
+    await loadCategories();
+    populateCategorySelects();
     await loadExpenses();
     renderRecurring();
     renderOnetime();
@@ -685,6 +760,8 @@
     populateMonthFilter();
     document.getElementById('year-display').textContent = currentYear;
     try {
+      await loadCategories();
+      populateCategorySelects();
       await loadExpenses();
     } catch(e) {
       console.error('Failed to load expenses', e);
