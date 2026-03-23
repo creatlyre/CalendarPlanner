@@ -41,7 +41,8 @@
   Plans:
   - [ ] 23-01-PLAN.md — Backend foundation: DB migration, models, category CRUD API, event category_id integration
   - [ ] 23-02-PLAN.md — Frontend: category selector in forms, color-coded grid/day view, category filter bar
-- [x] **Phase 24: Expense Categories & Charts** — Expense categorization, category selector in forms, pie/bar chart spending breakdown (completed 2026-03-23)
+- [x] **Phase 24: Expense Categories & Charts** — Expense categorization, category selector in forms, pie/bar chart spending breakdown
+ (completed 2026-03-23)
   **Plans:** 2 plans
   Plans:
   - [ ] 24-01-PLAN.md — Backend: DB migration, models, expense category CRUD API, category_id integration, stats breakdown endpoint
@@ -108,7 +109,10 @@
   2. Home page displays a compact 7-day upcoming events preview
   3. Budget snapshot shows current month balance, top spending categories, and income vs expenses
   4. Quick-add buttons let user create events and expenses directly from the home page
-**Plans**: TBD
+**Plans**: 2 plans
+  Plans:
+  - [ ] 27-01-PLAN.md — Dashboard service, route, template with all 4 sections, nav updates, i18n
+  - [ ] 27-02-PLAN.md — Dashboard tests and template polish, edge cases, empty states
 
 ## Progress
 
@@ -129,7 +133,7 @@
 | 24. Expense Categories & Charts | 2/2 | Complete    | 2026-03-23 | - |
 | 25. Shopping List | v3.0 | 0/? | Not started | - |
 | 26. Notifications | v3.0 | 0/? | Not started | - |
-| 27. Dashboard | v3.0 | 0/? | Not started | - |
+| 27. Dashboard | v3.0 | 0/2 | Planned | - |
 
 ---
 
