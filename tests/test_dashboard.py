@@ -158,8 +158,9 @@ class TestDashboardQuickAdd:
     def test_quick_add_buttons_present(self, authenticated_client):
         response = authenticated_client.get("/dashboard")
         html = response.text
-        assert "/calendar" in html
-        assert "/budget/expenses" in html
+        assert "/calendar?open=quick-add" in html
+        assert "/calendar?open=event-entry" in html
+        assert "/calendar?open=expense" in html
 
 
 # ── Navigation ───────────────────────────────────────────────────────

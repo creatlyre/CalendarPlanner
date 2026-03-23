@@ -454,6 +454,8 @@
   "dashboard.budget_snapshot": "Podsumowanie bud\u017cetu",
   "dashboard.quick_add": "Szybkie dodawanie",
   "dashboard.add_event": "Dodaj wydarzenie",
+  "dashboard.quick_event": "Szybkie wydarzenie",
+  "dashboard.full_event": "Pełne wydarzenie",
   "dashboard.add_expense": "Dodaj wydatek",
   "dashboard.no_events_today": "Brak wydarze\u0144 na dzi\u015b",
   "dashboard.no_events": "\u2014",

@@ -454,6 +454,8 @@
   "dashboard.budget_snapshot": "Budget Snapshot",
   "dashboard.quick_add": "Quick Add",
   "dashboard.add_event": "Add Event",
+  "dashboard.quick_event": "Quick Event",
+  "dashboard.full_event": "Full Event",
   "dashboard.add_expense": "Add Expense",
   "dashboard.no_events_today": "No events today",
   "dashboard.no_events": "\u2014",

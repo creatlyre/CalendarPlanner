@@ -3,8 +3,6 @@
 {% block title %}{{ t('app.calendar_title') }}{% endblock %}
 
 {% block content %}
-<script src="https://unpkg.com/htmx.org@1.9.12"></script>
-
 <div class="grid grid-cols-1 gap-4 lg:grid-cols-4">
     <section class="space-y-4 lg:col-span-3">
         <div id="category-filter" class="glass rounded-2xl p-3 flex flex-wrap items-center gap-2">
@@ -164,7 +162,14 @@ const I18N = {
   categoryNone: {{ t('category.none')|tojson }},
   categoryLabel: {{ t('category.label')|tojson }},
   categoryFilter: {{ t('category.filter')|tojson }},
-  categoryFilterAll: {{ t('category.filter_all')|tojson }}
+  categoryFilterAll: {{ t('category.filter_all')|tojson }},
+  categoryNames: {
+    'Work': {{ t('category.work')|tojson }},
+    'Personal': {{ t('category.personal')|tojson }},
+    'Health': {{ t('category.health')|tojson }},
+    'Errands': {{ t('category.errands')|tojson }},
+    'Social': {{ t('category.social')|tojson }}
+  }
 };
 
 function pad2(value) {
@@ -197,6 +202,10 @@ async function loadCategories() {
   } catch (_) {}
 }
 
+function catDisplayName(cat) {
+  return (cat.is_preset && I18N.categoryNames[cat.name]) || cat.name;
+}
+
 function populateCategoryDropdowns() {
   ['event-entry-category', 'event-category'].forEach(id => {
     const sel = document.getElementById(id);
@@ -206,7 +215,7 @@ function populateCategoryDropdowns() {
     categoriesCache.forEach(cat => {
       const opt = document.createElement('option');
       opt.value = cat.id;
-      opt.textContent = cat.name;
+      opt.textContent = catDisplayName(cat);
       opt.style.color = cat.color;
       sel.appendChild(opt);
     });
@@ -238,7 +247,7 @@ function renderCategoryFilterButtons() {
       btn.style.borderColor = cat.color + '60';
     }
     btn.dataset.category = cat.id;
-    btn.innerHTML = '<span class="inline-block w-2 h-2 rounded-full" style="background:' + cat.color + '"></span>' + cat.name;
+    btn.innerHTML = '<span class="inline-block w-2 h-2 rounded-full" style="background:' + cat.color + '"></span>' + catDisplayName(cat);
     btn.addEventListener('click', () => toggleCategoryFilter(cat.id));
     container.appendChild(btn);
   });
@@ -1805,5 +1814,23 @@ loadCategories();
 document.body.addEventListener('htmx:afterSwap', () => {
   applyCategoryFilter();
 });
+
+/* ── Auto-open modal from dashboard ?open= param ── */
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const openAction = params.get('open');
+  if (!openAction) return;
+  // Clean URL without reload
+  window.history.replaceState({}, '', window.location.pathname);
+  setTimeout(() => {
+    if (openAction === 'quick-add') {
+      document.getElementById('qa-open-btn')?.click();
+    } else if (openAction === 'event-entry') {
+      document.getElementById('event-entry-open-btn')?.click();
+    } else if (openAction === 'expense') {
+      document.getElementById('expense-open-btn')?.click();
+    }
+  }, 300);
+}());
 </script>
 {% endblock %}

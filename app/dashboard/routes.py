@@ -33,18 +33,28 @@ async def dashboard_page(
 
     from datetime import datetime
 
+    now = datetime.utcnow()
+    month_keys = [
+        "budget.income_month_jan", "budget.income_month_feb", "budget.income_month_mar",
+        "budget.income_month_apr", "budget.income_month_may", "budget.income_month_jun",
+        "budget.income_month_jul", "budget.income_month_aug", "budget.income_month_sep",
+        "budget.income_month_oct", "budget.income_month_nov", "budget.income_month_dec",
+    ]
+
     context = inject_template_i18n(
         request,
         {
             "request": request,
             "user": user,
-            "now": datetime.utcnow(),
+            "now": now,
             "today_events": today_events,
             "today_overflow": today_overflow,
             "week_preview": week_preview,
             "category_map": category_map,
             "budget_snapshot": budget_snapshot,
             "top_categories": top_categories,
+            "budget_month_key": month_keys[now.month - 1],
+            "budget_year": now.year,
         },
     )
 

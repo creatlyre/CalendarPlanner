@@ -4,6 +4,25 @@
 {% block page_heading %}{{ t('dashboard.nav_home') }}{% endblock %}
 
 {% block content %}
+<!-- Quick Add Bar (full width, top) -->
+<div class="glass rounded-2xl p-5 mb-6">
+  <h2 class="text-lg font-semibold mb-3">{{ t('dashboard.quick_add') }}</h2>
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+    <a href="/calendar?open=quick-add" class="glass-btn-primary text-center py-3 rounded-xl inline-flex items-center justify-center gap-2">
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      {{ t('dashboard.quick_event') }}
+    </a>
+    <a href="/calendar?open=event-entry" class="glass-btn-secondary text-center py-3 rounded-xl inline-flex items-center justify-center gap-2">
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      {{ t('dashboard.full_event') }}
+    </a>
+    <a href="/calendar?open=expense" class="glass-btn-info text-center py-3 rounded-xl inline-flex items-center justify-center gap-2">
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      {{ t('dashboard.add_expense') }}
+    </a>
+  </div>
+</div>
+
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
   <!-- Left column: Events -->
   <div class="space-y-6">
@@ -84,7 +103,10 @@
   <div class="space-y-6">
     <!-- Budget Snapshot Card -->
     <div class="glass rounded-2xl p-6">
-      <h2 class="text-lg font-semibold mb-4">{{ t('dashboard.budget_snapshot') }}</h2>
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-lg font-semibold">{{ t('dashboard.budget_snapshot') }}</h2>
+        <span class="text-sm opacity-60">{{ t(budget_month_key) }} {{ budget_year }}</span>
+      </div>
 
       {% if budget_snapshot.has_data %}
         <!-- Hero balance -->
@@ -97,11 +119,11 @@
 
         <!-- Income vs Expenses -->
         <div class="grid grid-cols-2 gap-4 mb-6">
-          <div class="p-3 rounded-xl bg-emerald-500/10 text-center">
+          <div class="p-3 rounded-xl bg-gradient-to-r from-emerald-600/20 to-emerald-400/10 text-center">
             <p class="text-xs opacity-60 mb-1">{{ t('dashboard.income') }}</p>
             <p class="text-lg font-semibold text-emerald-400">{{ budget_snapshot.income | int }} PLN</p>
           </div>
-          <div class="p-3 rounded-xl bg-red-500/10 text-center">
+          <div class="p-3 rounded-xl bg-gradient-to-r from-red-600/20 to-purple-500/20 text-center">
             <p class="text-xs opacity-60 mb-1">{{ t('dashboard.expenses') }}</p>
             <p class="text-lg font-semibold text-red-400">{{ budget_snapshot.expenses | int }} PLN</p>
           </div>
@@ -143,20 +165,6 @@
       {% endif %}
     </div>
 
-    <!-- Quick Add Card -->
-    <div class="glass rounded-2xl p-6">
-      <h2 class="text-lg font-semibold mb-4">{{ t('dashboard.quick_add') }}</h2>
-      <div class="grid grid-cols-2 gap-3">
-        <a href="/calendar" class="glass-btn-primary text-center py-3 rounded-xl inline-flex items-center justify-center gap-2">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          {{ t('dashboard.add_event') }}
-        </a>
-        <a href="/budget/expenses" class="glass-btn-primary text-center py-3 rounded-xl inline-flex items-center justify-center gap-2">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-          {{ t('dashboard.add_expense') }}
-        </a>
-      </div>
-    </div>
   </div>
 </div>
 {% endblock %}
