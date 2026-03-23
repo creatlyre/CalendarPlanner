@@ -423,6 +423,7 @@
   "notification.income_deleted": "{name} usun\u0105\u0142/usun\u0119\u0142a przych\u00f3d: {title}",
   "notification.event_reminder": "Przypomnienie: {title} zaczyna si\u0119 za {time}",
   "notification.mark_all_read": "Oznacz wszystkie jako przeczytane",
+  "notification.mark_read": "Oznacz jako przeczytane",
   "notification.no_notifications": "Brak powiadomie\u0144",
   "notification.email_toggle_label": "Powiadomienia email o zmianach partnera",
   "notification.dismiss": "Odrzu\u0107",

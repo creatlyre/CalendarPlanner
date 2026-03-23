@@ -848,7 +848,7 @@ def test_day_view_renders_category_color_indicator(authenticated_client):
     html = authenticated_client.get(f"/calendar/day?year={now.year}&month={now.month}&day={now.day}").text
     assert "category-color" in html
     assert health_cat["color"] in html
-    assert "Health" in html
+    assert "Zdrowie" in html # Default locale is pl
     assert f'data-category-id="{health_cat["id"]}"' in html
 
 

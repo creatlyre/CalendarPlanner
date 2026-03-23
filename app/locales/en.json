@@ -423,6 +423,7 @@
   "notification.income_deleted": "{name} deleted income: {title}",
   "notification.event_reminder": "Reminder: {title} starts in {time}",
   "notification.mark_all_read": "Mark all as read",
+  "notification.mark_read": "Mark as read",
   "notification.no_notifications": "No notifications",
   "notification.email_toggle_label": "Email alerts for partner changes",
   "notification.dismiss": "Dismiss",
