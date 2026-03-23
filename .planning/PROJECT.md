@@ -10,7 +10,8 @@ A shared calendar both partners can edit that stays in sync with Google Calendar
 
 ## Current State
 
-- v3.0 shipped on 2026-03-23.
+- v4.0 monetization milestone in progress (Phase 28 complete as of 2026-03-23).
+- Licensing foundation: AGPL-3.0 dual-license model with commercial terms (COMMERCIAL-LICENSE.md, MONETIZATION.md, NOTICE).
 - Dashboard home page: today's events, 7-day preview, budget snapshot, quick-add buttons.
 - In-app notifications: bell icon with unread badge, partner change alerts, SMTP email toggle, event reminders.
 - Event categories & colors: preset + custom categories, curated palette, color-coded calendar grid, category filtering.
@@ -72,16 +73,26 @@ A shared calendar both partners can edit that stays in sync with Google Calendar
 - ✓ Dashboard home page with today's events, 7-day preview, budget snapshot — v3.0
 - ✓ Quick-add buttons on dashboard for events and expenses — v3.0
 
+- ✓ Repository license is AGPL-3.0 for the core product (MON-01) — v4.0
+- ✓ Commercial license exception terms defined (COMMERCIAL-LICENSE.md) (MON-02) — v4.0
+- ✓ Monetization docs explain free vs paid vs AGPL obligations (MONETIZATION.md) (MON-03) — v4.0
+
 ### Active
 
-*(No active milestone — start next with `/gsd-new-milestone`)*
+**v4.0 Active Milestone: Monetization Foundation (Sales Milestone)**
 
-**Candidates for next milestone:**
-- Per-category budget limits with 80%/100% spending alerts (BLIM-01, BLIM-02)
-- Shopping list check-off/uncheck (SHOP-03)
-- Shopping list change notifications (NOTIF-09)
-- Daily digest email (NOTIF-10)
-- Notification preference granularity (NOTIF-11)
+**Chosen scope:** Option 3 — Both (SaaS primary + self-hosted purchase option)
+
+**Milestone goals:**
+- Build production-ready SaaS foundation with subscriptions and entitlement gating.
+- Keep AGPL-3.0 core open source while introducing dual-license/commercial terms path.
+- Launch paid self-hosted package (one-time purchase) alongside hosted plans.
+- Prioritize web app as the main product surface; deliver mobile via PWA + Android wrapper only.
+
+**Candidates for following milestone (post-v4.0):**
+- Native mobile app (full Android/iOS clients)
+- Advanced growth loops (referrals, affiliate, annual billing experiments)
+- Enterprise/team mode beyond two-person household
 
 ### Out of Scope additions from v2.0/v3.0
 
@@ -90,7 +101,7 @@ A shared calendar both partners can edit that stays in sync with Google Calendar
 ### Out of Scope
 
 - More than two concurrent users / team calendars — focus on household pair first
-- Native mobile app — Google Calendar on phone handles mobile access via sync
+- Native iOS app in v4.0 — deferred until monetization proof
 - Full two-way Google Calendar sync as v1 — export/push covers the core need
 
 - Two-way sync between budget and calendar events
@@ -144,6 +155,9 @@ A shared calendar both partners can edit that stays in sync with Google Calendar
 | Notification hooks in routes (not services) | Matches GoogleSync pattern, try/except wrapping | ✓ Shipped v3.0 |
 | HTMX polling for notification badge | 30s poll interval — simple, no WebSocket needed | ✓ Shipped v3.0 |
 | Dashboard as home page (/ → /dashboard) | Most useful landing page; calendar moved to /calendar | ✓ Shipped v3.0 |
+| Monetization model: Option 3 | Maximize upside with SaaS recurring revenue while serving self-hosted niche via one-time package | ✓ Selected for v4.0 |
+| Licensing strategy: AGPL core + commercial option | Protect open-source core from hosted forks while enabling paid license exceptions | ✓ Selected for v4.0 |
+| Product surface priority | Web app first; PWA and Android wrapper before native iOS/Android rewrite | ✓ Selected for v4.0 |
 
 ---
-*Last updated: 2026-03-23 after v3.0 milestone completed*
+*Last updated: 2026-03-23 for v4.0 monetization milestone kickoff*
