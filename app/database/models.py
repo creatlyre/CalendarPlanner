@@ -160,3 +160,27 @@ class CarryForwardOverride:
     amount: float = 0.0
     created_at: datetime | None = None
     updated_at: datetime | None = None
+
+
+@dataclass
+class Notification:
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str = ""
+    calendar_id: str = ""
+    actor_user_id: str = ""
+    type: str = ""  # event_created, event_updated, event_deleted, expense_created, etc.
+    entity_type: str = ""  # event, expense, income
+    entity_id: str | None = None
+    entity_title: str = ""
+    is_read: bool = False
+    is_dismissed: bool = False
+    created_at: datetime | None = None
+
+
+@dataclass
+class NotificationPreference:
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str = ""
+    email_enabled: bool = False
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
