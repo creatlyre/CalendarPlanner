@@ -33,6 +33,9 @@ class InMemoryStore:
             "additional_earnings": [],
             "expenses": [],
             "carry_forward_overrides": [],
+            "shopping_sections": [],
+            "shopping_items": [],
+            "shopping_keyword_overrides": [],
         }
 
     @staticmethod

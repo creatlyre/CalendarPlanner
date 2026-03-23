@@ -27,6 +27,8 @@ from app.users.routes import router as users_router
 from app.views.calendar_routes import router as calendar_router
 from app.notifications.routes import router as notifications_router
 from app.notifications.views import router as notification_views_router
+from app.shopping.routes import router as shopping_router
+from app.shopping.views import router as shopping_views_router
 
 app = FastAPI(
     title="Synco",
@@ -65,6 +67,8 @@ app.include_router(overview_router)
 app.include_router(overview_views_router)
 app.include_router(notifications_router)
 app.include_router(notification_views_router)
+app.include_router(shopping_router)
+app.include_router(shopping_views_router)
 
 
 @app.get("/", response_class=HTMLResponse)

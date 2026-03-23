@@ -184,3 +184,34 @@ class NotificationPreference:
     email_enabled: bool = False
     created_at: datetime | None = None
     updated_at: datetime | None = None
+
+
+@dataclass
+class ShoppingSection:
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    calendar_id: str = ""
+    name: str = ""
+    emoji: str = ""
+    sort_order: int = 0
+    is_preset: bool = True
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+@dataclass
+class ShoppingItem:
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    calendar_id: str = ""
+    name: str = ""
+    section_id: str | None = None
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+@dataclass
+class ShoppingKeywordOverride:
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    calendar_id: str = ""
+    keyword: str = ""
+    section_id: str = ""
+    created_at: datetime | None = None
