@@ -404,3 +404,87 @@ class TestExpenseCategories:
         assert totals[cat_a] == 80.0
         assert totals[cat_b] == 2000.0
         assert totals[None] == 100.0
+
+
+class TestExpenseCategoryAdvanced:
+    """Nyquist validation: auto-categorize, keywords API, normalize, preset completeness."""
+
+    def test_all_20_preset_category_names(self, authenticated_client):
+        """Verify all 20 preset categories are seeded with correct names."""
+        res = authenticated_client.get("/api/budget/expenses/categories")
+        names = {c["name"] for c in res.json()["data"]}
+        expected = {
+            "Groceries", "Rent", "Utilities", "Transport", "Entertainment",
+            "Health", "Education", "Home", "Clothing", "Children",
+            "Personal Care", "Pets", "Events", "Savings & Finance", "Travel",
+            "Shopping", "Electronics", "Garden", "Loan", "Other",
+        }
+        assert names == expected
+
+    def test_category_keywords_endpoint(self, authenticated_client):
+        """GET /category-keywords returns keyword dict with all categories."""
+        res = authenticated_client.get("/api/budget/expenses/category-keywords")
+        assert res.status_code == 200
+        data = res.json()["data"]
+        assert isinstance(data, dict)
+        assert len(data) >= 15
+        assert "Groceries" in data
+        assert "Pets" in data
+        assert isinstance(data["Groceries"], list)
+        assert len(data["Groceries"]) > 5
+
+    def test_expenses_return_category_id_for_frontend_filter(self, authenticated_client):
+        """XCAT-04: Expenses include category_id so frontend can filter."""
+        cats = authenticated_client.get("/api/budget/expenses/categories").json()["data"]
+        cat_id = cats[0]["id"]
+        # Create one with category, one without
+        authenticated_client.post(
+            "/api/budget/expenses",
+            json={"year": 2026, "month": 1, "name": "Categorized", "amount": 50, "category_id": cat_id},
+        )
+        authenticated_client.post(
+            "/api/budget/expenses",
+            json={"year": 2026, "month": 1, "name": "Uncategorized", "amount": 30},
+        )
+        year_data = authenticated_client.get("/api/budget/expenses?year=2026").json()["data"]
+        onetime = year_data["onetime_expenses"]
+        assert len(onetime) == 2
+        has_cat = [e for e in onetime if e["category_id"] == cat_id]
+        no_cat = [e for e in onetime if e["category_id"] is None]
+        assert len(has_cat) == 1
+        assert len(no_cat) == 1
+
+    def test_auto_categorize_assigns_categories(self, authenticated_client):
+        """POST /auto-categorize matches uncategorized expenses to categories by keyword."""
+        # Seed categories
+        authenticated_client.get("/api/budget/expenses/categories")
+        # Create uncategorized expenses with keyword-matching names
+        authenticated_client.post(
+            "/api/budget/expenses",
+            json={"year": 2026, "month": 1, "name": "Lidl zakupy", "amount": 200},
+        )
+        authenticated_client.post(
+            "/api/budget/expenses",
+            json={"year": 2026, "month": 2, "name": "Netflix", "amount": 50},
+        )
+        # Run auto-categorize
+        res = authenticated_client.post("/api/budget/expenses/auto-categorize?year=2026")
+        assert res.status_code == 200
+        result = res.json()["data"]
+        assert result["total"] == 2
+        assert result["updated"] == 2
+        # Verify expenses now have categories
+        year_data = authenticated_client.get("/api/budget/expenses?year=2026").json()["data"]
+        onetime = year_data["onetime_expenses"]
+        assert all(e["category_id"] is not None for e in onetime)
+
+    def test_normalize_strips_polish_diacritics(self):
+        """_normalize handles Polish ł→l and standard diacritic stripping."""
+        from app.budget.expense_service import _normalize
+
+        assert _normalize("Ładowarka") == "ladowarka"
+        assert _normalize("Żyletki") == "zyletki"
+        assert _normalize("Półki") == "polki"
+        assert _normalize("Ślinianki") == "slinianki"
+        assert _normalize("Czynsz") == "czynsz"
+        assert _normalize("ALLEGRO") == "allegro"
