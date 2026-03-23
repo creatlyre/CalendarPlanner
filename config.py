@@ -50,4 +50,11 @@ class Settings(BaseSettings):
     STRIPE_PRO_PRICE_ID: str = ""
     STRIPE_FAMILY_PLUS_PRICE_ID: str = ""
 
+    ENVIRONMENT: str = "development"
+    ALLOWED_ORIGINS: str = ""
+    LOG_LEVEL: str = "INFO"
+    LOG_FORMAT: str = "text"
+    WEB_CONCURRENCY: int = 3
+    SENTRY_DSN: str = ""
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")

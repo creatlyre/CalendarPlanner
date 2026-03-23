@@ -1,0 +1,13 @@
+.git
+.gitignore
+.env
+.env.*
+.planning/
+.agents/
+__pycache__/
+*.pyc
+tests/
+.venv/
+.pytest_cache/
+*.md
+!README.md
