@@ -58,7 +58,7 @@
   - [x] 26-01-PLAN.md — Backend foundation: DB migration, models, notification repository, service, API routes
   - [x] 26-02-PLAN.md — Service hooks in event/expense/income, SMTP email alerts, reminder notification check, i18n
   - [x] 26-03-PLAN.md — Frontend: bell icon with unread badge, notification dropdown, mark-read/dismiss actions, email toggle
-- [ ] **Phase 27: Dashboard** — Home page with today's events, 7-day preview, budget snapshot, quick-add buttons
+- [x] **Phase 27: Dashboard** — Home page with today's events, 7-day preview, budget snapshot, quick-add buttons
 
 ## Phase Details
 
@@ -121,8 +121,8 @@
   4. Quick-add buttons let user create events and expenses directly from the home page
 **Plans**: 2 plans
   Plans:
-  - [ ] 27-01-PLAN.md — Dashboard service, route, template with all 4 sections, nav updates, i18n
-  - [ ] 27-02-PLAN.md — Dashboard tests and template polish, edge cases, empty states
+  - [x] 27-01-PLAN.md — Dashboard service, route, template with all 4 sections, nav updates, i18n
+  - [x] 27-02-PLAN.md — Dashboard tests and template polish, edge cases, empty states
 
 ## Progress
 
@@ -143,7 +143,7 @@
 | 24. Expense Categories & Charts | 2/2 | Complete    | 2026-03-23 | - |
 | 25. Shopping List | v3.0 | 2/2 | Complete | 2026-03-23 |
 | 26. Notifications | v3.0 | 3/3 | Complete | 2026-03-23 |
-| 27. Dashboard | v3.0 | 0/2 | Planned | - |
+| 27. Dashboard | v3.0 | 2/2 | Complete | 2026-03-23 |
 
 ---
 
