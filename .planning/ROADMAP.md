@@ -22,9 +22,12 @@
   Plans:
   - [x] 29-01-PLAN.md — Billing data model, Stripe checkout, webhook handler
   - [x] 29-02-PLAN.md — Entitlement dependencies, billing settings page, i18n
-- [ ] Phase 30: SaaS Production Platform and Operations
-  **Goal:** [To be planned]
-  **Requirements:** [SAS-01, SAS-05, SAS-06]
+- [ ] Phase 30: SaaS Production Platform and Operations (2 plans)
+  **Goal:** Production-ready deployment: Dockerfile, Railway config, security hardening, structured logging, Sentry, enhanced health checks
+  **Requirements:** [SAS-01]
+  Plans:
+  - [ ] 30-01-PLAN.md — Dockerfile, environment config, Railway deployment
+  - [ ] 30-02-PLAN.md — Security headers, CORS, rate limiting, logging, Sentry, health checks
 - [ ] Phase 31: Paid Self-Hosted Distribution
 - [ ] Phase 32: Mobile Distribution Path (PWA + Android Wrapper)
 - [ ] Phase 33: Go-to-Market, Pricing, and Launch Funnel
@@ -87,7 +90,7 @@
 | 27. Dashboard | v3.0 | 2/2 | Complete | 2026-03-23 |
 | 28. Licensing and Commercial Terms Foundation | 2/2 | Complete    | 2026-03-23 | - |
 | 29. Billing, Plans, and Entitlements Core | v4.0 | 0/2 | Planned | - |
-| 30. SaaS Production Platform and Operations | v4.0 | 0/0 | Planned | - |
+| 30. SaaS Production Platform and Operations | v4.0 | 0/2 | Planned | - |
 | 31. Paid Self-Hosted Distribution | v4.0 | 0/0 | Planned | - |
 | 32. Mobile Distribution Path (PWA + Android Wrapper) | v4.0 | 0/0 | Planned | - |
 | 33. Go-to-Market, Pricing, and Launch Funnel | v4.0 | 0/0 | Planned | - |
