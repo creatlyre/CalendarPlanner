@@ -141,13 +141,16 @@ class UserRepository:
         updated_rows = self.db.select("users", {"id": f"eq.{user_id}", "limit": "1"})
         return _to_user(updated_rows[0]) if updated_rows else _to_user(user)
 
+    def get_users_by_calendar_id(self, calendar_id: str) -> list[User]:
+        rows = self.db.select("users", {"calendar_id": f"eq.{calendar_id}"})
+        return [_to_user(item) for item in rows]
+
     def get_household_members(self, user_id: str) -> list[User]:
         user = self.get_user_by_id(user_id)
         if not user or not user.calendar_id:
             return []
 
-        rows = self.db.select("users", {"calendar_id": f"eq.{user.calendar_id}"})
-        return [_to_user(item) for item in rows]
+        return self.get_users_by_calendar_id(user.calendar_id)
 
     def get_household_calendar(self, user_id: str) -> Calendar | None:
         user = self.get_user_by_id(user_id)

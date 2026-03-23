@@ -40,9 +40,8 @@ class GoogleSyncService:
         self.user_repo = UserRepository(db)
 
     def _household_users(self, calendar_id: str) -> list[User]:
-        rows = self.db.select("users", {"calendar_id": f"eq.{calendar_id}"})
-        users = [self.user_repo.get_user_by_id(item.get("id")) for item in rows if item.get("id")]
-        return [user for user in users if user is not None]
+        # Performance fix: use single query instead of N+1
+        return self.user_repo.get_users_by_calendar_id(calendar_id)
 
     def _credentials_for_user(self, user: User) -> Credentials | None:
         if not user.google_refresh_token and not user.google_access_token:
