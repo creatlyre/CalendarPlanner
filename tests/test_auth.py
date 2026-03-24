@@ -99,6 +99,46 @@ def test_logout_clears_session_cookie(test_client):
     assert "supabase_refresh=" in cookie_str
 
 
+def test_login_page_renders(test_client):
+    """GET /auth/login renders login HTML with password-login form and register link."""
+    response = test_client.get("/auth/login", follow_redirects=False)
+    assert response.status_code == 200
+    assert "text/html" in response.headers.get("content-type", "")
+    body = response.text
+    assert "password-login" in body
+    assert "auth/register" in body
+
+
+def test_login_google_redirect(test_client):
+    """GET /auth/login?provider=google redirects to OAuth provider."""
+    response = test_client.get("/auth/login?provider=google", follow_redirects=False)
+    assert response.status_code in (302, 307)
+    location = response.headers.get("location", "")
+    assert "google" in location.lower() or "supabase" in location.lower() or "accounts.google" in location.lower()
+
+
+def test_register_page_renders(test_client):
+    """GET /auth/register renders registration HTML with form and login link."""
+    response = test_client.get("/auth/register", follow_redirects=False)
+    assert response.status_code == 200
+    assert "text/html" in response.headers.get("content-type", "")
+    body = response.text
+    assert "auth/register" in body
+    assert "auth/login" in body
+
+
+def test_login_page_has_google_oauth_button(test_client):
+    """Login page includes a Google OAuth sign-in link."""
+    body = test_client.get("/auth/login").text
+    assert "auth/login?provider=google" in body
+
+
+def test_register_page_has_google_oauth_button(test_client):
+    """Register page includes a Google OAuth sign-up link."""
+    body = test_client.get("/auth/register").text
+    assert "auth/login?provider=google" in body
+
+
 def test_unauthenticated_post_to_protected_route_redirects_as_get(test_client):
     """Unauthenticated request to dashboard should redirect with 302 (not 307) to avoid 405."""
     resp = test_client.get("/dashboard", follow_redirects=False)

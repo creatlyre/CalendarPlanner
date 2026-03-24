@@ -7,6 +7,8 @@ from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from fastapi.responses import HTMLResponse, RedirectResponse
 from pydantic import BaseModel, EmailStr
 
+from fastapi.templating import Jinja2Templates
+
 from app.auth.oauth import exchange_code_for_token, get_authorization_url
 from app.auth.supabase_auth import (
     build_google_authorize_url,
@@ -18,12 +20,13 @@ from app.auth.supabase_auth import (
 from app.auth.utils import encrypt_token
 from app.database.database import get_db
 from app.database.models import User
-from app.i18n import resolve_locale, translate
+from app.i18n import inject_template_i18n, resolve_locale, translate
 from app.users.repository import UserRepository
 from app.users.service import UserService
 from config import Settings
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+templates = Jinja2Templates(directory="app/templates")
 
 
 class AuthSessionPayload(BaseModel):
@@ -126,14 +129,23 @@ def _upsert_local_user_from_profile(
 
 
 @router.get("/login")
-async def login():
+async def login_page(request: Request, provider: str | None = None, db=Depends(get_db)):
     settings = Settings()
-    if is_supabase_auth_enabled(settings):
-        auth_url = build_google_authorize_url(settings.GOOGLE_REDIRECT_URI)
+    if provider == "google":
+        if is_supabase_auth_enabled(settings):
+            auth_url = build_google_authorize_url(settings.GOOGLE_REDIRECT_URI)
+            return RedirectResponse(url=auth_url)
+        auth_url, _state = get_authorization_url()
         return RedirectResponse(url=auth_url)
 
-    auth_url, _state = get_authorization_url()
-    return RedirectResponse(url=auth_url)
+    context = inject_template_i18n(request, {"request": request})
+    return templates.TemplateResponse(request, "login.html", context)
+
+
+@router.get("/register")
+async def register_page(request: Request):
+    context = inject_template_i18n(request, {"request": request})
+    return templates.TemplateResponse(request, "register.html", context)
 
 
 @router.get("/callback")
