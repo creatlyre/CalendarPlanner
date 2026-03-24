@@ -22,14 +22,14 @@
 
     <div class="flex items-center gap-1 flex-shrink-0">
         {% if not nread %}
-        <button class="text-xs text-indigo-400 hover:text-indigo-300 p-1" title="Mark as read"
+        <button class="text-xs text-indigo-400 hover:text-indigo-300 p-1" title="Mark as read" aria-label="Mark as read"
                 hx-post="/notifications/{{ nid }}/read-html"
                 hx-target="#notif-{{ nid }}"
                 hx-swap="outerHTML">
             ✓
         </button>
         {% endif %}
-        <button class="text-xs text-white/30 hover:text-red-400 p-1" title="{{ t('notification.dismiss') }}"
+        <button class="text-xs text-white/30 hover:text-red-400 p-1" title="{{ t('notification.dismiss') }}" aria-label="{{ t('notification.dismiss') }}"
                 hx-post="/notifications/{{ nid }}/dismiss-html"
                 hx-target="#notif-{{ nid }}"
                 hx-swap="outerHTML">
