@@ -922,43 +922,6 @@
 
       // ── Navigation buttons ───────────────────────────────────────────────
       document.getElementById('qa-open-btn')?.addEventListener('click', openModal);
-
-      // ── Quick-Add Chooser (navbar + FAB → chooser, calendar inline → direct) ──
-      (function () {
-        const chooser = document.getElementById('qa-chooser-modal');
-        if (!chooser) return;
-        function openChooser() {
-          chooser.classList.remove('hidden');
-          chooser.classList.add('flex');
-        }
-        function closeChooser() {
-          chooser.classList.add('hidden');
-          chooser.classList.remove('flex');
-        }
-        document.getElementById('qa-global-btn')?.addEventListener('click', openChooser);
-        document.getElementById('qa-fab')?.addEventListener('click', openChooser);
-        document.getElementById('qa-chooser-close')?.addEventListener('click', closeChooser);
-        // Backdrop click
-        chooser.addEventListener('click', (e) => { if (e.target === chooser) closeChooser(); });
-        // Escape key
-        document.addEventListener('keydown', (e) => {
-          if (e.key === 'Escape' && !chooser.classList.contains('hidden')) closeChooser();
-        });
-        // Option buttons
-        document.getElementById('qa-chooser-event')?.addEventListener('click', () => {
-          closeChooser();
-          if (window.qaOpenModal) window.qaOpenModal();
-          else window.location.href = '/calendar';
-        });
-        document.getElementById('qa-chooser-expense')?.addEventListener('click', () => {
-          closeChooser();
-          window.location.href = '/calendar?open=expense';
-        });
-        document.getElementById('qa-chooser-shopping')?.addEventListener('click', () => {
-          closeChooser();
-          window.location.href = '/shopping';
-        });
-      })();
       document.getElementById('qa-header-close-btn').addEventListener('click', closeModal);
       document.getElementById('qa-close-btn-text').addEventListener('click', closeModal);
       qaManualBtn.addEventListener('click', () => {
@@ -1032,6 +995,42 @@
     }());
 
     loadCategories();
+    </script>
+
+    <!-- Quick-Add Chooser (separate from QA Modal IIFE so it always works) -->
+    <script>
+    (function () {
+      const chooser = document.getElementById('qa-chooser-modal');
+      if (!chooser) return;
+      function openChooser() {
+        chooser.classList.remove('hidden');
+        chooser.classList.add('flex');
+      }
+      function closeChooser() {
+        chooser.classList.add('hidden');
+        chooser.classList.remove('flex');
+      }
+      document.getElementById('qa-global-btn')?.addEventListener('click', openChooser);
+      document.getElementById('qa-fab')?.addEventListener('click', openChooser);
+      document.getElementById('qa-chooser-close')?.addEventListener('click', closeChooser);
+      chooser.addEventListener('click', (e) => { if (e.target === chooser) closeChooser(); });
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !chooser.classList.contains('hidden')) closeChooser();
+      });
+      document.getElementById('qa-chooser-event')?.addEventListener('click', () => {
+        closeChooser();
+        if (window.qaOpenModal) window.qaOpenModal();
+        else window.location.href = '/calendar';
+      });
+      document.getElementById('qa-chooser-expense')?.addEventListener('click', () => {
+        closeChooser();
+        window.location.href = '/calendar?open=expense';
+      });
+      document.getElementById('qa-chooser-shopping')?.addEventListener('click', () => {
+        closeChooser();
+        window.location.href = '/shopping';
+      });
+    })();
     </script>
 
     <script>
