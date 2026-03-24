@@ -226,13 +226,13 @@ async function checkout(plan) {
         return;
       }
       const err = await res.json().catch(() => ({}));
-      alert(err.detail || 'Checkout failed');
+      showToast(err.detail || 'Checkout failed', 'error');
       return;
     }
     const data = await res.json();
     if (data.url) window.location.href = data.url;
   } catch (e) {
-    alert('Network error. Please try again.');
+    showToast('Network error. Please try again.', 'error');
   }
 }
 </script>

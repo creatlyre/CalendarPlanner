@@ -36,6 +36,6 @@ class SessionValidationMiddleware(BaseHTTPMiddleware):
         session_cookie = request.cookies.get("session")
         refresh_cookie = request.cookies.get("supabase_refresh")
         if not session_cookie and not refresh_cookie:
-            return RedirectResponse(url="/auth/login", status_code=307)
+            return RedirectResponse(url="/auth/login", status_code=302)
 
         return await call_next(request)

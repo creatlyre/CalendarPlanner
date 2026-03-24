@@ -253,7 +253,7 @@ async def auth_redirect_handler(request: Request, exc: HTTPException):
     if exc.status_code == 401 and request.url.path in {"/invite", "/dashboard"}:
         from fastapi.responses import RedirectResponse
 
-        return RedirectResponse(url="/auth/login", status_code=307)
+        return RedirectResponse(url="/auth/login", status_code=302)
     return await http_exception_handler(request, exc)
 
 

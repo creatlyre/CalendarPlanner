@@ -93,9 +93,7 @@
                 </div>
                 
                 <!-- Logout -->
-                <form method="post" action="/auth/logout" class="inline">
-                    <button type="submit" class="glass-btn-secondary rounded-xl px-4 py-2 text-sm font-medium min-h-[44px]">{{ t('nav.logout') }}</button>
-                </form>
+                <a href="/auth/logout" class="glass-btn-secondary rounded-xl px-4 py-2 text-sm font-medium min-h-[44px] inline-flex items-center">{{ t('nav.logout') }}</a>
             </div>
             {% else %}
             {# Public nav for unauthenticated users #}
@@ -625,13 +623,13 @@
         };
       }
 
-      function showToast(message) {
+      function showToast(message, type) {
         const toast = document.getElementById('global-toast');
         if (!toast) return;
         toast.textContent = message;
-        toast.classList.remove('hidden');
-        toast.classList.add('toast-success', 'rounded-xl', 'px-4', 'py-3', 'text-sm', 'font-medium');
-        setTimeout(() => { toast.classList.add('hidden'); toast.textContent = ''; }, 3000);
+        toast.classList.remove('hidden', 'toast-success', 'toast-error');
+        toast.classList.add(type === 'error' ? 'toast-error' : 'toast-success', 'rounded-xl', 'px-4', 'py-3', 'text-sm', 'font-medium');
+        setTimeout(() => { toast.classList.add('hidden'); toast.textContent = ''; }, 4000);
       }
 
       // ── Parse ────────────────────────────────────────────────────────────

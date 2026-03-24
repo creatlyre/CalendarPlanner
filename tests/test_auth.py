@@ -40,7 +40,7 @@ def test_invalid_session_redirects(test_client):
 
     # Dashboard still requires auth and redirects
     response = test_client.get("/dashboard", follow_redirects=False)
-    assert response.status_code == 307
+    assert response.status_code == 302
     assert response.headers.get("location") == "/auth/login"
 
 
@@ -97,3 +97,14 @@ def test_logout_clears_session_cookie(test_client):
     cookie_str = " ".join(cookie_headers)
     assert "session=" in cookie_str
     assert "supabase_refresh=" in cookie_str
+
+
+def test_unauthenticated_post_to_protected_route_redirects_as_get(test_client):
+    """Unauthenticated request to dashboard should redirect with 302 (not 307) to avoid 405."""
+    resp = test_client.get("/dashboard", follow_redirects=False)
+    assert resp.status_code == 302
+    assert resp.headers.get("location") == "/auth/login"
+
+    resp = test_client.get("/invite", follow_redirects=False)
+    assert resp.status_code == 302
+    assert resp.headers.get("location") == "/auth/login"

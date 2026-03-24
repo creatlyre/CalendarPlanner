@@ -40,6 +40,17 @@ class TestPricingPage:
         resp = test_client.get("/pricing", follow_redirects=False)
         assert resp.status_code == 200
 
+    def test_pricing_page_no_native_alert(self, test_client):
+        """Pricing checkout function should use showToast instead of native alert()."""
+        resp = test_client.get("/pricing")
+        html = resp.text
+        # Extract the checkout function area (between 'function checkout' and end of script)
+        checkout_start = html.find("function checkout")
+        assert checkout_start != -1, "checkout function not found in pricing page"
+        checkout_section = html[checkout_start:checkout_start + 1000]
+        assert "alert(" not in checkout_section, "checkout() still uses native alert()"
+        assert "showToast" in checkout_section, "checkout() should use showToast for errors"
+
 
 # ── GTM-02: Landing Page ─────────────────────────────────────────────────
 
@@ -167,6 +178,12 @@ class TestLegalPages:
         for path in ["/terms", "/privacy", "/refund"]:
             resp = test_client.get(path, follow_redirects=False)
             assert resp.status_code == 200, f"{path} should be public"
+
+    def test_public_pages_no_post_forms(self, test_client):
+        """Public pages should not have POST forms that cause resubmission dialogs."""
+        for path in ["/pricing", "/terms", "/privacy", "/refund"]:
+            resp = test_client.get(path)
+            assert 'method="post"' not in resp.text.lower(), f"{path} contains a POST form"
 
     def test_footer_has_legal_links(self, authenticated_client):
         """Authenticated pages include footer with legal links."""
