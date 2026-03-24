@@ -12,6 +12,9 @@ from app.budget.income_schemas import (
 from app.budget.income_service import IncomeService
 from app.budget.repository import BudgetSettingsRepository
 from app.database.database import get_db
+from app.notifications.repository import NotificationRepository
+from app.notifications.service import NotificationService
+from app.users.repository import UserRepository
 
 router = APIRouter(prefix="/api/budget/income", tags=["income"])
 
@@ -22,6 +25,10 @@ def _service(db) -> IncomeService:
         AdditionalEarningsRepository(db),
         BudgetSettingsRepository(db),
     )
+
+
+def _notify_svc(db) -> NotificationService:
+    return NotificationService(NotificationRepository(db), UserRepository(db))
 
 
 @router.get("")
@@ -43,6 +50,10 @@ async def save_hours(
         raise HTTPException(status_code=400, detail="No calendar linked")
     service = _service(db)
     hours = service.save_hours(user.calendar_id, payload)
+    try:
+        _notify_svc(db).create_for_partner(user.id, user.calendar_id, "income_updated", "income", None, f"Monthly hours {payload.month}")
+    except Exception:
+        pass
     return {"data": MonthlyHoursResponse.model_validate(hours, from_attributes=True).model_dump()}
 
 
@@ -69,6 +80,10 @@ async def add_earning(
         raise HTTPException(status_code=400, detail="No calendar linked")
     service = _service(db)
     earning = service.add_earning(user.calendar_id, payload)
+    try:
+        _notify_svc(db).create_for_partner(user.id, user.calendar_id, "income_created", "income", earning.id, earning.name)
+    except Exception:
+        pass
     return {"data": AdditionalEarningResponse.model_validate(earning, from_attributes=True).model_dump()}
 
 
@@ -82,4 +97,8 @@ async def delete_earning(
     deleted = service.delete_earning(earning_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Earning not found")
+    try:
+        _notify_svc(db).create_for_partner(user.id, user.calendar_id, "income_deleted", "income", None, "")
+    except Exception:
+        pass
     return {"ok": True}

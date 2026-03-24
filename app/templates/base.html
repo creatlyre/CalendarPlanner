@@ -5,12 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Synco — Smart household calendar & budget planner">
     <meta name="theme-color" content="#1e1553">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236366f1' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='4' width='18' height='18' rx='2'/><line x1='16' y1='2' x2='16' y2='6'/><line x1='8' y1='2' x2='8' y2='6'/><line x1='3' y1='10' x2='21' y2='10'/></svg>">
     <title>{% block title %}{{ t('app.name') }}{% endblock %}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://unpkg.com/htmx.org@1.9.12"></script>
 </head>
 <body class="min-h-screen text-white transition-colors duration-300">
     <!-- Skip to main content -->
@@ -22,12 +25,49 @@
               <svg class="inline-block w-5 h-5 -mt-0.5 mr-0.5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
               {{ t('app.name') }}
             </a>
-            <a href="/budget/overview" class="glass-btn-secondary rounded-xl px-4 py-2 text-sm font-medium min-h-[44px] inline-flex items-center hidden md:inline-flex">{{ t('budget.nav_link') }}</a>
+            <a href="/dashboard" class="glass-btn-secondary rounded-xl px-4 py-2 text-sm font-medium min-h-[44px] inline-flex items-center hidden md:inline-flex {{ 'desktop-nav-active' if request.url.path == '/dashboard' else '' }}">{{ t('dashboard.nav_home') }}</a>
+            <a href="/calendar" class="glass-btn-secondary rounded-xl px-4 py-2 text-sm font-medium min-h-[44px] inline-flex items-center hidden md:inline-flex {{ 'desktop-nav-active' if request.url.path == '/calendar' else '' }}">{{ t('app.calendar_short') }}</a>
+            <a href="/budget/overview" class="glass-btn-secondary rounded-xl px-4 py-2 text-sm font-medium min-h-[44px] inline-flex items-center hidden md:inline-flex {{ 'desktop-nav-active' if '/budget' in request.url.path else '' }}">{{ t('budget.nav_link') }}</a>
+            <a href="/shopping" class="glass-btn-secondary rounded-xl px-4 py-2 text-sm font-medium min-h-[44px] inline-flex items-center hidden md:inline-flex {{ 'desktop-nav-active' if request.url.path == '/shopping' else '' }}">{{ t('shopping.nav_link') }}</a>
+            <a href="/billing/settings" class="glass-btn-secondary rounded-xl px-4 py-2 text-sm font-medium min-h-[44px] inline-flex items-center hidden md:inline-flex {{ 'desktop-nav-active' if '/billing' in request.url.path else '' }}">
+                {% if user_plan is defined and user_plan != 'free' %}<span class="inline-block w-2 h-2 rounded-full bg-emerald-400 mr-1.5"></span>{% endif %}{{ t('billing.nav_link') if t('billing.nav_link') != 'billing.nav_link' else 'Plan' }}
+            </a>
             <div class="flex items-center gap-2">
+                <!-- Quick Add (global) -->
+                <button id="qa-global-btn" type="button"
+                        class="glass-btn-primary rounded-xl min-h-[44px] px-3 py-2 text-sm font-medium inline-flex items-center gap-1.5 hidden md:inline-flex"
+                        title="{{ t('calendar.quick_add') }}">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                  {{ t('calendar.quick_add') }}
+                </button>
                 <!-- Theme Toggle -->
                 <button id="theme-toggle" class="glass-btn-secondary rounded-xl min-h-[44px] min-w-[44px] flex items-center justify-center p-2" aria-label="Toggle dark/light mode" title="Toggle theme (Press D)">
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
                 </button>
+
+                <!-- Notification Bell -->
+                <div class="relative" id="notification-bell-container">
+                    <button id="notification-bell" class="glass-btn-secondary rounded-xl min-h-[44px] min-w-[44px] flex items-center justify-center p-2 relative"
+                            aria-label="Notifications"
+                            title="Notifications"
+                            hx-get="/notifications/dropdown"
+                            hx-target="#notification-panel"
+                            hx-swap="innerHTML"
+                            hx-on::after-request="if(event.detail.elt===this){var p=document.getElementById('notification-panel'); if(p) p.classList.remove('hidden')}">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+                        </svg>
+                        <span id="notif-badge"
+                              hx-get="/notifications/badge"
+                              hx-trigger="load, every 30s"
+                              hx-target="this"
+                              hx-swap="innerHTML">
+                        </span>
+                    </button>
+                    <div id="notification-panel" class="absolute right-0 hidden pt-1 w-80 z-50" role="region" aria-label="Notifications">
+                    </div>
+                </div>
 
                 <!-- Language Switcher -->
                 <div class="relative inline-block" id="locale-dropdown">
@@ -63,12 +103,30 @@
         {% block content %}{% endblock %}
     </main>
 
+    {# Footer with legal links #}
+    <footer class="border-t border-white/10 py-6 mt-8">
+        <div class="mx-auto max-w-7xl px-4 flex flex-wrap items-center justify-center gap-4 text-xs text-gray-500">
+            <a href="/terms" class="hover:text-gray-300 transition-colors">{{ t('footer.terms') }}</a>
+            <span>·</span>
+            <a href="/privacy" class="hover:text-gray-300 transition-colors">{{ t('footer.privacy') }}</a>
+            <span>·</span>
+            <a href="/refund" class="hover:text-gray-300 transition-colors">{{ t('footer.refund') }}</a>
+        </div>
+    </footer>
+
     <!-- Global toast container for aria-live announcements -->
-    <div id="global-toast" class="fixed bottom-4 right-4 z-[100] hidden rounded-xl px-4 py-3 text-sm font-medium shadow-lg toast-success" role="status" aria-live="polite"></div>
+    <div id="global-toast" class="fixed bottom-4 right-4 z-[100] hidden rounded-xl px-4 py-3 text-sm font-medium shadow-lg toast-success toast-enter" role="status" aria-live="polite"></div>
+
+    <!-- Second ambient orb (bottom-left, complementary to body::after) -->
+    <div class="fixed bottom-[-10%] left-[-5%] w-[35vw] h-[35vw] max-w-[500px] max-h-[500px] rounded-full pointer-events-none z-0" style="background: radial-gradient(circle, rgba(6, 182, 212, 0.08) 0%, rgba(34, 197, 94, 0.04) 40%, transparent 70%); filter: blur(50px); animation: orbFloat 25s ease-in-out infinite alternate-reverse;"></div>
 
     <!-- Mobile Bottom Navigation -->
     <nav class="mobile-bottom-nav" aria-label="Mobile navigation">
-      <a href="/" class="{{ 'active' if request.url.path == '/' else '' }}" {{ 'aria-current=page' if request.url.path == '/' else '' }}>
+      <a href="/dashboard" class="{{ 'active' if request.url.path == '/dashboard' else '' }}" {{ 'aria-current=page' if request.url.path == '/dashboard' else '' }}>
+        <span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+        {{ t('dashboard.nav_home') }}
+      </a>
+      <a href="/calendar" class="{{ 'active' if request.url.path == '/calendar' else '' }}" {{ 'aria-current=page' if request.url.path == '/calendar' else '' }}>
         <span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
         {{ t('app.calendar_short') if t('app.calendar_short') != 'app.calendar_short' else 'Calendar' }}
       </a>
@@ -76,11 +134,808 @@
         <span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></span>
         {{ t('budget.nav_link') }}
       </a>
+      <a href="/shopping" class="{{ 'active' if request.url.path == '/shopping' else '' }}" {{ 'aria-current=page' if request.url.path == '/shopping' else '' }}>
+        <span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span>
+        {{ t('shopping.nav_link') }}
+      </a>
       <a href="/budget/settings" class="{{ 'active' if request.url.path == '/budget/settings' else '' }}" {{ 'aria-current=page' if request.url.path == '/budget/settings' else '' }}>
         <span class="nav-icon" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
         {{ t('budget.sidebar_settings') if t('budget.sidebar_settings') != 'budget.sidebar_settings' else 'Settings' }}
       </a>
     </nav>
+
+    <!-- Mobile FAB for Quick Add -->
+    <button id="qa-fab" type="button"
+            class="fixed bottom-20 right-4 z-40 md:hidden glass-btn-primary rounded-full w-14 h-14 flex items-center justify-center shadow-lg"
+            aria-label="{{ t('calendar.quick_add') }}">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+    </button>
+
+    {% include "partials/quick_add_modal.html" %}
+
+    <script>
+    // ── Quick Add I18N (available globally) ─────────────────────────────────
+    const I18N = {
+      eventSaved: {{ t('events.saved')|tojson }},
+      failedSaveEvent: {{ t('errors.save_event_failed')|tojson }},
+      errPastWhat: {{ t('qa.err_past_what')|tojson }},
+      errPastWhy: {{ t('qa.err_past_why')|tojson }},
+      errPastFix: {{ t('qa.err_past_fix')|tojson }},
+      errNoAnchorWhat: {{ t('qa.err_no_anchor_what')|tojson }},
+      errNoAnchorWhy: {{ t('qa.err_no_anchor_why')|tojson }},
+      errNoAnchorFix: {{ t('qa.err_no_anchor_fix')|tojson }},
+      errConflictingWhat: {{ t('qa.err_conflicting_what')|tojson }},
+      errConflictingWhy: {{ t('qa.err_conflicting_why')|tojson }},
+      errConflictingFix: {{ t('qa.err_conflicting_fix')|tojson }},
+      errNoTitleWhat: {{ t('qa.err_no_title_what')|tojson }},
+      errNoTitleWhy: {{ t('qa.err_no_title_why')|tojson }},
+      errNoTitleFix: {{ t('qa.err_no_title_fix')|tojson }},
+      errNetworkWhat: {{ t('qa.err_network_what')|tojson }},
+      errNetworkWhy: {{ t('qa.err_network_why')|tojson }},
+      errNetworkFix: {{ t('qa.err_network_fix')|tojson }},
+      errParseWhat: {{ t('qa.err_parse_what')|tojson }},
+      errParseWhy: {{ t('qa.err_parse_why')|tojson }},
+      errParseFix: {{ t('qa.err_parse_fix')|tojson }},
+      errUnknownWhy: {{ t('qa.err_unknown_why')|tojson }},
+      errUnknownFix: {{ t('qa.err_unknown_fix')|tojson }},
+      errWhyLabel: {{ t('qa.err_why_label')|tojson }},
+      errFixLabel: {{ t('qa.err_fix_label')|tojson }},
+      reminderToggleOn: {{ t('reminder.toggle_on')|tojson }},
+      reminderToggleOff: {{ t('reminder.toggle_off')|tojson }},
+      reminderMaxReached: {{ t('reminder.max_reached')|tojson }},
+      reminderRemoveLabel: {{ t('reminder.remove_label')|tojson }},
+      categoryNone: {{ t('category.none')|tojson }},
+      categoryLabel: {{ t('category.label')|tojson }},
+      categoryFilter: {{ t('category.filter')|tojson }},
+      categoryFilterAll: {{ t('category.filter_all')|tojson }},
+      categoryNames: {
+        'Work': {{ t('category.work')|tojson }},
+        'Personal': {{ t('category.personal')|tojson }},
+        'Health': {{ t('category.health')|tojson }},
+        'Errands': {{ t('category.errands')|tojson }},
+        'Social': {{ t('category.social')|tojson }}
+      }
+    };
+
+    // ── Shared utilities ────────────────────────────────────────────────────
+    function pad2(value) { return String(value).padStart(2, '0'); }
+
+    function formatDatetimeLocal(dateValue) {
+      if (!(dateValue instanceof Date) || Number.isNaN(dateValue.getTime())) return '';
+      return `${dateValue.getFullYear()}-${pad2(dateValue.getMonth() + 1)}-${pad2(dateValue.getDate())}T${pad2(dateValue.getHours())}:${pad2(dateValue.getMinutes())}`;
+    }
+
+    function formatReminderMinutes(minutes) {
+      if (minutes >= 1440 && minutes % 1440 === 0) return (minutes / 1440) + 'd';
+      if (minutes >= 60 && minutes % 60 === 0) return (minutes / 60) + 'h';
+      return minutes + ' min';
+    }
+
+    // ── Category system (shared) ────────────────────────────────────────────
+    let categoriesCache = [];
+
+    async function loadCategories() {
+      try {
+        const res = await fetch('/api/events/categories');
+        if (res.ok) {
+          categoriesCache = await res.json();
+          populateCategoryDropdowns();
+          if (window.onCategoriesLoaded) window.onCategoriesLoaded();
+        }
+      } catch (_) {}
+    }
+
+    function catDisplayName(cat) {
+      return (cat.is_preset && I18N.categoryNames[cat.name]) || cat.name;
+    }
+
+    function populateCategoryDropdowns() {
+      ['event-entry-category', 'event-category', 'qa-parsed-category'].forEach(id => {
+        const sel = document.getElementById(id);
+        if (!sel) return;
+        const current = sel.value;
+        sel.innerHTML = '<option value="">' + I18N.categoryNone + '</option>';
+        categoriesCache.forEach(cat => {
+          const opt = document.createElement('option');
+          opt.value = cat.id;
+          opt.textContent = catDisplayName(cat);
+          opt.style.color = cat.color;
+          sel.appendChild(opt);
+        });
+        if (current) sel.value = current;
+      });
+    }
+
+    function findCategoryIdByPresetName(presetName) {
+      if (!presetName) return '';
+      const match = categoriesCache.find(c => c.is_preset && c.name.toLowerCase() === presetName.toLowerCase());
+      return match ? match.id : '';
+    }
+
+    function suggestCategoryFromTitle(title) {
+      if (!title) return '';
+      const text = title.toLowerCase();
+      const KEYWORDS = {
+        Work: ['meeting','standup','stand-up','scrum','sprint','retro','review','1:1','sync','workshop','presentation','demo','conference','call','interview','deadline','report','project','client','office','shift','training','seminar','webinar','brainstorm','kickoff','planning','release','deploy','spotkanie','zebranie','narada','prezentacja','konferencja','rozmowa','termin','raport','projekt','klient','biuro','szkolenie','seminarium','planowanie','wdrożenie','wdrozenie','deadline'],
+        Health: ['doctor','dentist','therapy','therapist','gym','workout','exercise','run','running','yoga','pilates','checkup','check-up','physio','vaccination','vaccine','blood test','surgery','hospital','clinic','medication','meditation','swim','swimming','cycling','hike','hiking','walk','fitness','lekarz','dentysta','stomatolog','terapia','siłownia','silownia','trening','ćwiczenia','cwiczenia','bieganie','joga','badanie','wizyta','fizjoterapia','szczepienie','krew','operacja','szpital','klinika','medytacja','pływanie','plywanie','rower','spacer','basen','rehabilitacja'],
+        Social: ['dinner','lunch','brunch','breakfast','coffee','party','birthday','wedding','anniversary','date','drinks','beer','wine','bar','pub','gathering','reunion','hangout','bbq','barbecue','picnic','game night','movie night','concert','show','festival','visit','guests','friends','celebration','obiad','kolacja','śniadanie','sniadanie','kawa','impreza','urodziny','ślub','slub','rocznica','randka','piwo','wino','grill','piknik','koncert','festiwal','odwiedziny','goście','goscie','znajomi','przyjaciele','imieniny','wigilia'],
+        Errands: ['shopping','groceries','store','market','pharmacy','bank','post office','laundry','cleaning','repair','mechanic','car wash','pickup','pick up','drop off','deliver','delivery','return','exchange','pay','payment','bill','insurance','passport','visa','plumber','electrician','move','moving','zakupy','sklep','apteka','poczta','pranie','sprzątanie','sprzatanie','naprawa','mechanik','myjnia','odbiór','odbior','dostarczenie','dostawa','zwrot','wymiana','płatność','platnosc','rachunek','ubezpieczenie','paszport','hydraulik','elektryk','przeprowadzka'],
+        Personal: ['hobby','read','reading','study','studying','course','class','lesson','practice','rehearsal','music','guitar','piano','painting','drawing','writing','journal','diary','self-care','haircut','spa','massage','nails','beauty','relax','vacation','holiday','travel','trip','flight','plan','rest','czytanie','nauka','kurs','lekcja','zajęcia','zajecia','próba','proba','muzyka','gitara','pianino','malowanie','rysowanie','pisanie','fryzjer','masaż','masaz','urlop','wakacje','podróż','podroz','wycieczka','lot','odpoczynek','drzemka']
+      };
+      let best = '', bestCount = 0;
+      for (const [cat, kws] of Object.entries(KEYWORDS)) {
+        let count = 0;
+        for (const kw of kws) {
+          const re = new RegExp('\\b' + kw.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i');
+          if (re.test(text)) count++;
+        }
+        if (count > bestCount) { bestCount = count; best = cat; }
+      }
+      return bestCount > 0 ? findCategoryIdByPresetName(best) : '';
+    }
+
+    // ── Quick Add Modal ────────────────────────────────────────────────────
+    (function () {
+      const qaModal       = document.getElementById('quick-add-modal');
+      if (!qaModal) return; // guard: modal not in DOM
+      const qaTextEntry   = document.getElementById('qa-text-entry');
+      const qaReview      = document.getElementById('qa-review-phase');
+      const qaAmbiguity   = document.getElementById('qa-ambiguity-phase');
+      const qaLoading     = document.getElementById('qa-loading');
+      const qaTextInput   = document.getElementById('qa-text-input');
+      const qaParseBtn    = document.getElementById('qa-parse-btn');
+      const qaManualBtn   = document.getElementById('qa-manual-btn');
+      const qaOcrBtn      = document.getElementById('qa-ocr-btn');
+      const qaOcrInput    = document.getElementById('qa-ocr-input');
+      const qaSaveBtn     = document.getElementById('qa-save-btn');
+      const qaSaveAnotherBtn = document.getElementById('qa-save-another-btn');
+      const qaErrorInline = document.getElementById('qa-error-inline');
+      const qaSaveError   = document.getElementById('qa-save-error');
+      const qaSrStatus    = document.getElementById('qa-sr-status');
+      const qaLiveRegion  = document.getElementById('qa-live-region');
+
+      let _saveInFlight = false;
+      let _ocrInFlight = false;
+      let qaParseFailures = 0;
+      let _ambiguityPending = false;
+      let _ambiguousParseData = null;
+      let _ambiguousOriginalText = '';
+
+      function openModal() {
+        resetModal();
+        qaModal.classList.remove('hidden');
+        qaModal.classList.add('flex');
+        qaTextInput.focus();
+      }
+
+      function closeModal() {
+        if (_saveInFlight) return;
+        qaModal.classList.add('hidden');
+        qaModal.classList.remove('flex');
+        resetModal();
+      }
+
+      // Expose globally so other pages can open it
+      window.qaOpenModal = openModal;
+
+      function resetModal() {
+        showPhase('text-entry');
+        qaTextInput.value = '';
+        qaParseFailures = 0;
+        _ambiguityPending = false;
+        _ambiguousParseData = null;
+        _ambiguousOriginalText = '';
+        _ocrInFlight = false;
+        hideError();
+        hideSaveError();
+        clearReviewFields();
+        document.getElementById('qa-review-note').classList.add('hidden');
+      }
+
+      function showPhase(phase) {
+        qaTextEntry.classList.toggle('hidden', phase !== 'text-entry');
+        qaLoading.classList.toggle('hidden', phase !== 'loading');
+        qaLoading.setAttribute('aria-hidden', phase !== 'loading' ? 'true' : 'false');
+        qaAmbiguity.classList.toggle('hidden', phase !== 'ambiguity');
+        qaReview.classList.toggle('hidden', phase !== 'review');
+        document.getElementById('qa-fallback-phase').classList.toggle('hidden', phase !== 'fallback');
+      }
+
+      function showError(message, examples) {
+        qaErrorInline.classList.remove('hidden');
+        document.getElementById('qa-error-summary').textContent = message;
+        const examplesEl  = document.getElementById('qa-error-examples');
+        const exListEl    = document.getElementById('qa-examples-list');
+        if (examplesEl && exListEl) {
+          if (examples && examples.length > 0) {
+            examplesEl.classList.remove('hidden');
+            exListEl.textContent = examples.slice(0, 2).join(' · ');
+          } else {
+            examplesEl.classList.add('hidden');
+          }
+        }
+        qaSrStatus.textContent = message;
+      }
+
+      function showQAError(errorType, details = '') {
+        const errorMessages = {
+          'past_date': { what: I18N.errPastWhat, why: I18N.errPastWhy, fix: I18N.errPastFix },
+          'no_anchor': { what: I18N.errNoAnchorWhat, why: I18N.errNoAnchorWhy, fix: I18N.errNoAnchorFix },
+          'conflicting_date': { what: I18N.errConflictingWhat, why: I18N.errConflictingWhy, fix: I18N.errConflictingFix },
+          'no_title': { what: I18N.errNoTitleWhat, why: I18N.errNoTitleWhy, fix: I18N.errNoTitleFix },
+          'network_error': { what: I18N.errNetworkWhat, why: I18N.errNetworkWhy, fix: I18N.errNetworkFix },
+          'parse_failed': { what: I18N.errParseWhat, why: I18N.errParseWhy, fix: I18N.errParseFix }
+        };
+        const msg = errorMessages[errorType] || {
+          what: details || I18N.errParseWhat,
+          why: I18N.errUnknownWhy,
+          fix: I18N.errUnknownFix
+        };
+        const errorSummary = document.getElementById('qa-error-summary');
+        const errorWhy = document.getElementById('qa-error-why');
+        errorSummary.textContent = msg.what;
+        errorWhy.innerHTML = `<strong>${I18N.errWhyLabel}</strong> ${msg.why}<br/><strong>${I18N.errFixLabel}</strong> ${msg.fix}`;
+        qaErrorInline.classList.remove('hidden');
+        qaLiveRegion.setAttribute('role', 'alert');
+        qaLiveRegion.textContent = `Error: ${msg.what}. ${msg.fix}`;
+      }
+
+      function hideError() {
+        qaErrorInline.classList.add('hidden');
+        qaSrStatus.textContent = '';
+      }
+
+      function showSaveError(message) {
+        qaSaveError.textContent = message;
+        qaSaveError.classList.remove('hidden');
+      }
+
+      function hideSaveError() {
+        qaSaveError.classList.add('hidden');
+        qaSaveError.textContent = '';
+      }
+
+      function clearReviewFields() {
+        ['qa-parsed-title', 'qa-parsed-start', 'qa-parsed-end',
+         'qa-parsed-count', 'qa-parsed-until'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) {
+            el.value = '';
+            el.classList.remove('border-yellow-500', 'bg-yellow-50');
+            el.removeAttribute('aria-describedby');
+          }
+        });
+        const rep = document.getElementById('qa-parsed-repeat');
+        if (rep) rep.value = '';
+        const vis = document.getElementById('qa-parsed-visibility');
+        if (vis) vis.value = 'shared';
+        const cat = document.getElementById('qa-parsed-category');
+        if (cat) cat.value = '';
+        resetQaReminders();
+      }
+
+      function toDatetimeLocal(isoString) {
+        if (!isoString) return '';
+        return formatDatetimeLocal(new Date(isoString));
+      }
+
+      function populateReview(originalText, parsed) {
+        document.getElementById('qa-review-original-text').textContent = originalText;
+        const titleField = document.getElementById('qa-parsed-title');
+        const startField = document.getElementById('qa-parsed-start');
+        titleField.value  = parsed.title || '';
+        startField.value  = toDatetimeLocal(parsed.start_at);
+        document.getElementById('qa-parsed-end').value = toDatetimeLocal(parsed.end_at);
+        if (parsed.confidence_title < 0.9) {
+          titleField.classList.add('border-yellow-500', 'bg-yellow-50');
+          titleField.setAttribute('aria-describedby', 'qa-check-title-label');
+        } else {
+          titleField.classList.remove('border-yellow-500', 'bg-yellow-50');
+          titleField.removeAttribute('aria-describedby');
+        }
+        if (parsed.confidence_date < 0.9) {
+          startField.classList.add('border-yellow-500', 'bg-yellow-50');
+          startField.setAttribute('aria-describedby', 'qa-check-date-label');
+        } else {
+          startField.classList.remove('border-yellow-500', 'bg-yellow-50');
+          startField.removeAttribute('aria-describedby');
+        }
+        const noteEl = document.getElementById('qa-review-note');
+        if (parsed.note) {
+          noteEl.textContent = parsed.note;
+          noteEl.classList.remove('hidden');
+        } else {
+          noteEl.classList.add('hidden');
+        }
+        const catSel = document.getElementById('qa-parsed-category');
+        if (catSel) {
+          const catId = parsed.suggested_category
+            ? findCategoryIdByPresetName(parsed.suggested_category)
+            : suggestCategoryFromTitle(parsed.title);
+          catSel.value = catId || '';
+        }
+        if (parsed.recurrence && parsed.recurrence.freq) {
+          document.getElementById('qa-parsed-repeat').value = parsed.recurrence.freq;
+          if (parsed.recurrence.count) {
+            document.getElementById('qa-parsed-count').value = parsed.recurrence.count;
+          }
+          if (parsed.recurrence.until) {
+            document.getElementById('qa-parsed-until').value = parsed.recurrence.until.split('T')[0];
+          }
+        }
+        const confidenceNote = [];
+        if (parsed.confidence_date < 0.9) confidenceNote.push('Date is uncertain, please check.');
+        if (parsed.confidence_title < 0.9) confidenceNote.push('Title may need correction.');
+        const announcement = `Parsed: ${parsed.title || 'no title'} on ${new Date(parsed.start_at).toLocaleDateString()}. ${confidenceNote.join(' ')}`;
+        qaLiveRegion.setAttribute('role', 'status');
+        qaLiveRegion.textContent = announcement;
+      }
+
+      function selectAmbiguousYear(year) {
+        _ambiguityPending = false;
+        const parsed = { ..._ambiguousParseData };
+        if (parsed.start_at) {
+          const d = new Date(parsed.start_at);
+          d.setFullYear(year);
+          parsed.start_at = d.toISOString();
+        }
+        if (parsed.end_at) {
+          const d = new Date(parsed.end_at);
+          d.setFullYear(year);
+          parsed.end_at = d.toISOString();
+        }
+        populateReview(_ambiguousOriginalText, parsed);
+        showPhase('review');
+        document.getElementById('qa-parsed-title').focus();
+        qaSrStatus.textContent = `Year ${year} selected. Review your event details.`;
+      }
+
+      function buildQARRule() {
+        const freq  = document.getElementById('qa-parsed-repeat').value;
+        const count = document.getElementById('qa-parsed-count').value;
+        const until = document.getElementById('qa-parsed-until').value;
+        if (!freq) return null;
+        const parts = [`FREQ=${freq}`];
+        if (count) parts.push(`COUNT=${parseInt(count, 10)}`);
+        if (until) parts.push(`UNTIL=${until.replaceAll('-', '')}T235959Z`);
+        return parts.join(';');
+      }
+
+      // ── QA Reminders state ─────────────────────────────────────────────
+      let qaReminders = [30, 2880];
+      const QA_MAX_REMINDERS = 5;
+      const qaRemindersToggle = document.getElementById('qa-reminders-toggle');
+      const qaRemindersToggleLabel = document.getElementById('qa-reminders-toggle-label');
+      const qaRemindersContainer = document.getElementById('qa-reminders-container');
+      const qaReminderChips = document.getElementById('qa-reminder-chips');
+      const qaReminderAddRow = document.getElementById('qa-reminder-add-row');
+      const qaReminderMinutesInput = document.getElementById('qa-reminder-minutes-input');
+      const qaReminderMethodSelect = document.getElementById('qa-reminder-method-select');
+      const qaReminderConfirmBtn = document.getElementById('qa-reminder-confirm-btn');
+      const qaReminderAddBtn = document.getElementById('qa-reminder-add-btn');
+      const qaReminderCounter = document.getElementById('qa-reminder-counter');
+
+      function renderQaReminderChips() {
+        qaReminderChips.innerHTML = '';
+        qaReminders.forEach((minutes, index) => {
+          const chip = document.createElement('span');
+          chip.className = 'inline-flex items-center gap-1 rounded-full bg-indigo-500/25 border border-indigo-400/30 px-2.5 py-1 text-xs text-white/90';
+          chip.innerHTML = `${formatReminderMinutes(minutes)} <button type="button" data-idx="${index}" class="ml-0.5 text-white/50 hover:text-white" aria-label="${I18N.reminderRemoveLabel}">&times;</button>`;
+          chip.querySelector('button').addEventListener('click', () => {
+            qaReminders.splice(index, 1);
+            renderQaReminderChips();
+            updateQaReminderAddState();
+          });
+          qaReminderChips.appendChild(chip);
+        });
+      }
+
+      function updateQaReminderAddState() {
+        const atMax = qaReminders.length >= QA_MAX_REMINDERS;
+        qaReminderAddBtn.disabled = atMax;
+        qaReminderAddBtn.classList.toggle('opacity-40', atMax);
+        qaReminderAddBtn.classList.toggle('cursor-not-allowed', atMax);
+        qaReminderCounter.classList.toggle('hidden', !atMax);
+      }
+
+      function setQaRemindersEnabled(enabled) {
+        qaRemindersContainer.classList.toggle('hidden', !enabled);
+        qaRemindersToggleLabel.textContent = enabled ? I18N.reminderToggleOn : I18N.reminderToggleOff;
+      }
+
+      function resetQaReminders() {
+        qaReminders = [30, 2880];
+        qaRemindersToggle.checked = true;
+        setQaRemindersEnabled(true);
+        renderQaReminderChips();
+        updateQaReminderAddState();
+        qaReminderAddRow.classList.add('hidden');
+        qaReminderAddRow.classList.remove('flex');
+      }
+
+      qaRemindersToggle.addEventListener('change', () => {
+        setQaRemindersEnabled(qaRemindersToggle.checked);
+      });
+
+      qaReminderAddBtn.addEventListener('click', () => {
+        if (qaReminders.length >= QA_MAX_REMINDERS) return;
+        qaReminderAddRow.classList.remove('hidden');
+        qaReminderAddRow.classList.add('flex');
+        qaReminderMinutesInput.value = '';
+        qaReminderMethodSelect.value = 'popup';
+        qaReminderMinutesInput.focus();
+      });
+
+      qaReminderConfirmBtn.addEventListener('click', () => {
+        const val = parseInt(qaReminderMinutesInput.value, 10);
+        if (isNaN(val) || val < 0 || val > 40320) return;
+        qaReminders.push(val);
+        qaReminderAddRow.classList.add('hidden');
+        qaReminderAddRow.classList.remove('flex');
+        renderQaReminderChips();
+        updateQaReminderAddState();
+      });
+
+      renderQaReminderChips();
+      updateQaReminderAddState();
+
+      function buildPayload() {
+        const startVal = document.getElementById('qa-parsed-start').value;
+        const endVal   = document.getElementById('qa-parsed-end').value;
+        return {
+          title:      document.getElementById('qa-parsed-title').value.trim(),
+          start_at:   startVal ? new Date(startVal).toISOString() : null,
+          end_at:     endVal   ? new Date(endVal).toISOString()   : null,
+          timezone:   Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
+          rrule:      buildQARRule(),
+          visibility: document.getElementById('qa-parsed-visibility').value,
+          category_id: document.getElementById('qa-parsed-category')?.value || null,
+          reminder_minutes_list: qaRemindersToggle.checked ? qaReminders : []
+        };
+      }
+
+      function showToast(message) {
+        const toast = document.getElementById('global-toast');
+        if (!toast) return;
+        toast.textContent = message;
+        toast.classList.remove('hidden');
+        toast.classList.add('toast-success', 'rounded-xl', 'px-4', 'py-3', 'text-sm', 'font-medium');
+        setTimeout(() => { toast.classList.add('hidden'); toast.textContent = ''; }, 3000);
+      }
+
+      // ── Parse ────────────────────────────────────────────────────────────
+      qaParseBtn.addEventListener('click', async () => {
+        const text = qaTextInput.value.trim();
+        if (!text) { showQAError('no_title'); return; }
+        hideError();
+        showPhase('loading');
+        try {
+          const ctxDate = window.getContextDate ? window.getContextDate() : new Date();
+          const contextDate = ctxDate.toISOString().split('T')[0];
+          const res = await fetch('/api/events/parse', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text, context_date: contextDate })
+          });
+          if (!res.ok) {
+            qaParseFailures++;
+            const data = await res.json().catch(() => ({}));
+            showPhase('text-entry');
+            showQAError('parse_failed', data.detail || {{ t('qa.parse_text_failed')|tojson }});
+            if (qaParseFailures >= 2) showQAFallbackOption();
+            return;
+          }
+          const parsed = await res.json();
+          if (parsed.errors && parsed.errors.length > 0) {
+            qaParseFailures++;
+            showPhase('text-entry');
+            const errorMsg = parsed.errors[0];
+            let errorType = 'parse_failed';
+            if (errorMsg.includes('past')) errorType = 'past_date';
+            else if (errorMsg.includes('date') || errorMsg.includes('anchor')) errorType = 'no_anchor';
+            else if (errorMsg.includes('conflicting')) errorType = 'conflicting_date';
+            else if (errorMsg.includes('title') || errorMsg.includes('event')) errorType = 'no_title';
+            showQAError(errorType, errorMsg);
+            if (qaParseFailures >= 2) showQAFallbackOption();
+            return;
+          }
+          qaParseFailures = 0;
+          if (parsed.ambiguous && parsed.year_candidates && parsed.year_candidates.length > 1) {
+            _ambiguityPending = true;
+            _ambiguousParseData = parsed;
+            _ambiguousOriginalText = text;
+            document.getElementById('qa-ambiguity-event-summary').textContent = parsed.title || text;
+            const container = document.getElementById('qa-year-choice-container');
+            container.innerHTML = '';
+            parsed.year_candidates.forEach(year => {
+              const btn = document.createElement('button');
+              btn.type = 'button';
+              btn.className = 'flex-1 glass-btn-secondary rounded-xl px-4 py-2 text-sm font-medium';
+              btn.dataset.year = year;
+              btn.textContent = String(year);
+              btn.setAttribute('aria-label', `Use year ${year}`);
+              btn.addEventListener('click', () => selectAmbiguousYear(year));
+              container.appendChild(btn);
+            });
+            showPhase('ambiguity');
+            qaLiveRegion.textContent = `Which year did you mean? Choose ${parsed.year_candidates.join(' or ')}.`;
+          } else {
+            populateReview(text, parsed);
+            showPhase('review');
+            document.getElementById('qa-parsed-title').focus();
+            qaSrStatus.textContent = 'Parsed. Review your event details.';
+          }
+        } catch (err) {
+          qaParseFailures++;
+          showPhase('text-entry');
+          showQAError('network_error');
+        }
+      });
+
+      // ── Fallback ─────────────────────────────────────────────────────────
+      function showQAFallbackOption() {
+        const existingBtn = document.getElementById('qa-fallback-try-btn');
+        if (existingBtn) return;
+        const fallbackBtn = document.createElement('button');
+        fallbackBtn.id = 'qa-fallback-try-btn';
+        fallbackBtn.type = 'button';
+        fallbackBtn.className = 'glass-btn-secondary w-full rounded-xl px-4 py-2 text-sm font-medium mt-2';
+        fallbackBtn.textContent = {{ t('qa.try_manual')|tojson }};
+        fallbackBtn.addEventListener('click', showQAFallback);
+        qaErrorInline.appendChild(fallbackBtn);
+      }
+
+      function showQAFallback() {
+        showPhase('fallback');
+        const originalText = qaTextInput.value || '';
+        document.getElementById('qa-fallback-original-text').textContent = originalText;
+        const titleGuess = originalText.split(' ').slice(0, 3).join(' ');
+        document.getElementById('qa-fallback-title').value = titleGuess;
+        const now = new Date();
+        const end = new Date(now.getTime() + 3600000);
+        document.getElementById('qa-fallback-start').value = formatDatetimeLocal(now);
+        document.getElementById('qa-fallback-end').value = formatDatetimeLocal(end);
+        document.getElementById('qa-fallback-title').focus();
+        qaLiveRegion.textContent = {{ t('qa.manual_announce')|tojson }};
+      }
+
+      async function parseFromImage(file) {
+        if (!file) return;
+        hideError();
+        showPhase('loading');
+        _ocrInFlight = true;
+        try {
+          const ctxDate = window.getContextDate ? window.getContextDate() : new Date();
+          const contextDate = ctxDate.toISOString().split('T')[0];
+          const formData = new FormData();
+          formData.append('image', file);
+          formData.append('context_date', contextDate);
+          const res = await fetch('/api/events/ocr-parse', { method: 'POST', body: formData });
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            showPhase('text-entry');
+            showQAError('parse_failed', err.detail || {{ t('qa.parse_image_failed')|tojson }});
+            return;
+          }
+          const parsed = await res.json();
+          if (parsed.errors && parsed.errors.length > 0) {
+            showPhase('fallback');
+            document.getElementById('qa-fallback-original-text').textContent = parsed.raw_text || {{ t('qa.no_text_extracted')|tojson }};
+            document.getElementById('qa-fallback-title').value = parsed.title || '';
+            showQAError('parse_failed', parsed.errors[0]);
+            qaLiveRegion.textContent = 'OCR parsing needs review. Manual form is shown with extracted text.';
+            return;
+          }
+          qaTextInput.value = parsed.raw_text || qaTextInput.value;
+          populateReview(parsed.raw_text || 'Image extraction', {
+            title: parsed.title, start_at: parsed.start_at, end_at: parsed.end_at,
+            confidence_title: parsed.confidence_title, confidence_date: parsed.confidence_date,
+            recurrence: null, note: `OCR confidence: ${(parsed.confidence_raw * 100).toFixed(0)}%`,
+          });
+          showPhase('review');
+          qaSrStatus.textContent = 'Image parsed. Review extracted fields before saving.';
+        } catch (_) {
+          showPhase('text-entry');
+          showQAError('network_error');
+        } finally {
+          _ocrInFlight = false;
+          qaOcrInput.value = '';
+        }
+      }
+
+      // Fallback form save
+      document.getElementById('qa-fallback-save-btn').addEventListener('click', async () => {
+        const title = document.getElementById('qa-fallback-title').value.trim();
+        const startStr = document.getElementById('qa-fallback-start').value;
+        const endStr = document.getElementById('qa-fallback-end').value;
+        const description = document.getElementById('qa-fallback-description').value.trim();
+        const repeat = document.getElementById('qa-fallback-repeat').value;
+        const count = document.getElementById('qa-fallback-count').value;
+        const until = document.getElementById('qa-fallback-until').value;
+        if (!title) { alert({{ t('qa.event_name_required')|tojson }}); return; }
+        if (!startStr) { alert({{ t('qa.start_required')|tojson }}); return; }
+        if (!endStr) { alert({{ t('qa.end_required')|tojson }}); return; }
+        _saveInFlight = true;
+        document.getElementById('qa-fallback-save-btn').disabled = true;
+        document.getElementById('qa-fallback-cancel-btn').disabled = true;
+        try {
+          let rrule = null;
+          if (repeat) {
+            const parts = [`FREQ=${repeat}`];
+            if (count) parts.push(`COUNT=${parseInt(count, 10)}`);
+            if (until) parts.push(`UNTIL=${until.replaceAll('-', '')}T235959Z`);
+            rrule = parts.join(';');
+          }
+          const payload = {
+            title, description: description || undefined,
+            start_at: new Date(startStr).toISOString(),
+            end_at: new Date(endStr).toISOString(),
+            timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC',
+            rrule: rrule
+          };
+          const res = await fetch('/api/events', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            alert(err.detail || I18N.failedSaveEvent);
+            return;
+          }
+          showToast(I18N.eventSaved);
+          closeModal();
+          if (window.refreshPanels) await window.refreshPanels();
+        } catch (error) {
+          alert('Network error: ' + error.message);
+        } finally {
+          _saveInFlight = false;
+          document.getElementById('qa-fallback-save-btn').disabled = false;
+          document.getElementById('qa-fallback-cancel-btn').disabled = false;
+        }
+      });
+
+      document.getElementById('qa-fallback-cancel-btn').addEventListener('click', () => {
+        showPhase('text-entry');
+        qaTextInput.focus();
+      });
+
+      // ── Save ─────────────────────────────────────────────────────────────
+      async function saveEvent(keepOpen) {
+        if (_ambiguityPending) {
+          showSaveError({{ t('qa.choose_year')|tojson }});
+          showPhase('ambiguity');
+          return;
+        }
+        hideSaveError();
+        const payload = buildPayload();
+        if (!payload.title) {
+          showSaveError({{ t('qa.title_required')|tojson }});
+          document.getElementById('qa-parsed-title').focus();
+          return;
+        }
+        if (!payload.start_at) {
+          showSaveError({{ t('qa.start_required')|tojson }});
+          document.getElementById('qa-parsed-start').focus();
+          return;
+        }
+        _saveInFlight = true;
+        qaSaveBtn.disabled = true;
+        qaSaveAnotherBtn.disabled = true;
+        try {
+          const res = await fetch('/api/events', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            showSaveError(err.detail || {{ t('qa.save_failed_check')|tojson }});
+            return;
+          }
+          showToast(I18N.eventSaved);
+          if (keepOpen) {
+            resetModal();
+            qaTextInput.focus();
+          } else {
+            closeModal();
+            if (window.refreshPanels) await window.refreshPanels();
+          }
+        } catch (_) {
+          showSaveError({{ t('qa.network_not_saved')|tojson }});
+        } finally {
+          _saveInFlight = false;
+          qaSaveBtn.disabled = false;
+          qaSaveAnotherBtn.disabled = false;
+        }
+      }
+
+      qaSaveBtn.addEventListener('click', () => saveEvent(false));
+      qaSaveAnotherBtn.addEventListener('click', () => saveEvent(true));
+      qaOcrBtn.addEventListener('click', () => qaOcrInput.click());
+      qaOcrInput.addEventListener('change', () => {
+        const file = qaOcrInput.files && qaOcrInput.files[0] ? qaOcrInput.files[0] : null;
+        if (file) parseFromImage(file);
+      });
+
+      // ── Navigation buttons ───────────────────────────────────────────────
+      document.getElementById('qa-open-btn')?.addEventListener('click', openModal);
+      document.getElementById('qa-global-btn')?.addEventListener('click', openModal);
+      document.getElementById('qa-fab')?.addEventListener('click', openModal);
+      document.getElementById('qa-header-close-btn').addEventListener('click', closeModal);
+      document.getElementById('qa-close-btn-text').addEventListener('click', closeModal);
+      qaManualBtn.addEventListener('click', () => {
+        if (window.openManualFromQuickAdd) {
+          window.openManualFromQuickAdd();
+        } else {
+          window.location.href = '/calendar?open=event-entry';
+        }
+      });
+
+      document.getElementById('qa-back-btn').addEventListener('click', () => {
+        showPhase('text-entry');
+        qaTextInput.focus();
+      });
+
+      document.getElementById('qa-ambiguity-back-btn').addEventListener('click', () => {
+        _ambiguityPending = false;
+        _ambiguousParseData = null;
+        _ambiguousOriginalText = '';
+        showPhase('text-entry');
+        qaTextInput.focus();
+      });
+
+      document.getElementById('qa-edit-text-btn').addEventListener('click', () => {
+        showPhase('text-entry');
+        qaTextInput.focus();
+      });
+
+      // Escape closes
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          const eventEntryModal = document.getElementById('event-entry-modal');
+          const eventEntryVisible = eventEntryModal && !eventEntryModal.classList.contains('hidden');
+          const quickAddVisible = !qaModal.classList.contains('hidden');
+          if (eventEntryVisible) return; // calendar handles its own modal
+          if (quickAddVisible && !_saveInFlight) closeModal();
+        }
+      });
+
+      // ── Focus Trap (WCAG 2.1 AA) ────────────────────────────────────────
+      const qaFocusableSelector = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+      function getVisibleFocusableElements() {
+        const all = Array.from(qaModal.querySelectorAll(qaFocusableSelector));
+        return all.filter(el => {
+          const rect = el.getBoundingClientRect();
+          const style = window.getComputedStyle(el);
+          const parentHidden = el.closest('[style*="display: none"]') || el.closest('.hidden');
+          const selfHidden = style.display === 'none' || style.visibility === 'hidden' || el.hasAttribute('aria-hidden');
+          return (rect.width > 0 || rect.height > 0) && !selfHidden && !parentHidden;
+        });
+      }
+      document.addEventListener('keydown', (e) => {
+        if (qaModal.classList.contains('hidden') || _saveInFlight) return;
+        if (e.key === 'Tab') {
+          const focusableElements = getVisibleFocusableElements();
+          if (focusableElements.length === 0) return;
+          const activeEl = document.activeElement;
+          const activeIndex = focusableElements.indexOf(activeEl);
+          if (e.shiftKey) {
+            if (activeIndex <= 0) { focusableElements[focusableElements.length - 1].focus(); e.preventDefault(); }
+          } else {
+            if (activeIndex >= focusableElements.length - 1) { focusableElements[0].focus(); e.preventDefault(); }
+          }
+        }
+      });
+
+      // Click outside closes
+      qaModal.addEventListener('click', (e) => {
+        if (e.target === qaModal && !_saveInFlight) closeModal();
+      });
+    }());
+
+    loadCategories();
+    </script>
 
     <script>
       // ── Language switcher (keyboard-accessible) ────────────
@@ -116,6 +971,17 @@
           if (e.key === 'ArrowDown' && idx < items.length - 1) { items[idx + 1].focus(); e.preventDefault(); }
           if (e.key === 'ArrowUp' && idx > 0) { items[idx - 1].focus(); e.preventDefault(); }
           if (e.key === 'Escape') { menu.classList.add('hidden'); btn.focus(); btn.setAttribute('aria-expanded', 'false'); }
+        });
+      })();
+
+      // Notification bell click-outside
+      (function() {
+        document.addEventListener('click', function(e) {
+          const bellContainer = document.getElementById('notification-bell-container');
+          if (bellContainer && !bellContainer.contains(e.target)) {
+            const panel = document.getElementById('notification-panel');
+            if (panel) panel.classList.add('hidden');
+          }
         });
       })();
 
@@ -163,6 +1029,48 @@
       });
 
       initTheme();
+    </script>
+    <script>
+    (function() {
+      var deferredPrompt;
+      window.addEventListener('beforeinstallprompt', function(e) {
+        e.preventDefault();
+        deferredPrompt = e;
+        if (localStorage.getItem('synco-pwa-dismissed')) return;
+        var banner = document.createElement('div');
+        banner.id = 'pwa-install-banner';
+        banner.innerHTML = '<span>Install Synco for quick access</span> <button id="pwa-install-btn" style="background:#6366f1;color:white;border:none;padding:6px 16px;border-radius:8px;cursor:pointer;font-size:13px;margin-left:8px;">Install</button> <button id="pwa-dismiss-btn" style="background:none;border:none;color:#94a3b8;cursor:pointer;font-size:18px;margin-left:4px;">&times;</button>';
+        banner.style.cssText = 'position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#1e293b;color:white;padding:12px 20px;border-radius:12px;z-index:9998;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,0.3);display:flex;align-items:center;gap:4px;';
+        document.body.appendChild(banner);
+        document.getElementById('pwa-install-btn').onclick = function() {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then(function() { banner.remove(); });
+        };
+        document.getElementById('pwa-dismiss-btn').onclick = function() {
+          banner.remove();
+          localStorage.setItem('synco-pwa-dismissed', '1');
+        };
+      });
+    })();
+    </script>
+    <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('/sw.js')
+        .then(function(reg) {
+          reg.addEventListener('updatefound', function() {
+            var newWorker = reg.installing;
+            newWorker.addEventListener('statechange', function() {
+              if (newWorker.state === 'activated' && navigator.serviceWorker.controller) {
+                var toast = document.createElement('div');
+                toast.innerHTML = 'New version available. <button onclick="location.reload()" style="color:#fef08a;text-decoration:underline;background:none;border:none;cursor:pointer;font-size:inherit;">Refresh</button>';
+                toast.style.cssText = 'position:fixed;bottom:60px;left:50%;transform:translateX(-50%);background:#4f46e5;color:white;padding:12px 20px;border-radius:12px;z-index:9999;font-size:14px;box-shadow:0 4px 12px rgba(0,0,0,0.3);';
+                document.body.appendChild(toast);
+                setTimeout(function() { toast.remove(); }, 10000);
+              }
+            });
+          });
+        });
+    }
     </script>
 </body>
 </html>

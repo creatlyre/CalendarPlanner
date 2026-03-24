@@ -1,87 +1,64 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.0
-milestone_name: Dashboard, Notifications & Categories
-status: roadmap-created
-stopped_at: Roadmap created — ready for Phase 23 planning
-last_updated: "2026-03-22T23:00:00.000Z"
-last_activity: 2026-03-22
+milestone: v4.0
+milestone_name: Monetization Foundation
+status: complete
+stopped_at: Milestone audit complete
+last_updated: "2026-03-23"
+last_activity: 2026-03-23
 progress:
-  total_phases: 5
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_phases: 6
+  completed_phases: 6
+  total_plans: 13
+  completed_plans: 13
 ---
 
 # Session State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-22)
+See: .planning/PROJECT.md (updated 2026-03-23)
 
 **Core value:** A shared calendar both partners can edit that stays in sync with Google Calendar.
-**Current focus:** v3.0 — Dashboard, Notifications & Categories
+**Current focus:** v4.0 Monetization Foundation — SHIPPED
 
 ## Position
 
-**Milestone:** v3.0 Dashboard, Notifications & Categories
-**Current phase:** Phase 23 — Event Categories & Colors
-**Status:** Roadmap created — ready for phase planning
-Last activity: 2026-03-22 — v3.0 roadmap created (5 phases, 27 requirements)
+**Milestone:** v4.0 Monetization Foundation
+**Status:** COMPLETE — all 6 phases, 13 plans, 21 requirements fulfilled
+Last activity: 2026-03-23
 
-[░░░░░░░░░░░░░░░░░░░░] 0/5 phases
-
-## Performance Metrics
-
-**Velocity:**
-
-- Total plans completed: 0 (v2.1)
-- Average duration: -
-- Total execution time: -
-
-**By Phase:**
-
-| Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
-| - | - | - | - |
+[████████████████████] 6/6 phases — 13 plans completed
 
 ## Accumulated Context
 
-| Phase 18 P01 | 3min | 2 tasks | 3 files |
-| Phase 18 P02 | 3min | 2 tasks | 2 files |
-| Phase 19 P01 | 3min | 2 tasks | 6 files |
+Previous milestone archived. See `.planning/milestones/v3.0-ROADMAP.md` for full history.
 
 ### Decisions
 
-- Research confirms zero new packages, zero database migrations needed for v2.1
-- Event privacy backend ~90% done — phase is validation + UI + sync cleanup
-- Reminder backend 100% done — phase is form UI only
-- Multi-year budget API already year-parameterized — main work is data integrity + YoY endpoint
-- [Phase 18]: Lock emoji chosen as sole privacy indicator, no background color change
-- [Phase 19]: Default reminders 30min + 2 days; method select visual-only; max 5 client-side
+(Archived to PROJECT.md Key Decisions table)
 
 ### Pending Todos
 
-None yet.
-
-### Roadmap Evolution
-
-- Phase 22 added: Historical Year Import — backward-looking import of past-year income hours/rates, one-time expenses, and monthly expenses
-
-### Blockers/Concerns
-
-- Carry-forward balance computation strategy needs validation during Phase 20 planning
+- Define detailed phase plans for phases 28-33
+- Start execution with `/gsd-plan-phase 28`
+- Add filtered one-time expenses to main dashboard (2026-03-24)
 
 ## Session Continuity
 
-Last session: 2026-03-21T20:13:36.444Z
-Stopped at: Phase 22 UI-SPEC approved
-Resume file: .planning/phases/22-historical-year-import/22-UI-SPEC.md
+Last session: 2026-03-23
+Stopped at: Phase 33 complete
+Next action: v4.0 milestone shipped — ready for v5.0 planning or launch execution
 
 ## Session Log
 
-- 2026-03-20: Started v2.1 milestone — Privacy, Reminders & Multi-Year Budget
-- 2026-03-20: Gathered milestone goals — event visibility, reminder UI, multi-year budget browsing, year comparison
-- 2026-03-20: Research completed — HIGH confidence, zero new dependencies
-- 2026-03-20: Requirements defined — 11 requirements (PRIV×4, REM×3, BUD×4)
-- 2026-03-22: Roadmap created — 5 phases (23-27), 27/27 requirements mapped, 100% coverage
+- 2026-03-23: v3.0 milestone archived — 5 phases, 11 plans, 331 tests, 60 commits
+- 2026-03-23: Started v4.0 milestone — Monetization Foundation
+- 2026-03-23: Scope selected — Option 3 (SaaS primary + self-hosted purchase option)
+- 2026-03-23: Roadmap created — phases 28-33 (licensing, billing, SaaS ops, self-hosted, mobile path, launch)
+- 2026-03-23: Phase 28 executed — licensing, commercial terms, NOTICE
+- 2026-03-23: Phase 29 executed — Stripe billing, entitlements, billing settings UI (2 plans, 4 tasks)
+- 2026-03-23: Phase 30 executed — Dockerfile, Railway, security headers, CORS, rate limiting, logging, Sentry, health checks (2 plans, 4 tasks)
+- 2026-03-23: Phase 31 executed — License key system, Docker Compose, setup guide, upgrade docs
+- 2026-03-23: Phase 32 executed — PWA manifest, service worker, offline shell, TWA config
+- 2026-03-23: Phase 33 executed — Pricing page, landing page, legal pages, Docker CI/CD, LAUNCH.md (3 plans, 6 tasks, 446 tests passing)

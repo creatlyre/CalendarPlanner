@@ -1,0 +1,112 @@
+{
+  "_meta": {
+    "description": "Shopping item to store section keyword mapping. Case-insensitive substring matching against normalized (diacritics-stripped) item names. First match wins. Section names must match preset section names in repository._PRESET_SECTIONS."
+  },
+
+  "Warzywa i Owoce": [
+    "banan", "jabłk", "jabłko", "ziemniak", "kartof", "pomidor", "ogórek", "ogorek",
+    "cebul", "czosn", "marchew", "marchewk", "pietruszk", "seler", "por ",
+    "kalafior", "brokuł", "brokul", "kapust", "sałat", "salat", "rukol",
+    "szpinak", "papryk", "burak", "dyni", "cukin", "bakłażan", "baklażan",
+    "rzodkiew", "grzyb", "pieczark", "malin", "truskawk", "jagod", "borówk",
+    "borowk", "winogronn", "gruszk", "śliwk", "sliwk", "pomara", "cytry",
+    "grejpfrut", "mandarynk", "ananas", "mango", "awokado", "kiwi", "arbuz",
+    "melon", "nektarynk", "brzoskwin", "morela", "wiśni", "wisni", "czereśni",
+    "czeresni", "agrest", "porzeczk", "rabarbar", "natka", "szczypior",
+    "koper", "bazylia", "mięta", "mieta", "tymianek", "rozmaryn", "oregano",
+    "lubczyk", "kolendra", "imbir", "kurkuma", "rzodkiewka", "cukinia",
+    "papryka", "fasolka szpar", "groch", "bob ", "ciecierzyc", "soczewic",
+    "bataty", "jarmuż", "jarmuz", "endywia", "pac choi", "bok choy"
+  ],
+
+  "Lada Tradycyjna / Mięso": [
+    "szynk", "kiełbas", "kielbas", "parówk", "parowk", "boczek", "salami",
+    "mięs", "mies", "wołowin", "wolowin", "wieprzow", "drob", "kurczak",
+    "indyk", "pierś kur", "piers kur", "udko", "skrzyd", "mielon", "schabow",
+    "karkówk", "karkowk", "żeberka", "zeberka", "polędwic", "poledwic",
+    "mortadel", "kabanos", "pasztet", "wędlin", "wedlin", "szyneczk",
+    "golonk", "rostbef", "antrykot", "filet z kur", "filet z ind",
+    "pierś z ind", "piers z ind", "gulasz", "kotlet", "zraz",
+    "pałk", "palk", "kaczk", "gęś", "ges", "królicz", "krolicz",
+    "cielęc", "cielec", "jagnięc", "jagniec"
+  ],
+
+  "Ryby": [
+    "dorsz", "łosoś", "losos", "tuńczyk", "tunczyk", "ryb", "śledź", "sledz",
+    "makrela", "pstrąg", "pstrag", "sandacz", "karp", "krewetk", "małż", "malz",
+    "owoce morza", "tilapia", "halibut", "sardynk", "szprot", "flądra",
+    "flądra", "fladra", "sum ", "szczupak", "okoń", "okon", "mintaj",
+    "surimi", "paluszki krab", "paluszki rybne"
+  ],
+
+  "Nabiał i Lodówki": [
+    "mleko", "jogurt", "kefir", "śmieta", "smieta", "masło", "maslo",
+    "margary", "ser ", "serek", "twaróg", "twarog", "twarożek", "twarozek",
+    "jajk", "jaja", "jajec", "mascarpone", "ricotta", "mozzarell", "feta",
+    "camembert", "brie", "gouda", "edamsk", "tylżyc", "tilzyc", "ciasto francusk",
+    "tortill", "hummus", "tofu", "kremówk", "budyń goto", "budyn goto",
+    "deser mlecz", "kisiel goto", "śmietan", "smietan", "maślank", "maslank",
+    "mleko roślin", "mleko roslin", "mleko sojow", "mleko migdał", "mleko kokos",
+    "mleko owsian", "bita śmieta", "bita smieta", "lody"
+  ],
+
+  "Puszki, Sosy, Przetwory": [
+    "puszk", "konserw", "kukurydz", "fasol", "groszek", "ketchup", "musztard",
+    "majone", "sos", "ocet", "oliw", "olej", "koncentrat", "passata",
+    "pelati", "ogórki konserwow", "ogorki konserwow", "ogórki kiszon",
+    "ogorki kiszon", "kapusta kiszon", "buraczk", "dżem", "dzem",
+    "marmolad", "miód", "miod", "powid", "syrop", "makaron", "ryż", "ryz",
+    "kasza", "kuskus", "płatki", "platki", "musli", "granola", "owsiank",
+    "herbat", "kaw", "kakao", "cukierk", "czipsy", "chipsy", "krakery",
+    "paluszki solone", "precle", "sól", "sol", "pieprz", "przypraw",
+    "cynamon", "curry", "papryka mielona", "majeranek", "ziele angielskie",
+    "liść laurow", "lisc laurow", "kminek", "kmin", "lubczyk"
+  ],
+
+  "Pieczenie / Bakalie": [
+    "mąk", "mak", "cukier", "cukier puder", "budyń", "budyn", "proszek do piecz",
+    "drożdż", "drozdz", "żelatyn", "zelatyn", "czekolad", "orzechy", "orzech",
+    "migdał", "migdal", "pistacj", "rodzynk", "bakali", "wanil", "pasta pistacj",
+    "nutell", "krem orzechow", "wiórk kokos", "wiork kokos", "sezam",
+    "słonecznik", "slonecznik", "pestki dyni", "mak niebiesk", "masa krokant",
+    "polewa", "posypka", "lukier", "marcepan", "masa makow", "krakersy graham",
+    "biszkopty", "wafelki", "herbatniki"
+  ],
+
+  "Dział Dziecięcy": [
+    "pampers", "pieluch", "pielucha", "chusteczk", "dziecięc", "dzieciec",
+    "bobovit", "hipp", "gerber", "aptamil", "smoczek", "butelk dziec",
+    "kaszk", "tubk", "deserek", "mleko modyfik", "mleko następ",
+    "mleko nastep", "mleko pocz", "julia", "słoik julia", "słoiczek"
+  ],
+
+  "Napoje": [
+    "sok", "woda", "napój", "napoj", "cola", "pepsi", "fanta", "sprite",
+    "ice tea", "kompot", "nektar", "lemoniada", "oranżada", "oranzada",
+    "woda gaz", "woda niegaz", "woda mineral", "tonic", "schweppes",
+    "red bull", "tiger", "energetyk", "isotonic", "powerade", "gatorade"
+  ],
+
+  "Alkohol": [
+    "piwo", "wino", "wódka", "wodka", "whisky", "gin", "rum", "likier",
+    "szampan", "prosecco", "cydr", "aperol", "vermut", "brandy",
+    "koniak", "absynt", "sake", "tequila", "bourbon", "scotch",
+    "beefeater", "finlandia", "żubrówk", "zubrowk", "soplica",
+    "lech", "tyskie", "żywiec", "zywiec", "perła", "perla"
+  ],
+
+  "Chemia / Higiena": [
+    "papier toalet", "ręcznik papier", "recznik papier", "papier nawilż",
+    "szampon", "mydło", "mydlo", "żel pod prysznic", "zel pod prysznic",
+    "pasta do zęb", "pasta do zeb", "szczoteczk", "dezodorant",
+    "proszek do prani", "płyn do prani", "plyn do prani", "płyn do naczyń",
+    "plyn do naczyn", "zmywak", "gąbk", "gabk", "ściereczk", "sciereczk",
+    "wybielacz", "odświeżacz", "odswiezacz", "worki na śmieci", "worki na smieci",
+    "krem do rąk", "krem do rak", "krem do twar", "balsam", "odżywka",
+    "odzywka", "wacik", "płatki kosmet", "platki kosmet", "chusteczk higien",
+    "golarki", "maszynka do gol", "żyletk", "zyletk", "tampon", "podpask",
+    "płyn micelar", "plyn micelar", "tonik", "serum", "peeling",
+    "foli alumin", "foli spo", "woreczk", "reklamówk", "reklamowk",
+    "serwetki", "zapałki", "zapalki", "świeczk", "swieczk", "baterie"
+  ]
+}

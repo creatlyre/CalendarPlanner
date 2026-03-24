@@ -1,0 +1,39 @@
+{% set nid = n.id if n.id is defined else n['id'] %}
+{% set ntype = n.type if n.type is defined else n['type'] %}
+{% set ntitle = n.entity_title if n.entity_title is defined else n['entity_title'] %}
+{% set nread = n.is_read if n.is_read is defined else n['is_read'] %}
+{% set nactor = n.actor_name if n.actor_name is defined else n['actor_name'] %}
+{% set ncreated = n.created_at if n.created_at is defined else n['created_at'] %}
+<div id="notif-{{ nid }}" class="px-4 py-3 flex items-start gap-3 hover:bg-white/5 transition-colors {{ '' if nread else 'bg-indigo-500/5' }}">
+    {% if not nread %}
+    <span class="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-indigo-500"></span>
+    {% else %}
+    <span class="mt-1.5 h-2 w-2 flex-shrink-0"></span>
+    {% endif %}
+
+    <div class="flex-1 min-w-0">
+        <p class="text-sm {{ 'font-semibold text-white/90' if not nread else 'text-white/50' }} truncate">
+            {{ t('notification.' + ntype, name=nactor, title=ntitle) }}
+        </p>
+        <p class="text-xs text-white/40 mt-0.5">
+            {{ ncreated|default('', true) }}
+        </p>
+    </div>
+
+    <div class="flex items-center gap-1 flex-shrink-0">
+        {% if not nread %}
+        <button class="text-xs text-indigo-400 hover:text-indigo-300 p-1" title="Mark as read"
+                hx-post="/notifications/{{ nid }}/read-html"
+                hx-target="#notif-{{ nid }}"
+                hx-swap="outerHTML">
+            ✓
+        </button>
+        {% endif %}
+        <button class="text-xs text-white/30 hover:text-red-400 p-1" title="{{ t('notification.dismiss') }}"
+                hx-post="/notifications/{{ nid }}/dismiss-html"
+                hx-target="#notif-{{ nid }}"
+                hx-swap="outerHTML">
+            ✕
+        </button>
+    </div>
+</div>

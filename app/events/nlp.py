@@ -26,6 +26,7 @@ class ParseResult:
     raw_text: str = ""
     ambiguous: bool = False          # True when year is uncertain (month/day without year)
     year_candidates: list[int] = field(default_factory=list)
+    suggested_category: Optional[str] = None  # Preset category name suggestion
 
 
 class NLPService:
@@ -69,6 +70,18 @@ class NLPService:
             r"\bpo\s+po[\u0142l]udniu\b": (14, 0),
             r"\bwiecz[o\u00f3]r(em)?\b": (18, 0),
             r"\bw\s+nocy\b": (20, 0),
+        },
+    }
+
+    # Pre-compiled regex patterns for time keywords to avoid redundant compilation
+    COMPILED_TIME_DEFAULTS = {
+        "en": {re.compile(k): v for k, v in TIME_DEFAULTS["en"].items()},
+        "pl": {
+            re.compile(k): v
+            for k, v in {
+                **TIME_DEFAULTS["en"],
+                **TIME_DEFAULTS["pl"],
+            }.items()
         },
     }
 
@@ -203,6 +216,7 @@ class NLPService:
                 else:
                     result.errors.append("No date found in input")
                 result.confidence_date = 0.0
+                result.suggested_category = self._suggest_category(text, locale)
                 return result
 
         result.start_at = parsed_dates["start_at"]
@@ -224,6 +238,9 @@ class NLPService:
                 except ValueError as e:
                     result.errors.append(f"Invalid recurrence: {str(e)}")
                     result.recurrence = None
+
+        # Suggest category based on title keywords
+        result.suggested_category = self._suggest_category(text, locale)
 
         return result
 
@@ -573,9 +590,11 @@ class NLPService:
         if locale == "pl" and re.search(r"\bo\s+\d{1,2}\b", text.lower()):
             return True
         text_lower = text.lower()
-        merged_time = {**self.TIME_DEFAULTS.get("en", {}), **self.TIME_DEFAULTS.get(locale, {})}
-        for pattern in merged_time:
-            if re.search(pattern, text_lower):
+        compiled_patterns = self.COMPILED_TIME_DEFAULTS.get(
+            locale, self.COMPILED_TIME_DEFAULTS["en"]
+        )
+        for pattern in compiled_patterns:
+            if pattern.search(text_lower):
                 return True
         return False
 
@@ -616,12 +635,139 @@ class NLPService:
 
         # Semantic time keywords (locale-keyed, merged with English fallback)
         text_lower = text.lower()
-        merged_time = {**self.TIME_DEFAULTS.get("en", {}), **self.TIME_DEFAULTS.get(locale, {})}
-        for pattern, (keyword_hour, keyword_minute) in merged_time.items():
-            if re.search(pattern, text_lower):
+        compiled_patterns = self.COMPILED_TIME_DEFAULTS.get(
+            locale, self.COMPILED_TIME_DEFAULTS["en"]
+        )
+        for pattern, (keyword_hour, keyword_minute) in compiled_patterns.items():
+            if pattern.search(text_lower):
                 return keyword_hour, keyword_minute
 
         return hour, minute
+
+    # ── Category suggestion ──────────────────────────────────────────────
+
+    # Keywords mapped to preset category names (matched against lowered text)
+    CATEGORY_KEYWORDS: dict[str, dict[str, list[str]]] = {
+        "Work": {
+            "en": [
+                "meeting", "standup", "stand-up", "scrum", "sprint", "retro",
+                "retrospective", "review", "1:1", "one-on-one", "sync",
+                "workshop", "presentation", "demo", "conference", "call",
+                "interview", "deadline", "report", "project", "client",
+                "office", "shift", "on-call", "oncall", "training",
+                "seminar", "webinar", "brainstorm", "kickoff", "kick-off",
+                "planning", "release", "deploy", "deployment", "code review",
+            ],
+            "pl": [
+                "spotkanie", "zebranie", "narada", "standup", "scrum",
+                "sprint", "retro", "retrospektywa", "prezentacja", "demo",
+                "konferencja", "rozmowa", "termin", "raport", "projekt",
+                "klient", "biuro", "zmiana", "szkolenie", "seminarium",
+                "webinar", "burza mózgów", "planowanie", "wdrożenie",
+                "wdrozenie", "przegląd kodu", "przeglad kodu",
+                "deadline", "call", "review",
+            ],
+        },
+        "Health": {
+            "en": [
+                "doctor", "dentist", "therapy", "therapist", "gym",
+                "workout", "exercise", "run", "running", "yoga", "pilates",
+                "checkup", "check-up", "appointment", "physio",
+                "physiotherapy", "vaccination", "vaccine", "blood test",
+                "surgery", "hospital", "clinic", "medication", "med",
+                "meditation", "swim", "swimming", "cycling", "hike",
+                "hiking", "walk", "fitness",
+            ],
+            "pl": [
+                "lekarz", "dentysta", "stomatolog", "terapia", "terapeuta",
+                "siłownia", "silownia", "trening", "ćwiczenia", "cwiczenia",
+                "bieganie", "joga", "pilates", "badanie", "wizyta",
+                "fizjoterapia", "szczepienie", "szczepionka", "krew",
+                "operacja", "szpital", "klinika", "lek", "medytacja",
+                "pływanie", "plywanie", "rower", "spacer", "fitness",
+                "basen", "rehabilitacja",
+            ],
+        },
+        "Social": {
+            "en": [
+                "dinner", "lunch", "brunch", "breakfast", "coffee",
+                "party", "birthday", "wedding", "anniversary", "date",
+                "drinks", "beer", "wine", "bar", "pub", "club",
+                "gathering", "reunion", "hangout", "hang out", "bbq",
+                "barbecue", "picnic", "game night", "movie night",
+                "concert", "show", "festival", "visit", "guests",
+                "friends", "family dinner", "celebration",
+            ],
+            "pl": [
+                "obiad", "kolacja", "śniadanie", "sniadanie", "brunch",
+                "kawa", "impreza", "urodziny", "ślub", "slub",
+                "rocznica", "randka", "piwo", "wino", "bar", "pub",
+                "spotkanie towarzyskie", "zjazd", "grill", "piknik",
+                "wieczór filmowy", "wieczor filmowy", "koncert",
+                "występ", "wystep", "festiwal", "odwiedziny", "goście",
+                "goscie", "znajomi", "przyjaciele", "imieniny",
+                "wigilia", "celebracja",
+            ],
+        },
+        "Errands": {
+            "en": [
+                "shopping", "groceries", "store", "market", "pharmacy",
+                "bank", "post office", "laundry", "cleaning", "repair",
+                "mechanic", "car wash", "oil change", "appointment",
+                "pickup", "pick up", "drop off", "dropoff", "deliver",
+                "delivery", "return", "exchange", "pay", "payment",
+                "bill", "insurance", "dmv", "passport", "visa",
+                "plumber", "electrician", "move", "moving",
+            ],
+            "pl": [
+                "zakupy", "sklep", "market", "apteka", "bank",
+                "poczta", "pranie", "sprzątanie", "sprzatanie",
+                "naprawa", "mechanik", "myjnia", "wymiana oleju",
+                "odbiór", "odbior", "dostarczenie", "dostawa",
+                "zwrot", "wymiana", "płatność", "platnosc", "rachunek",
+                "ubezpieczenie", "paszport", "wiza",
+                "hydraulik", "elektryk", "przeprowadzka",
+            ],
+        },
+        "Personal": {
+            "en": [
+                "hobby", "read", "reading", "study", "studying",
+                "course", "class", "lesson", "practice", "rehearsal",
+                "music", "guitar", "piano", "painting", "drawing",
+                "writing", "journal", "diary", "self-care", "haircut",
+                "spa", "massage", "nails", "beauty", "relax",
+                "vacation", "holiday", "travel", "trip", "flight",
+                "plan", "rest", "sleep", "nap",
+            ],
+            "pl": [
+                "hobby", "czytanie", "nauka", "kurs", "lekcja",
+                "zajęcia", "zajecia", "ćwiczenie", "próba", "proba",
+                "muzyka", "gitara", "pianino", "malowanie", "rysowanie",
+                "pisanie", "dziennik", "pamiętnik", "pamietnik",
+                "fryzjer", "spa", "masaż", "masaz", "paznokcie",
+                "urlop", "wakacje", "podróż", "podroz", "wycieczka",
+                "lot", "odpoczynek", "sen", "drzemka",
+            ],
+        },
+    }
+
+    def _suggest_category(self, text: str, locale: str = "en") -> Optional[str]:
+        """Suggest a preset category name based on keyword matching."""
+        text_lower = text.lower()
+        best_cat: Optional[str] = None
+        best_count = 0
+
+        for cat_name, locale_keywords in self.CATEGORY_KEYWORDS.items():
+            keywords = locale_keywords.get(locale, []) + locale_keywords.get("en", [])
+            count = 0
+            for kw in keywords:
+                if re.search(r"\b" + re.escape(kw) + r"\b", text_lower):
+                    count += 1
+            if count > best_count:
+                best_count = count
+                best_cat = cat_name
+
+        return best_cat if best_count > 0 else None
 
     def _parse_recurrence(self, text: str, locale: str = "en") -> Optional[dict]:
         """Parse recurrence patterns like 'every Friday' or 'daily for 10 times'."""

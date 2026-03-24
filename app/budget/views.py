@@ -3,6 +3,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 from app.auth.dependencies import get_current_user
+from app.billing.dependencies import get_user_plan_for_template
 from app.budget.repository import BudgetSettingsRepository
 from app.budget.service import BudgetSettingsService
 from app.database.database import get_db
@@ -30,6 +31,7 @@ async def budget_settings_page(
             "request": request,
             "user": user,
             "settings": settings,
+            "user_plan": get_user_plan_for_template(user, db),
         },
     )
     response = templates.TemplateResponse(request=request, name="budget_settings.html", context=context)

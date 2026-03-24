@@ -1,0 +1,377 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('shopping.page_title') }} - {{ t('app.name') }}{% endblock %}
+
+{% block page_heading %}{{ t('shopping.page_title') }}{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <!-- Toast -->
+  <div id="toast" class="hidden rounded-xl px-4 py-3 mb-4 text-sm font-medium toast-success" role="status" aria-live="polite"></div>
+
+  <!-- Loading skeleton -->
+  <div id="skeleton-loader">
+    <div class="glass rounded-2xl p-6 mb-4">
+      <div class="skeleton-shimmer h-8 w-48 rounded mb-4 mx-auto"></div>
+      <div class="space-y-2">
+        {% for i in range(4) %}
+        <div class="skeleton-shimmer h-6 rounded"></div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Main content (hidden until loaded) -->
+  <div id="shopping-content" class="hidden stagger-children">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-xl font-bold" style="font-family: var(--font-display);">
+        <svg class="inline-block w-5 h-5 -mt-0.5 mr-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+        {{ t('shopping.page_title') }}
+      </h2>
+      <div class="flex gap-2">
+        <button id="multi-add-btn" class="glass-btn-info rounded-lg px-3 py-2 text-xs min-h-[44px]">📋 {{ t('shopping.multi_add') }}</button>
+        <button id="clear-all-btn" class="glass-btn-danger rounded-lg px-3 py-2 text-xs min-h-[44px] hidden">🗑 {{ t('shopping.clear_all') }}</button>
+      </div>
+    </div>
+
+    <!-- Add item form -->
+    <div class="glass rounded-xl p-4 mb-4">
+      <div class="flex gap-2 items-center">
+        <input type="text" id="item-input" placeholder="{{ t('shopping.add_item') }}" class="glass-input flex-1 rounded-lg px-3 py-2 text-sm" autocomplete="off">
+        <button id="add-item-btn" class="glass-btn-primary rounded-lg px-4 py-2 text-sm min-h-[44px]">{{ t('shopping.add_btn') }}</button>
+      </div>
+    </div>
+
+    <!-- Shopping list sections -->
+    <div id="shopping-sections"></div>
+
+    <!-- Uncategorized items -->
+    <div id="uncategorized-section" class="hidden">
+      <div class="glass rounded-xl p-4 mb-4 border border-amber-500/30">
+        <h3 class="text-sm font-semibold mb-3 flex items-center gap-2">
+          <span>❓</span>
+          <span>{{ t('shopping.uncategorized') }}</span>
+          <span class="text-xs opacity-50 font-normal">{{ t('shopping.uncategorized_hint') }}</span>
+        </h3>
+        <div id="uncategorized-items"></div>
+      </div>
+    </div>
+
+    <!-- Empty state -->
+    <div id="empty-state" class="hidden">
+      <div class="glass rounded-xl p-8">
+        <div class="empty-state">
+          <div class="empty-state-icon">🛒</div>
+          <p class="empty-state-title">{{ t('shopping.empty') }}</p>
+          <p class="empty-state-text">{{ t('shopping.add_item') }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Multi-add modal -->
+<div id="multi-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center px-3 py-3 modal-backdrop is-visible" role="dialog" aria-modal="true" aria-labelledby="multi-modal-title">
+  <div class="glass-elevated rounded-2xl p-6 w-full max-w-lg mx-4 modal-panel">
+    <h3 id="multi-modal-title" class="text-sm font-semibold mb-3">📋 {{ t('shopping.multi_add') }}</h3>
+    <textarea id="multi-textarea" rows="6" class="glass-input w-full rounded-lg px-3 py-2 text-sm mb-3" placeholder="{{ t('shopping.multi_placeholder') }}"></textarea>
+    <div class="flex gap-2 justify-end">
+      <button id="multi-cancel-btn" class="glass-btn-secondary rounded-lg px-4 py-2 text-sm min-h-[44px]">{{ t('shopping.cancel') }}</button>
+      <button id="multi-submit-btn" class="glass-btn-primary rounded-lg px-4 py-2 text-sm min-h-[44px]">{{ t('shopping.multi_submit') }}</button>
+    </div>
+  </div>
+</div>
+
+<!-- Section picker modal (for uncategorized items) -->
+<div id="section-picker-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center px-3 py-3 modal-backdrop is-visible" role="dialog" aria-modal="true" aria-labelledby="section-picker-title">
+  <div class="glass-elevated rounded-2xl p-6 w-full max-w-sm mx-4 modal-panel">
+    <h3 id="section-picker-title" class="text-sm font-semibold mb-3">{{ t('shopping.pick_section') }}</h3>
+    <p id="section-picker-item-name" class="text-xs opacity-70 mb-3"></p>
+    <div id="section-picker-list" class="space-y-1 max-h-64 overflow-y-auto"></div>
+    <div class="flex gap-2 justify-end mt-4">
+      <button id="section-picker-cancel" class="glass-btn-secondary rounded-lg px-4 py-2 text-sm min-h-[44px]">{{ t('shopping.cancel') }}</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function() {
+  const I18N = {
+    item_added: {{ t('shopping.item_added')|tojson }},
+    items_added: {{ t('shopping.items_added')|tojson }},
+    item_deleted: {{ t('shopping.item_deleted')|tojson }},
+    item_updated: {{ t('shopping.item_updated')|tojson }},
+    section_learned: {{ t('shopping.section_learned')|tojson }},
+    clear_confirm: {{ t('shopping.clear_confirm')|tojson }},
+    edit: {{ t('shopping.edit')|tojson }},
+    delete: {{ t('shopping.delete')|tojson }},
+    save: {{ t('shopping.save')|tojson }},
+    cancel: {{ t('shopping.cancel')|tojson }},
+    pick_section: {{ t('shopping.pick_section')|tojson }},
+  };
+
+  let data = null; // { sections: [...], uncategorized: [...] }
+
+  // ── API helpers ────────────────────────────────────────────
+  async function api(url, opts = {}) {
+    const res = await fetch(url, {
+      headers: { 'Content-Type': 'application/json', ...opts.headers },
+      ...opts,
+    });
+    if (!res.ok) throw new Error(`API ${res.status}`);
+    return res.json();
+  }
+
+  function toast(msg, type = 'success') {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.className = `rounded-xl px-4 py-3 mb-4 text-sm font-medium toast-${type}`;
+    el.classList.remove('hidden');
+    setTimeout(() => el.classList.add('hidden'), 2500);
+  }
+
+  // ── Load & render ──────────────────────────────────────────
+  async function loadItems() {
+    const res = await api('/api/shopping/items');
+    data = res.data;
+    render();
+  }
+
+  function render() {
+    const sectionsEl = document.getElementById('shopping-sections');
+    const uncatSection = document.getElementById('uncategorized-section');
+    const uncatItems = document.getElementById('uncategorized-items');
+    const emptyState = document.getElementById('empty-state');
+    const clearBtn = document.getElementById('clear-all-btn');
+
+    // Count total items
+    let totalItems = (data.uncategorized || []).length;
+    data.sections.forEach(s => { totalItems += (s.items || []).length; });
+
+    if (totalItems === 0) {
+      sectionsEl.innerHTML = '';
+      uncatSection.classList.add('hidden');
+      emptyState.classList.remove('hidden');
+      clearBtn.classList.add('hidden');
+      return;
+    }
+
+    emptyState.classList.add('hidden');
+    clearBtn.classList.remove('hidden');
+
+    // Render sections with items
+    let html = '';
+    for (const section of data.sections) {
+      if (!section.items || section.items.length === 0) continue;
+      html += `<div class="glass rounded-xl p-4 mb-3">`;
+      html += `<h3 class="text-sm font-semibold mb-2 flex items-center gap-2">`;
+      html += `<span>${esc(section.emoji)}</span>`;
+      html += `<span>${esc(section.name)}</span>`;
+      html += `<span class="text-xs opacity-40 font-normal">(${section.items.length})</span>`;
+      html += `</h3>`;
+      html += `<div class="space-y-1">`;
+      for (const item of section.items) {
+        html += renderItem(item);
+      }
+      html += `</div></div>`;
+    }
+    sectionsEl.innerHTML = html;
+
+    // Render uncategorized
+    if (data.uncategorized && data.uncategorized.length > 0) {
+      uncatSection.classList.remove('hidden');
+      let uhtml = '';
+      for (const item of data.uncategorized) {
+        uhtml += renderUncategorizedItem(item);
+      }
+      uncatItems.innerHTML = uhtml;
+    } else {
+      uncatSection.classList.add('hidden');
+    }
+
+    // Wire up edit/delete/learn buttons
+    wireButtons();
+  }
+
+  function renderItem(item) {
+    return `<div class="flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-white/5 group" data-id="${esc(item.id)}">
+      <span class="flex-1 text-sm" id="item-text-${esc(item.id)}">${esc(item.name)}</span>
+      <button class="edit-btn opacity-0 group-hover:opacity-70 text-xs px-2 py-1 rounded hover:bg-white/10 min-h-[32px]" data-id="${esc(item.id)}" data-name="${esc(item.name)}" title="${I18N.edit}">✏️</button>
+      <button class="delete-btn opacity-0 group-hover:opacity-70 text-xs px-2 py-1 rounded hover:bg-white/10 min-h-[32px]" data-id="${esc(item.id)}" title="${I18N.delete}">🗑</button>
+    </div>`;
+  }
+
+  function renderUncategorizedItem(item) {
+    return `<div class="flex items-center gap-2 py-1.5 px-2 rounded-lg hover:bg-white/5 group" data-id="${esc(item.id)}">
+      <span class="flex-1 text-sm">${esc(item.name)}</span>
+      <button class="learn-btn glass-btn-info rounded-lg px-2 py-1 text-xs min-h-[32px]" data-id="${esc(item.id)}" data-name="${esc(item.name)}">${I18N.pick_section}</button>
+      <button class="edit-btn opacity-0 group-hover:opacity-70 text-xs px-2 py-1 rounded hover:bg-white/10 min-h-[32px]" data-id="${esc(item.id)}" data-name="${esc(item.name)}" title="${I18N.edit}">✏️</button>
+      <button class="delete-btn opacity-0 group-hover:opacity-70 text-xs px-2 py-1 rounded hover:bg-white/10 min-h-[32px]" data-id="${esc(item.id)}" title="${I18N.delete}">🗑</button>
+    </div>`;
+  }
+
+  function wireButtons() {
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+      btn.onclick = async () => {
+        const id = btn.dataset.id;
+        await api(`/api/shopping/items/${encodeURIComponent(id)}`, { method: 'DELETE' });
+        toast(I18N.item_deleted);
+        await loadItems();
+      };
+    });
+
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+      btn.onclick = () => startEdit(btn.dataset.id, btn.dataset.name);
+    });
+
+    document.querySelectorAll('.learn-btn').forEach(btn => {
+      btn.onclick = () => openSectionPicker(btn.dataset.id, btn.dataset.name);
+    });
+  }
+
+  // ── Add item ───────────────────────────────────────────────
+  const itemInput = document.getElementById('item-input');
+  const addBtn = document.getElementById('add-item-btn');
+
+  async function addItem() {
+    const name = itemInput.value.trim();
+    if (!name) return;
+    await api('/api/shopping/items', { method: 'POST', body: JSON.stringify({ name }) });
+    itemInput.value = '';
+    toast(I18N.item_added);
+    await loadItems();
+  }
+
+  addBtn.addEventListener('click', addItem);
+  itemInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { e.preventDefault(); addItem(); }
+  });
+
+  // ── Multi-add ──────────────────────────────────────────────
+  const multiModal = document.getElementById('multi-modal');
+  const multiTextarea = document.getElementById('multi-textarea');
+  document.getElementById('multi-add-btn').addEventListener('click', () => {
+    multiTextarea.value = '';
+    multiModal.classList.remove('hidden');
+    multiTextarea.focus();
+  });
+  document.getElementById('multi-cancel-btn').addEventListener('click', () => {
+    multiModal.classList.add('hidden');
+  });
+  document.getElementById('multi-submit-btn').addEventListener('click', async () => {
+    const text = multiTextarea.value.trim();
+    if (!text) return;
+    const res = await api('/api/shopping/items/multi', { method: 'POST', body: JSON.stringify({ text }) });
+    multiModal.classList.add('hidden');
+    const count = res.data.items.length;
+    toast(I18N.items_added.replace('{count}', count));
+    await loadItems();
+  });
+  multiModal.addEventListener('click', (e) => {
+    if (e.target === multiModal) multiModal.classList.add('hidden');
+  });
+
+  // ── Inline edit ────────────────────────────────────────────
+  function startEdit(id, currentName) {
+    const textEl = document.getElementById(`item-text-${id}`);
+    if (!textEl) return;
+    const parent = textEl.closest('[data-id]');
+    const origHtml = parent.innerHTML;
+    parent.innerHTML = `
+      <input type="text" class="glass-input flex-1 rounded-lg px-2 py-1 text-sm" value="${esc(currentName)}" id="edit-input-${esc(id)}">
+      <button class="save-edit-btn glass-btn-primary rounded-lg px-2 py-1 text-xs min-h-[32px]">${I18N.save}</button>
+      <button class="cancel-edit-btn glass-btn-secondary rounded-lg px-2 py-1 text-xs min-h-[32px]">${I18N.cancel}</button>
+    `;
+    const input = document.getElementById(`edit-input-${id}`);
+    input.focus();
+    input.select();
+
+    parent.querySelector('.save-edit-btn').onclick = async () => {
+      const newName = input.value.trim();
+      if (!newName) return;
+      await api(`/api/shopping/items/${encodeURIComponent(id)}`, { method: 'PUT', body: JSON.stringify({ name: newName }) });
+      toast(I18N.item_updated);
+      await loadItems();
+    };
+    parent.querySelector('.cancel-edit-btn').onclick = () => {
+      parent.innerHTML = origHtml;
+      wireButtons();
+    };
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') parent.querySelector('.save-edit-btn').click();
+      if (e.key === 'Escape') parent.querySelector('.cancel-edit-btn').click();
+    });
+  }
+
+  // ── Section picker ─────────────────────────────────────────
+  const sectionPickerModal = document.getElementById('section-picker-modal');
+  let pickerItemId = null;
+  let pickerItemName = null;
+
+  function openSectionPicker(itemId, itemName) {
+    pickerItemId = itemId;
+    pickerItemName = itemName;
+    document.getElementById('section-picker-item-name').textContent = itemName;
+    const list = document.getElementById('section-picker-list');
+    let html = '';
+    for (const section of data.sections) {
+      html += `<button class="picker-section-btn w-full text-left px-3 py-2.5 rounded-lg hover:bg-white/10 text-sm min-h-[44px] flex items-center gap-2" data-section-id="${esc(section.id)}">
+        <span>${esc(section.emoji)}</span>
+        <span>${esc(section.name)}</span>
+      </button>`;
+    }
+    list.innerHTML = html;
+    sectionPickerModal.classList.remove('hidden');
+
+    list.querySelectorAll('.picker-section-btn').forEach(btn => {
+      btn.onclick = async () => {
+        const sectionId = btn.dataset.sectionId;
+        await api(`/api/shopping/items/${encodeURIComponent(pickerItemId)}/learn`, {
+          method: 'POST',
+          body: JSON.stringify({ item_name: pickerItemName, section_id: sectionId }),
+        });
+        sectionPickerModal.classList.add('hidden');
+        toast(I18N.section_learned);
+        await loadItems();
+      };
+    });
+  }
+
+  document.getElementById('section-picker-cancel').addEventListener('click', () => {
+    sectionPickerModal.classList.add('hidden');
+  });
+  sectionPickerModal.addEventListener('click', (e) => {
+    if (e.target === sectionPickerModal) sectionPickerModal.classList.add('hidden');
+  });
+
+  // ── Clear all ──────────────────────────────────────────────
+  document.getElementById('clear-all-btn').addEventListener('click', async () => {
+    if (!confirm(I18N.clear_confirm)) return;
+    // Delete all items one by one (no bulk delete API)
+    const allItems = [];
+    data.sections.forEach(s => { (s.items || []).forEach(i => allItems.push(i.id)); });
+    (data.uncategorized || []).forEach(i => allItems.push(i.id));
+    for (const id of allItems) {
+      await api(`/api/shopping/items/${encodeURIComponent(id)}`, { method: 'DELETE' });
+    }
+    await loadItems();
+  });
+
+  // ── Escape HTML ────────────────────────────────────────────
+  function esc(s) {
+    if (!s) return '';
+    const div = document.createElement('div');
+    div.textContent = s;
+    return div.innerHTML;
+  }
+
+  // ── Init ───────────────────────────────────────────────────
+  loadItems().then(() => {
+    document.getElementById('skeleton-loader').classList.add('hidden');
+    document.getElementById('shopping-content').classList.remove('hidden');
+    itemInput.focus();
+  });
+})();
+</script>
+{% endblock %}

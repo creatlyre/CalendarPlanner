@@ -2,15 +2,72 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from app.auth.dependencies import get_current_user
 from app.budget.expense_repository import ExpenseRepository
-from app.budget.expense_schemas import BulkExpenseCreate, ExpenseCreate, ExpenseResponse, ExpenseUpdate
+from app.budget.expense_schemas import (
+    BulkExpenseCreate,
+    ExpenseCategoryCreate,
+    ExpenseCategoryResponse,
+    ExpenseCreate,
+    ExpenseResponse,
+    ExpenseUpdate,
+)
 from app.budget.expense_service import ExpenseService
+from app.budget.expense_service import CATEGORY_KEYWORDS
 from app.database.database import get_db
+from app.notifications.repository import NotificationRepository
+from app.notifications.service import NotificationService
+from app.users.repository import UserRepository
 
 router = APIRouter(prefix="/api/budget/expenses", tags=["expenses"])
 
 
 def _service(db) -> ExpenseService:
     return ExpenseService(ExpenseRepository(db))
+
+
+def _notify_svc(db) -> NotificationService:
+    return NotificationService(NotificationRepository(db), UserRepository(db))
+
+
+@router.get("/category-keywords")
+async def get_category_keywords(user=Depends(get_current_user)):
+    """Serve the keyword mapping so the frontend can do client-side auto-detection."""
+    return {"data": CATEGORY_KEYWORDS}
+
+
+@router.get("/categories")
+async def list_expense_categories(user=Depends(get_current_user), db=Depends(get_db)):
+    if not user.calendar_id:
+        raise HTTPException(status_code=400, detail="No calendar linked")
+    service = _service(db)
+    categories = service.list_categories(user.calendar_id)
+    return {"data": [ExpenseCategoryResponse.model_validate(c, from_attributes=True).model_dump() for c in categories]}
+
+
+@router.post("/categories", status_code=201)
+async def create_expense_category(payload: ExpenseCategoryCreate, user=Depends(get_current_user), db=Depends(get_db)):
+    if not user.calendar_id:
+        raise HTTPException(status_code=400, detail="No calendar linked")
+    service = _service(db)
+    category = service.create_category(user.calendar_id, payload.name, payload.color)
+    return {"data": ExpenseCategoryResponse.model_validate(category, from_attributes=True).model_dump()}
+
+
+@router.get("/by-category")
+async def get_expenses_by_category(year: int, user=Depends(get_current_user), db=Depends(get_db)):
+    if not user.calendar_id:
+        raise HTTPException(status_code=400, detail="No calendar linked")
+    service = _service(db)
+    breakdown = service.get_category_breakdown(user.calendar_id, year)
+    return {"data": breakdown}
+
+
+@router.post("/auto-categorize")
+async def auto_categorize_expenses(year: int, user=Depends(get_current_user), db=Depends(get_db)):
+    if not user.calendar_id:
+        raise HTTPException(status_code=400, detail="No calendar linked")
+    service = _service(db)
+    result = service.auto_categorize(user.calendar_id, year)
+    return {"data": result}
 
 
 @router.get("")
@@ -32,6 +89,10 @@ async def create_expense(
         raise HTTPException(status_code=400, detail="No calendar linked")
     service = _service(db)
     expense = service.create_expense(user.calendar_id, payload)
+    try:
+        _notify_svc(db).create_for_partner(user.id, user.calendar_id, "expense_created", "expense", expense.id, expense.name)
+    except Exception:
+        pass
     return {"data": ExpenseResponse.model_validate(expense, from_attributes=True).model_dump()}
 
 
@@ -59,6 +120,10 @@ async def update_expense(
     expense = service.update_expense(expense_id, payload)
     if not expense:
         raise HTTPException(status_code=404, detail="Expense not found")
+    try:
+        _notify_svc(db).create_for_partner(user.id, user.calendar_id, "expense_updated", "expense", expense.id, expense.name)
+    except Exception:
+        pass
     return {"data": ExpenseResponse.model_validate(expense, from_attributes=True).model_dump()}
 
 
@@ -89,4 +154,8 @@ async def delete_expense(
     deleted = service.delete_expense(expense_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Expense not found")
+    try:
+        _notify_svc(db).create_for_partner(user.id, user.calendar_id, "expense_deleted", "expense", None, "")
+    except Exception:
+        pass
     return {"ok": True}

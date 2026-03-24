@@ -1,0 +1,39 @@
+<div class="rounded-lg bg-[#1a1a2e] border border-white/20 shadow-xl max-h-96 overflow-y-auto dropdown-open backdrop-blur-xl">
+    <!-- Header -->
+    <div class="sticky top-0 bg-[#1a1a2e] border-b border-white/10 px-4 py-2.5 flex items-center justify-between">
+        <span class="text-sm font-semibold text-white/90">{{ t('notification.no_notifications') if not notifications else '' }}{% if notifications %}Notifications{% endif %}</span>
+        {% if notifications %}
+        <button class="text-xs text-indigo-400 hover:text-indigo-300"
+                hx-post="/notifications/read-all-html"
+                hx-target="#notification-panel"
+                hx-swap="innerHTML">
+            {{ t('notification.mark_all_read') }}
+        </button>
+        {% endif %}
+    </div>
+
+    <!-- Notification list -->
+    {% if notifications %}
+    <div class="divide-y divide-white/5">
+        {% for n in notifications %}
+        {% include "partials/notification_item.html" %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="px-4 py-8 text-center text-sm text-white/40">
+        {{ t('notification.no_notifications') }}
+    </div>
+    {% endif %}
+
+    <!-- Footer: email toggle -->
+    <div id="email-toggle-container" class="border-t border-white/10 px-4 py-2.5">
+        <label class="flex items-center gap-2 text-xs text-white/60 cursor-pointer">
+            <input type="checkbox" {{ 'checked' if email_enabled else '' }}
+                   hx-put="/notifications/preferences-html"
+                   hx-target="#email-toggle-container"
+                   hx-swap="innerHTML"
+                   class="accent-indigo-500">
+            {{ t('notification.email_toggle_label') }}
+        </label>
+    </div>
+</div>

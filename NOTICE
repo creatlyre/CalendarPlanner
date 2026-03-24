@@ -1,0 +1,23 @@
+Synco — Shared Household Calendar & Budget Planner
+Copyright (C) 2026 Wojciech
+
+This product is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+See LICENSE for the full license text.
+A commercial license is also available. See COMMERCIAL-LICENSE.md for details.
+
+Third-Party Notices
+-------------------
+
+This project includes or depends on the following third-party libraries:
+
+- FastAPI (https://fastapi.tiangolo.com/) — MIT License
+- Uvicorn (https://www.uvicorn.org/) — BSD License
+- Pydantic (https://docs.pydantic.dev/) — MIT License
+- Jinja2 (https://palletsprojects.com/p/jinja/) — BSD License
+- httpx (https://www.python-httpx.org/) — BSD License
+- PyJWT (https://pyjwt.readthedocs.io/) — MIT License
+- cryptography (https://cryptography.io/) — Apache 2.0 / BSD
+- python-dateutil (https://dateutil.readthedocs.io/) — Apache 2.0 / BSD
+- google-api-python-client — Apache 2.0
+- google-auth-oauthlib — Apache 2.0
+- python-dotenv — BSD License

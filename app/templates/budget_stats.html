@@ -49,10 +49,10 @@
     <!-- Loading skeleton -->
     <div id="skeleton-loader">
       <div class="glass rounded-2xl p-6">
-        <div class="animate-pulse bg-white/5 h-8 w-48 rounded mb-4 mx-auto"></div>
+        <div class="skeleton-shimmer h-8 w-48 rounded mb-4 mx-auto"></div>
         <div class="space-y-2">
           {% for i in range(6) %}
-          <div class="animate-pulse bg-white/5 h-8 rounded"></div>
+          <div class="skeleton-shimmer h-8 rounded"></div>
           {% endfor %}
         </div>
       </div>
@@ -99,6 +99,26 @@
       <div class="glass rounded-xl p-4 mb-6">
         <h3 class="text-sm font-semibold mb-4 text-center">{{ t('budget.stats_monthly_chart') }}</h3>
         <div id="monthly-bars" class="space-y-2"></div>
+      </div>
+
+      <!-- Category Spending Breakdown -->
+      <div class="glass rounded-xl p-4 mb-6">
+        <h3 class="text-sm font-semibold mb-4 text-center">{{ t('budget.expense_category_chart_title') }}</h3>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Pie chart (CSS-only donut) -->
+          <div class="flex flex-col items-center">
+            <div id="category-pie" class="relative w-48 h-48 rounded-full mb-4" style="background: conic-gradient(#374151 0deg 360deg);">
+              <div class="absolute inset-0 m-auto w-28 h-28 rounded-full bg-[#0f172a]"></div>
+              <div class="absolute inset-0 flex items-center justify-center">
+                <span id="category-pie-total" class="text-lg font-bold"></span>
+              </div>
+            </div>
+            <div id="category-pie-legend" class="flex flex-wrap justify-center gap-x-4 gap-y-1 text-xs"></div>
+          </div>
+          <!-- Bar chart -->
+          <div id="category-bars" class="space-y-2"></div>
+        </div>
+        <div id="category-empty" class="hidden text-center text-sm opacity-50 py-8">{{ t('budget.expense_category_none') }}</div>
       </div>
 
       <!-- YoY Comparison Card -->
@@ -164,6 +184,30 @@
   let currentYear = new Date().getFullYear();
   let yearBounds = null;
 
+  const catTranslations = {
+    'Groceries': {{ t('budget.expense_category_groceries')|tojson }},
+    'Rent': {{ t('budget.expense_category_rent')|tojson }},
+    'Utilities': {{ t('budget.expense_category_utilities')|tojson }},
+    'Transport': {{ t('budget.expense_category_transport')|tojson }},
+    'Entertainment': {{ t('budget.expense_category_entertainment')|tojson }},
+    'Health': {{ t('budget.expense_category_health')|tojson }},
+    'Education': {{ t('budget.expense_category_education')|tojson }},
+    'Home': {{ t('budget.expense_category_home')|tojson }},
+    'Clothing': {{ t('budget.expense_category_clothing')|tojson }},
+    'Children': {{ t('budget.expense_category_children')|tojson }},
+    'Personal Care': {{ t('budget.expense_category_personal_care')|tojson }},
+    'Pets': {{ t('budget.expense_category_pets')|tojson }},
+    'Events': {{ t('budget.expense_category_events')|tojson }},
+    'Savings & Finance': {{ t('budget.expense_category_savings')|tojson }},
+    'Travel': {{ t('budget.expense_category_travel')|tojson }},
+    'Shopping': {{ t('budget.expense_category_shopping')|tojson }},
+    'Electronics': {{ t('budget.expense_category_electronics')|tojson }},
+    'Garden': {{ t('budget.expense_category_garden')|tojson }},
+    'Loan': {{ t('budget.expense_category_loan')|tojson }},
+    'Other': {{ t('budget.expense_category_other')|tojson }}
+  };
+  function translateCat(name) { return catTranslations[name] || name; }
+
   function fmt(n) {
     const s = Math.abs(n).toFixed(2);
     const parts = s.split('.');
@@ -183,7 +227,7 @@
   }
 
   async function loadSettings() {
-    const res = await fetch('/api/budget/settings');
+    const res = await fetch('/api/budget/settings?year=' + currentYear);
     const json = await res.json();
     return json.data;
   }
@@ -282,6 +326,81 @@
     document.getElementById('worst-month-value').style = colorClass(worst.monthly_balance);
   }
 
+  // ── Category breakdown charts ──────────────────────────────────────
+
+  async function loadCategoryBreakdown() {
+    try {
+      const res = await fetch('/api/budget/expenses/by-category?year=' + currentYear);
+      const json = await res.json();
+      return json.data || [];
+    } catch(e) {
+      return [];
+    }
+  }
+
+  function renderCategoryPie(breakdown) {
+    const pieEl = document.getElementById('category-pie');
+    const totalEl = document.getElementById('category-pie-total');
+    const legendEl = document.getElementById('category-pie-legend');
+    const emptyEl = document.getElementById('category-empty');
+    const barsEl = document.getElementById('category-bars');
+
+    var data = breakdown.filter(function(c) { return c.total_amount > 0; });
+
+    if (data.length === 0) {
+      pieEl.style.background = 'conic-gradient(#374151 0deg 360deg)';
+      totalEl.textContent = '0';
+      legendEl.innerHTML = '';
+      barsEl.innerHTML = '';
+      emptyEl.classList.remove('hidden');
+      return;
+    }
+    emptyEl.classList.add('hidden');
+
+    var total = data.reduce(function(s, c) { return s + c.total_amount; }, 0);
+    totalEl.textContent = fmt(total) + ' ' + currency;
+
+    var currentDeg = 0;
+    var segments = data.map(function(c) {
+      var deg = (c.total_amount / total) * 360;
+      var color = c.color || '#64748b';
+      var seg = color + ' ' + currentDeg.toFixed(1) + 'deg ' + (currentDeg + deg).toFixed(1) + 'deg';
+      currentDeg += deg;
+      return seg;
+    });
+    pieEl.style.background = 'conic-gradient(' + segments.join(', ') + ')';
+
+    var uncatLabel = {{ t('budget.expense_category_uncategorized')|tojson }};
+    legendEl.innerHTML = data.map(function(c) {
+      var pct = ((c.total_amount / total) * 100).toFixed(1);
+      var name = translateCat(c.category_name) || uncatLabel;
+      return '<span class="flex items-center gap-1"><span class="inline-block w-2.5 h-2.5 rounded-full" style="background:' + (c.color || '#64748b') + '"></span>' + name + ' (' + pct + '%)</span>';
+    }).join('');
+  }
+
+  function renderCategoryBars(breakdown) {
+    var container = document.getElementById('category-bars');
+    var data = breakdown.filter(function(c) { return c.total_amount > 0; });
+    if (data.length === 0) { container.innerHTML = ''; return; }
+
+    var maxAmount = Math.max.apply(null, data.map(function(c) { return c.total_amount; }));
+    var uncatLabel = {{ t('budget.expense_category_uncategorized')|tojson }};
+
+    data.sort(function(a, b) { return b.total_amount - a.total_amount; });
+    container.innerHTML = data.map(function(c) {
+      var pct = Math.min((c.total_amount / maxAmount) * 100, 100);
+      var color = c.color || '#64748b';
+      var name = translateCat(c.category_name) || uncatLabel;
+      return '<div class="flex items-center gap-3">' +
+        '<span class="text-xs w-24 text-right opacity-70 flex-shrink-0 truncate">' + name + '</span>' +
+        '<div class="flex-1 h-5 rounded bg-white/5 overflow-hidden relative">' +
+          '<div class="h-full rounded transition-all duration-500" style="width:' + pct + '%;background:' + color + '80"></div>' +
+        '</div>' +
+        '<span class="text-xs w-24 text-right font-medium flex-shrink-0">' + fmt(c.total_amount) + '</span>' +
+      '</div>';
+    }).join('');
+  }
+
   function renderComparison(data) {
     if (!data) {
       document.getElementById('yoy-comparison').classList.add('hidden');
@@ -334,6 +453,9 @@
     updateYearNav();
     const comparison = await loadComparison();
     renderComparison(comparison);
+    const categoryData = await loadCategoryBreakdown();
+    renderCategoryPie(categoryData);
+    renderCategoryBars(categoryData);
   }
 
   async function init() {
@@ -354,6 +476,9 @@
       updateYearNav();
       const comparison = await loadComparison();
       renderComparison(comparison);
+      const categoryData = await loadCategoryBreakdown();
+      renderCategoryPie(categoryData);
+      renderCategoryBars(categoryData);
     } catch(e) {
       console.error('Failed to load stats', e);
       document.getElementById('skeleton-loader').classList.add('hidden');

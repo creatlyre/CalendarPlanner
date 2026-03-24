@@ -91,6 +91,7 @@ class Event:
 class BudgetSettings:
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     calendar_id: str = ""
+    year: int = 0
     rate_1: float = 0.0
     rate_2: float = 0.0
     rate_3: float = 0.0
@@ -127,6 +128,18 @@ class AdditionalEarning:
 
 
 @dataclass
+class ExpenseCategory:
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    calendar_id: str = ""
+    name: str = ""
+    color: str = "#6366f1"
+    is_preset: bool = False
+    sort_order: int = 0
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+@dataclass
 class Expense:
     id: str = field(default_factory=lambda: str(uuid.uuid4()))
     calendar_id: str = ""
@@ -135,6 +148,7 @@ class Expense:
     name: str = ""
     amount: float = 0.0
     recurring: bool = False
+    category_id: str | None = None
     created_at: datetime | None = None
     updated_at: datetime | None = None
 
@@ -147,3 +161,83 @@ class CarryForwardOverride:
     amount: float = 0.0
     created_at: datetime | None = None
     updated_at: datetime | None = None
+
+
+@dataclass
+class Notification:
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str = ""
+    calendar_id: str = ""
+    actor_user_id: str = ""
+    type: str = ""  # event_created, event_updated, event_deleted, expense_created, etc.
+    entity_type: str = ""  # event, expense, income
+    entity_id: str | None = None
+    entity_title: str = ""
+    is_read: bool = False
+    is_dismissed: bool = False
+    created_at: datetime | None = None
+
+
+@dataclass
+class NotificationPreference:
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str = ""
+    email_enabled: bool = False
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+@dataclass
+class ShoppingSection:
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    calendar_id: str = ""
+    name: str = ""
+    emoji: str = ""
+    sort_order: int = 0
+    is_preset: bool = True
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+@dataclass
+class ShoppingItem:
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    calendar_id: str = ""
+    name: str = ""
+    section_id: str | None = None
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+@dataclass
+class ShoppingKeywordOverride:
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    calendar_id: str = ""
+    keyword: str = ""
+    section_id: str = ""
+    created_at: datetime | None = None
+
+
+@dataclass
+class Subscription:
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str = ""
+    stripe_customer_id: str | None = None
+    stripe_subscription_id: str | None = None
+    plan: str = "free"
+    status: str = "active"
+    current_period_end: datetime | None = None
+    cancel_at_period_end: bool = False
+    created_at: datetime | None = None
+    updated_at: datetime | None = None
+
+
+@dataclass
+class BillingEvent:
+    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    user_id: str = ""
+    event_type: str = ""
+    plan: str | None = None
+    stripe_event_id: str | None = None
+    metadata: dict = field(default_factory=dict)
+    created_at: datetime | None = None

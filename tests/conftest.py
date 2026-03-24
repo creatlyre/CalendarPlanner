@@ -8,7 +8,7 @@ import jwt
 import pytest
 from fastapi.testclient import TestClient
 
-from app.auth.dependencies import get_current_user
+from app.auth.dependencies import get_current_user, get_current_user_optional
 from app.database.database import Base, get_db
 from app.database.models import Calendar, User
 from config import Settings
@@ -33,6 +33,14 @@ class InMemoryStore:
             "additional_earnings": [],
             "expenses": [],
             "carry_forward_overrides": [],
+            "shopping_sections": [],
+            "shopping_items": [],
+            "shopping_keyword_overrides": [],
+            "subscriptions": [],
+            "billing_events": [],
+            "expense_categories": [],
+            "notification_preferences": [],
+            "notifications": [],
         }
 
     @staticmethod
@@ -183,6 +191,10 @@ class InMemoryStore:
             table = "additional_earnings"
         elif item.__class__.__name__ == "CarryForwardOverride":
             table = "carry_forward_overrides"
+        elif item.__class__.__name__ == "Subscription":
+            table = "subscriptions"
+        elif item.__class__.__name__ == "BillingEvent":
+            table = "billing_events"
         else:
             raise ValueError(f"Unsupported model for add(): {item.__class__.__name__}")
 
@@ -305,6 +317,7 @@ def authenticated_client(test_db, test_user_a: User):
 
     app.dependency_overrides[get_db] = override_get_db
     app.dependency_overrides[get_current_user] = override_get_current_user
+    app.dependency_overrides[get_current_user_optional] = override_get_current_user
 
     client = TestClient(app)
     settings = Settings()

@@ -1,0 +1,285 @@
+{% extends "base.html" %}
+
+{% block title %}{{ t('dashboard.nav_home') }} - {{ t('app.name') }}{% endblock %}
+{% block page_heading %}{{ t('dashboard.nav_home') }}{% endblock %}
+
+{% block content %}
+<!-- Quick Add Bar (full width, top) -->
+<div class="glass-elevated rounded-2xl p-5 mb-6">
+  <h2 class="text-eyebrow mb-3">{{ t('dashboard.quick_add') }}</h2>
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+    <button type="button" onclick="window.qaOpenModal?.()" class="glass-btn-primary text-center py-3 rounded-xl inline-flex items-center justify-center gap-2 glass-interactive w-full">
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+      {{ t('dashboard.quick_event') }}
+    </button>
+    <a href="/calendar?open=event-entry" class="glass-btn-secondary text-center py-3 rounded-xl inline-flex items-center justify-center gap-2 glass-interactive">
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+      {{ t('dashboard.full_event') }}
+    </a>
+    <a href="/calendar?open=expense" class="glass-btn-info text-center py-3 rounded-xl inline-flex items-center justify-center gap-2 glass-interactive">
+      <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      {{ t('dashboard.add_expense') }}
+    </a>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <!-- Left column: Events -->
+  <div class="space-y-6">
+    <!-- Today's Events Card -->
+    <div class="glass rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-section-title">{{ t('dashboard.today_events') }}</h2>
+        <span class="text-caption opacity-60">{{ now.strftime('%d.%m.%Y') }}</span>
+      </div>
+
+      {% if today_events %}
+        <div class="space-y-3">
+          {% for event in today_events %}
+            <div class="flex items-center gap-3 p-3 rounded-xl glass-subtle hover:bg-white/10 transition-colors">
+              {% if event.category_id and event.category_id in category_map %}
+                <span class="cat-dot" style="background-color: {{ category_map[event.category_id].color }}"></span>
+              {% else %}
+                <span class="cat-dot bg-white/30"></span>
+              {% endif %}
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-medium truncate">{{ event.title }}</p>
+              </div>
+              <span class="text-caption opacity-60 flex-shrink-0 font-mono">{{ event.start_at.strftime('%H:%M') }} – {{ event.end_at.strftime('%H:%M') }}</span>
+            </div>
+          {% endfor %}
+          {% if today_overflow > 0 %}
+            <a href="/calendar" class="block text-center text-sm opacity-60 hover:opacity-100 transition-opacity py-2">
+              +{{ today_overflow }} {{ t('dashboard.more_events') }}
+            </a>
+          {% endif %}
+        </div>
+      {% else %}
+        <div class="empty-state">
+          <div class="empty-state-icon">
+            <svg class="w-7 h-7 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          </div>
+          <p class="empty-state-title">{{ t('dashboard.no_events_today') }}</p>
+          <p class="empty-state-text">{{ t('dashboard.quick_event') }}</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- 7-Day Preview Card -->
+    <div class="glass rounded-2xl p-6">
+      <h2 class="text-section-title mb-4">{{ t('dashboard.week_preview') }}</h2>
+      <div class="space-y-1">
+        {% for day in week_preview %}
+          <div class="rounded-lg hover:bg-white/5 transition-colors p-2">
+            <div class="flex items-center gap-3 mb-1">
+              <span class="text-xs uppercase opacity-60 w-8">{{ day.day_name }}</span>
+              <span class="text-sm font-semibold w-6">{{ day.date.day }}</span>
+              {% if not day.events %}
+                <span class="text-xs opacity-30">{{ t('dashboard.no_events') }}</span>
+              {% endif %}
+            </div>
+            {% if day.events %}
+              <div class="ml-[56px] space-y-1">
+                {% for event in day.events %}
+                  <div class="flex items-center gap-2 text-xs">
+                    {% if event.category_id and event.category_id in category_map %}
+                      <span class="w-2 h-2 rounded-full flex-shrink-0" style="background-color: {{ category_map[event.category_id].color }}"></span>
+                    {% else %}
+                      <span class="w-2 h-2 rounded-full flex-shrink-0 bg-white/30"></span>
+                    {% endif %}
+                    <span class="opacity-50 flex-shrink-0 font-mono">{{ event.start_at.strftime('%H:%M') }}</span>
+                    <span class="truncate">{{ event.title }}</span>
+                  </div>
+                {% endfor %}
+                {% if day.overflow > 0 %}
+                  <span class="text-xs opacity-40 ml-4">+{{ day.overflow }} {{ t('dashboard.more_events') }}</span>
+                {% endif %}
+              </div>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Right column: Budget -->
+  <div class="space-y-6">
+    <!-- Budget Snapshot Card -->
+    <div class="glass-hero rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-section-title">{{ t('dashboard.budget_snapshot') }}</h2>
+        <span class="text-caption opacity-60">{{ t(budget_month_key) }} {{ budget_year }}</span>
+      </div>
+
+      {% if budget_snapshot.has_data %}
+        <!-- Hero balance -->
+        <div class="text-center mb-6">
+          <p class="text-eyebrow mb-1">{{ t('dashboard.monthly_balance') }}</p>
+          <p class="text-stat text-3xl {% if budget_snapshot.monthly_balance >= 0 %}text-emerald-400{% else %}text-red-400{% endif %}">
+            {{ budget_snapshot.monthly_balance | int }} PLN
+          </p>
+        </div>
+
+        <!-- Income vs Expenses -->
+        <div class="grid grid-cols-2 gap-4 mb-6">
+          <div class="p-3 rounded-xl glass-success text-center">
+            <p class="text-eyebrow mb-1">{{ t('dashboard.income') }}</p>
+            <p class="text-stat text-lg text-emerald-400">{{ budget_snapshot.income | int }} PLN</p>
+          </div>
+          <div class="p-3 rounded-xl glass-danger text-center">
+            <p class="text-eyebrow mb-1">{{ t('dashboard.expenses') }}</p>
+            <p class="text-stat text-lg text-red-400">{{ budget_snapshot.expenses | int }} PLN</p>
+          </div>
+        </div>
+
+        <!-- Top categories -->
+        {% if top_categories %}
+          <div class="mb-4">
+            <p class="text-eyebrow mb-2">{{ t('dashboard.top_categories') }}</p>
+            <div class="space-y-2">
+              {% for cat in top_categories %}
+                <div class="flex items-center justify-between text-sm">
+                  <div class="flex items-center gap-2">
+                    {% if cat.color %}
+                      <span class="cat-dot" style="background-color: {{ cat.color }}"></span>
+                    {% else %}
+                      <span class="cat-dot bg-white/30"></span>
+                    {% endif %}
+                    <span>{{ cat_i18n.get(cat.category_name, cat.category_name) or t('dashboard.no_events') }}</span>
+                  </div>
+                  <span class="font-medium">{{ cat.total_amount | int }} PLN</span>
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        {% endif %}
+
+        <!-- One-time expenses for current month -->
+        <div class="mb-4">
+          <div class="flex items-center justify-between mb-2">
+            <p class="text-eyebrow">{{ t('dashboard.onetime_expenses') }}</p>
+            <button type="button" id="dash-add-expense-toggle" class="text-xs text-indigo-400 hover:text-indigo-300 transition-colors">+ {{ t('dashboard.add_expense') }}</button>
+          </div>
+
+          {% if onetime_expenses %}
+            <div class="space-y-2 mb-2" id="dash-onetime-list">
+              {% for exp in onetime_expenses %}
+                <div class="flex items-center justify-between text-sm p-2 rounded-lg glass-subtle">
+                  <div class="flex items-center gap-2 min-w-0">
+                    {% if exp.category_id and exp.category_id in expense_categories and expense_categories[exp.category_id].color %}
+                      <span class="cat-dot" style="background-color: {{ expense_categories[exp.category_id].color }}"></span>
+                    {% else %}
+                      <span class="cat-dot bg-white/30"></span>
+                    {% endif %}
+                    <span class="truncate">{{ exp.name }}</span>
+                  </div>
+                  <span class="font-medium flex-shrink-0 ml-2">{{ exp.amount | int }} PLN</span>
+                </div>
+              {% endfor %}
+            </div>
+            <div class="text-xs opacity-60 text-right">
+              {{ t('dashboard.onetime_total') }}: <span class="font-semibold">{{ onetime_expenses | sum(attribute='amount') | int }} PLN</span>
+            </div>
+          {% else %}
+            <p class="text-xs opacity-40">{{ t('dashboard.no_onetime') }}</p>
+          {% endif %}
+
+          <!-- Inline add expense form (hidden by default) -->
+          <div id="dash-expense-form" class="hidden mt-3 p-3 rounded-xl glass-subtle">
+            <div class="space-y-2">
+              <input type="text" id="dash-exp-name" placeholder="{{ t('budget.expenses_name') }}" class="glass-input w-full rounded-lg px-3 py-2 text-sm">
+              <div class="flex gap-2">
+                <input type="number" id="dash-exp-amount" placeholder="{{ t('budget.expenses_amount') }}" step="0.01" min="0.01" class="glass-input flex-1 rounded-lg px-3 py-2 text-sm">
+                <button type="button" id="dash-exp-submit" class="glass-btn-primary rounded-lg px-4 py-2 text-sm">{{ t('dashboard.add_expense') }}</button>
+              </div>
+              <details class="text-xs opacity-60">
+                <summary class="cursor-pointer hover:opacity-100 transition-opacity">{{ t('dashboard.bulk_paste') }}</summary>
+                <textarea id="dash-exp-bulk" rows="3" placeholder="{{ t('dashboard.bulk_paste_hint') }}" class="glass-input w-full rounded-lg px-3 py-2 text-sm mt-1"></textarea>
+                <button type="button" id="dash-exp-bulk-submit" class="glass-btn-info rounded-lg px-3 py-1.5 text-xs mt-1">{{ t('dashboard.bulk_add') }}</button>
+              </details>
+            </div>
+          </div>
+        </div>
+
+        <a href="/budget/overview" class="block text-center text-sm text-indigo-400 hover:text-indigo-300 transition-colors py-1">
+          {{ t('dashboard.view_overview') }}
+        </a>
+      {% else %}
+        <div class="empty-state">
+          <div class="empty-state-icon">
+            <svg class="w-7 h-7 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
+          <p class="empty-state-title">{{ t('dashboard.setup_budget') }}</p>
+          <a href="/budget/settings" class="glass-btn-primary rounded-xl px-5 py-2.5 text-sm inline-block mt-3">
+            {{ t('dashboard.setup_budget') }}
+          </a>
+        </div>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function() {
+  const now = new Date();
+  const year = now.getUTCFullYear();
+  const month = now.getUTCMonth() + 1;
+
+  // Toggle add expense form
+  const toggle = document.getElementById('dash-add-expense-toggle');
+  const form = document.getElementById('dash-expense-form');
+  if (toggle && form) {
+    toggle.addEventListener('click', () => form.classList.toggle('hidden'));
+  }
+
+  // Single expense add
+  const submitBtn = document.getElementById('dash-exp-submit');
+  if (submitBtn) {
+    submitBtn.addEventListener('click', async () => {
+      const name = document.getElementById('dash-exp-name').value.trim();
+      const amount = parseFloat(document.getElementById('dash-exp-amount').value);
+      if (!name || !amount || amount <= 0) return;
+      try {
+        const resp = await fetch('/api/budget/expenses', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ year, month, name, amount, recurring: false }),
+        });
+        if (resp.ok) location.reload();
+      } catch (e) { /* ignore */ }
+    });
+  }
+
+  // Bulk paste add
+  const bulkBtn = document.getElementById('dash-exp-bulk-submit');
+  if (bulkBtn) {
+    bulkBtn.addEventListener('click', async () => {
+      const raw = document.getElementById('dash-exp-bulk').value.trim();
+      if (!raw) return;
+      const lines = raw.split('\n').filter(l => l.trim());
+      const expenses = [];
+      for (const line of lines) {
+        // Support "Name Amount" or "Name\tAmount" format
+        const match = line.match(/^(.+?)\s+([\d.,]+)\s*$/);
+        if (match) {
+          const amt = parseFloat(match[2].replace(',', '.'));
+          if (amt > 0) {
+            expenses.push({ year, month, name: match[1].trim(), amount: amt, recurring: false });
+          }
+        }
+      }
+      if (!expenses.length) return;
+      try {
+        const resp = await fetch('/api/budget/expenses/bulk', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ expenses }),
+        });
+        if (resp.ok) location.reload();
+      } catch (e) { /* ignore */ }
+    });
+  }
+})();
+</script>
+{% endblock %}

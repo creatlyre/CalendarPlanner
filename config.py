@@ -37,4 +37,29 @@ class Settings(BaseSettings):
     JWT_EXPIRY_HOURS: int = 8
     DB_ENCRYPTION_KEY: str
 
+    SMTP_HOST: str = ""
+    SMTP_PORT: int = 587
+    SMTP_USER: str = ""
+    SMTP_PASSWORD: str = ""
+    SMTP_FROM_ADDRESS: str = ""
+    SMTP_USE_TLS: bool = True
+
+    STRIPE_SECRET_KEY: str = ""
+    STRIPE_WEBHOOK_SECRET: str = ""
+    STRIPE_PUBLISHABLE_KEY: str = ""
+    STRIPE_PRO_PRICE_ID: str = ""
+    STRIPE_PRO_ANNUAL_PRICE_ID: str = ""
+    STRIPE_FAMILY_PLUS_PRICE_ID: str = ""
+    STRIPE_FAMILY_PLUS_ANNUAL_PRICE_ID: str = ""
+    STRIPE_SELF_HOSTED_PRICE_ID: str = ""
+
+    ENVIRONMENT: str = "development"
+    ALLOWED_ORIGINS: str = ""
+    SYNCO_LICENSE_KEY: str = ""
+    SYNCO_LICENSE_SECRET: str = ""
+    LOG_LEVEL: str = "INFO"
+    LOG_FORMAT: str = "text"
+    WEB_CONCURRENCY: int = 3
+    SENTRY_DSN: str = ""
+
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")

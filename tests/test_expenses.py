@@ -302,3 +302,189 @@ class TestExpensePage:
     def test_expense_api_requires_auth(self, test_client):
         res = test_client.get("/api/budget/expenses?year=2026")
         assert res.status_code in (302, 303, 401)
+
+
+class TestExpenseCategories:
+    """XCAT-01, XCAT-02, XCAT-05: Expense category CRUD and breakdown."""
+
+    def test_list_expense_categories_returns_presets(self, authenticated_client):
+        res = authenticated_client.get("/api/budget/expenses/categories")
+        assert res.status_code == 200
+        data = res.json()["data"]
+        assert len(data) == 20
+        names = {c["name"] for c in data}
+        assert "Groceries" in names
+        assert "Rent" in names
+        assert "Other" in names
+        assert "Home" in names
+        assert "Clothing" in names
+        assert "Children" in names
+        # All are presets
+        assert all(c["is_preset"] for c in data)
+
+    def test_create_custom_expense_category(self, authenticated_client):
+        # Trigger preset seeding first
+        authenticated_client.get("/api/budget/expenses/categories")
+        res = authenticated_client.post(
+            "/api/budget/expenses/categories",
+            json={"name": "Subscriptions", "color": "#8b5cf6"},
+        )
+        assert res.status_code == 201
+        data = res.json()["data"]
+        assert data["name"] == "Subscriptions"
+        assert data["color"] == "#8b5cf6"
+        assert data["is_preset"] is False
+
+    def test_create_category_invalid_color(self, authenticated_client):
+        res = authenticated_client.post(
+            "/api/budget/expenses/categories",
+            json={"name": "Bad", "color": "red"},
+        )
+        assert res.status_code == 422
+
+    def test_create_expense_with_category(self, authenticated_client):
+        # Get categories (seeds presets)
+        cats = authenticated_client.get("/api/budget/expenses/categories").json()["data"]
+        cat_id = cats[0]["id"]
+        # Create expense with category
+        res = authenticated_client.post(
+            "/api/budget/expenses",
+            json={"year": 2026, "month": 1, "name": "Weekly groceries", "amount": 250, "category_id": cat_id},
+        )
+        assert res.status_code == 200
+        assert res.json()["data"]["category_id"] == cat_id
+        # Verify in year data
+        year_data = authenticated_client.get("/api/budget/expenses?year=2026").json()["data"]
+        ot = year_data["onetime_expenses"]
+        assert any(e["category_id"] == cat_id for e in ot)
+
+    def test_update_expense_category(self, authenticated_client):
+        cats = authenticated_client.get("/api/budget/expenses/categories").json()["data"]
+        cat_id = cats[0]["id"]
+        create = authenticated_client.post(
+            "/api/budget/expenses",
+            json={"year": 2026, "month": 3, "name": "Test", "amount": 100},
+        )
+        eid = create.json()["data"]["id"]
+        res = authenticated_client.put(
+            f"/api/budget/expenses/{eid}",
+            json={"category_id": cat_id},
+        )
+        assert res.status_code == 200
+        assert res.json()["data"]["category_id"] == cat_id
+
+    def test_expenses_by_category_breakdown(self, authenticated_client):
+        cats = authenticated_client.get("/api/budget/expenses/categories").json()["data"]
+        cat_a = cats[0]["id"]
+        cat_b = cats[1]["id"]
+        # Create expenses with categories
+        authenticated_client.post(
+            "/api/budget/expenses",
+            json={"year": 2026, "month": 1, "name": "Milk", "amount": 50, "category_id": cat_a},
+        )
+        authenticated_client.post(
+            "/api/budget/expenses",
+            json={"year": 2026, "month": 2, "name": "Bread", "amount": 30, "category_id": cat_a},
+        )
+        authenticated_client.post(
+            "/api/budget/expenses",
+            json={"year": 2026, "month": 1, "name": "Monthly rent", "amount": 2000, "category_id": cat_b},
+        )
+        # Uncategorized
+        authenticated_client.post(
+            "/api/budget/expenses",
+            json={"year": 2026, "month": 5, "name": "Random", "amount": 100},
+        )
+        res = authenticated_client.get("/api/budget/expenses/by-category?year=2026")
+        assert res.status_code == 200
+        data = res.json()["data"]
+        # Should have 3 buckets: cat_a, cat_b, uncategorized
+        assert len(data) == 3
+        totals = {b["category_id"]: b["total_amount"] for b in data}
+        assert totals[cat_a] == 80.0
+        assert totals[cat_b] == 2000.0
+        assert totals[None] == 100.0
+
+
+class TestExpenseCategoryAdvanced:
+    """Nyquist validation: auto-categorize, keywords API, normalize, preset completeness."""
+
+    def test_all_20_preset_category_names(self, authenticated_client):
+        """Verify all 20 preset categories are seeded with correct names."""
+        res = authenticated_client.get("/api/budget/expenses/categories")
+        names = {c["name"] for c in res.json()["data"]}
+        expected = {
+            "Groceries", "Rent", "Utilities", "Transport", "Entertainment",
+            "Health", "Education", "Home", "Clothing", "Children",
+            "Personal Care", "Pets", "Events", "Savings & Finance", "Travel",
+            "Shopping", "Electronics", "Garden", "Loan", "Other",
+        }
+        assert names == expected
+
+    def test_category_keywords_endpoint(self, authenticated_client):
+        """GET /category-keywords returns keyword dict with all categories."""
+        res = authenticated_client.get("/api/budget/expenses/category-keywords")
+        assert res.status_code == 200
+        data = res.json()["data"]
+        assert isinstance(data, dict)
+        assert len(data) >= 15
+        assert "Groceries" in data
+        assert "Pets" in data
+        assert isinstance(data["Groceries"], list)
+        assert len(data["Groceries"]) > 5
+
+    def test_expenses_return_category_id_for_frontend_filter(self, authenticated_client):
+        """XCAT-04: Expenses include category_id so frontend can filter."""
+        cats = authenticated_client.get("/api/budget/expenses/categories").json()["data"]
+        cat_id = cats[0]["id"]
+        # Create one with category, one without
+        authenticated_client.post(
+            "/api/budget/expenses",
+            json={"year": 2026, "month": 1, "name": "Categorized", "amount": 50, "category_id": cat_id},
+        )
+        authenticated_client.post(
+            "/api/budget/expenses",
+            json={"year": 2026, "month": 1, "name": "Uncategorized", "amount": 30},
+        )
+        year_data = authenticated_client.get("/api/budget/expenses?year=2026").json()["data"]
+        onetime = year_data["onetime_expenses"]
+        assert len(onetime) == 2
+        has_cat = [e for e in onetime if e["category_id"] == cat_id]
+        no_cat = [e for e in onetime if e["category_id"] is None]
+        assert len(has_cat) == 1
+        assert len(no_cat) == 1
+
+    def test_auto_categorize_assigns_categories(self, authenticated_client):
+        """POST /auto-categorize matches uncategorized expenses to categories by keyword."""
+        # Seed categories
+        authenticated_client.get("/api/budget/expenses/categories")
+        # Create uncategorized expenses with keyword-matching names
+        authenticated_client.post(
+            "/api/budget/expenses",
+            json={"year": 2026, "month": 1, "name": "Lidl zakupy", "amount": 200},
+        )
+        authenticated_client.post(
+            "/api/budget/expenses",
+            json={"year": 2026, "month": 2, "name": "Netflix", "amount": 50},
+        )
+        # Run auto-categorize
+        res = authenticated_client.post("/api/budget/expenses/auto-categorize?year=2026")
+        assert res.status_code == 200
+        result = res.json()["data"]
+        assert result["total"] == 2
+        assert result["updated"] == 2
+        # Verify expenses now have categories
+        year_data = authenticated_client.get("/api/budget/expenses?year=2026").json()["data"]
+        onetime = year_data["onetime_expenses"]
+        assert all(e["category_id"] is not None for e in onetime)
+
+    def test_normalize_strips_polish_diacritics(self):
+        """_normalize handles Polish ł→l and standard diacritic stripping."""
+        from app.budget.expense_service import _normalize
+
+        assert _normalize("Ładowarka") == "ladowarka"
+        assert _normalize("Żyletki") == "zyletki"
+        assert _normalize("Półki") == "polki"
+        assert _normalize("Ślinianki") == "slinianki"
+        assert _normalize("Czynsz") == "czynsz"
+        assert _normalize("ALLEGRO") == "allegro"

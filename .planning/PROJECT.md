@@ -2,7 +2,7 @@
 
 ## What This Is
 
-A shared household calendar web application that lets two people (e.g., partners/spouses) collaboratively manage their schedule from a single source of truth. It supports recurring and one-time events, push sync to Google Calendar, natural-language event requests, image-based event extraction, and full Polish/English localization — keeping both users aligned on the family schedule across all devices.
+A shared household calendar and finance web application that lets two people (e.g., partners/spouses) collaboratively manage their schedule, budget, and shopping from a single source of truth. It supports recurring and one-time events with category color coding, push sync to Google Calendar, natural-language event requests, image-based event extraction, a full household budget tracker with expense categorization and charts, a shared shopping list with store-section auto-grouping, partner activity notifications, and a unified dashboard — all with Polish/English localization.
 
 ## Core Value
 
@@ -10,18 +10,24 @@ A shared calendar both partners can edit that stays in sync with Google Calendar
 
 ## Current State
 
-- v2.1 shipped on 2026-03-21.
+- v4.0 monetization milestone in progress (Phases 28-32 complete as of 2026-03-23).
+- PWA foundation: web app manifest, service worker (offline shell), install prompt, app icons, root-level routes.
+- Android TWA distribution: Bubblewrap config, build docs (PWABuilder + CLI paths), Digital Asset Links guide.
+- Licensing foundation: AGPL-3.0 dual-license model with commercial terms (COMMERCIAL-LICENSE.md, MONETIZATION.md, NOTICE).
+- Self-hosted distribution: Docker Compose package with HMAC license key verification, setup guide, upgrade docs.
+- Dashboard home page: today's events, 7-day preview, budget snapshot, quick-add buttons.
+- In-app notifications: bell icon with unread badge, partner change alerts, SMTP email toggle, event reminders.
+- Event categories & colors: preset + custom categories, curated palette, color-coded calendar grid, category filtering.
+- Expense categories & charts: categorization, CSS-only pie/bar charts, smart keyword auto-detection.
+- Shared shopping list: Biedronka store-section auto-grouping, multi-item paste, keyword learning.
 - Event privacy: visibility toggle, lock icons, partner filtering, sync retraction to Google Calendar.
 - Reminder UI: chip-based multi-reminder form with toggle, add/remove (up to 5), edit prefill, GCal sync.
 - Multi-year budget: year navigation with carry-forward balance, manual override, year bounds.
-- Year-over-year comparison: side-by-side annual totals with color-coded delta arrows.
-- Historical import: TSV paste for past-year income hours/rates, one-time & recurring expenses.
-- Full household budget tracker: income calculation from 3 hourly rates, expense management, 12-month year overview with running balance.
+- Full household budget tracker: income calculation from 3 hourly rates, expense management, 12-month year overview.
 - Full Polish/English localization with language switcher, persisted preference, and locale-aware NLP/OCR parsing.
-- Budget stats dashboard with yearly summary cards, monthly bar chart, best/worst months, and YoY comparison.
-- 270 tests passing across auth, events, calendar, NLP, sync, budget, and performance.
-- ~8,137 LOC Python (app + tests), plus HTML templates, CSS, and JSON locale files.
-- Planning artifacts for v1.0, v1.1, v2.0, v2.1 archived under `.planning/milestones/`.
+- 354 tests passing across auth, events, calendar, NLP, sync, budget, shopping, dashboard, licensing, and performance.
+- ~10,686 LOC Python (6,106 app + 4,580 tests), plus HTML templates, CSS, and JSON locale files.
+- Planning artifacts for v1.0, v1.1, v2.0, v2.1, v3.0 archived under `.planning/milestones/`.
 
 ## Requirements
 
@@ -57,18 +63,43 @@ A shared calendar both partners can edit that stays in sync with Google Calendar
 - ✓ Year-over-year summary comparison — income, expenses, balance totals side-by-side — v2.1
 - ✓ Historical year import — TSV paste for past-year data (income hours, expenses) — v2.1
 
+- ✓ Event categories with preset + custom, curated palette colors — v3.0
+- ✓ Color-coded calendar grid indicators and category filtering — v3.0
+- ✓ Expense categories with preset + custom, pie/bar chart spending breakdown — v3.0
+- ✓ Expense category auto-detection from keywords — v3.0
+- ✓ Shared shopping list with Biedronka store-section auto-grouping — v3.0
+- ✓ Multi-item paste for shopping list (comma/newline separated) — v3.0
+- ✓ In-app notification feed with bell icon and unread badge — v3.0
+- ✓ Partner change notifications for events, expenses, and income — v3.0
+- ✓ Optional SMTP email alerts for partner activity — v3.0
+- ✓ Event reminder notifications at configured times — v3.0
+- ✓ Dashboard home page with today's events, 7-day preview, budget snapshot — v3.0
+- ✓ Quick-add buttons on dashboard for events and expenses — v3.0
+
+- ✓ Repository license is AGPL-3.0 for the core product (MON-01) — v4.0
+- ✓ Commercial license exception terms defined (COMMERCIAL-LICENSE.md) (MON-02) — v4.0
+- ✓ Monetization docs explain free vs paid vs AGPL obligations (MONETIZATION.md) (MON-03) — v4.0
+- ✓ Docker Compose self-hosted package with app + postgres + postgrest + caddy (SHS-01) — v4.0
+- ✓ HMAC-based license key generation/validation, no phone-home (SHS-02) — v4.0
+- ✓ Versioned upgrade path with backup/rollback procedure (SHS-03) — v4.0
+- ✓ Buyer-facing setup guide covering prerequisites through first login (SHS-04) — v4.0
+
 ### Active
 
-**Current Milestone: v3.0 — Dashboard, Notifications & Categories**
+**v4.0 Active Milestone: Monetization Foundation (Sales Milestone)**
 
-**Goal:** Add a unified dashboard home page, partner notifications (in-app + email), event categories with color coding, expense categories with budget limits and charts, and a shared shopping list.
+**Chosen scope:** Option 3 — Both (SaaS primary + self-hosted purchase option)
 
-**Target features:**
-- Dashboard home page — today's events, next 7 days preview, current month budget snapshot, quick-add
-- Notifications — in-app activity feed + optional email alerts for partner event changes
-- Event categories & colors — preset categories (Work, Personal, Health, Errands, Social) + custom, color-coded on calendar grid
-- Expense categories — tag expenses, filter/group, pie/bar chart breakdown, per-category budget limits with alerts
-- Shared shopping list — add/delete items, accepts string input to parse, both users share the list
+**Milestone goals:**
+- Build production-ready SaaS foundation with subscriptions and entitlement gating.
+- Keep AGPL-3.0 core open source while introducing dual-license/commercial terms path.
+- Launch paid self-hosted package (one-time purchase) alongside hosted plans.
+- Prioritize web app as the main product surface; deliver mobile via PWA + Android wrapper only.
+
+**Candidates for following milestone (post-v4.0):**
+- Native mobile app (full Android/iOS clients)
+- Advanced growth loops (referrals, affiliate, annual billing experiments)
+- Enterprise/team mode beyond two-person household
 
 ### Out of Scope additions from v2.0/v3.0
 
@@ -77,7 +108,7 @@ A shared calendar both partners can edit that stays in sync with Google Calendar
 ### Out of Scope
 
 - More than two concurrent users / team calendars — focus on household pair first
-- Native mobile app — Google Calendar on phone handles mobile access via sync
+- Native iOS app in v4.0 — deferred until monetization proof
 - Full two-way Google Calendar sync as v1 — export/push covers the core need
 
 - Two-way sync between budget and calendar events
@@ -124,6 +155,20 @@ A shared calendar both partners can edit that stays in sync with Google Calendar
 | Carry-forward balance computation | Prior year ending balance → next year starting balance | ✓ Shipped v2.1 |
 | Unicode arrows for YoY deltas | No icon library dependency | ✓ Shipped v2.1 |
 | TSV paste for historical import | Simple, no file upload needed | ✓ Shipped v2.1 |
+| Lazy-seeded categories | Preset categories created on first GET — no migration seeding | ✓ Shipped v3.0 |
+| CSS-only conic-gradient charts | No chart library dependency — pure CSS donut + bars | ✓ Shipped v3.0 |
+| Keyword-based category auto-detection | Pattern matching from JSON keywords instead of ML | ✓ Shipped v3.0 |
+| Biedronka store-section layout | Optimized for user's actual supermarket for route shopping | ✓ Shipped v3.0 |
+| Notification hooks in routes (not services) | Matches GoogleSync pattern, try/except wrapping | ✓ Shipped v3.0 |
+| HTMX polling for notification badge | 30s poll interval — simple, no WebSocket needed | ✓ Shipped v3.0 |
+| Dashboard as home page (/ → /dashboard) | Most useful landing page; calendar moved to /calendar | ✓ Shipped v3.0 |
+| Monetization model: Option 3 | Maximize upside with SaaS recurring revenue while serving self-hosted niche via one-time package | ✓ Selected for v4.0 |
+| Licensing strategy: AGPL core + commercial option | Protect open-source core from hosted forks while enabling paid license exceptions | ✓ Selected for v4.0 |
+| Product surface priority | Web app first; PWA and Android wrapper before native iOS/Android rewrite | ✓ Selected for v4.0 |
+
+| HMAC license keys for self-hosted | Offline validation, no phone-home, simple hex format | ✓ Shipped v4.0 |
+| Docker Compose with PostgREST | Supabase-compatible REST API for self-hosted without full Supabase stack | ✓ Shipped v4.0 |
+| Caddy for auto-HTTPS | Zero-config TLS via Let's Encrypt | ✓ Shipped v4.0 |
 
 ---
-*Last updated: 2026-03-22 after v3.0 milestone started*
+*Last updated: 2026-03-23 — Phase 31 self-hosted distribution complete*
