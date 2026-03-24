@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-03-23)
 
 **Milestone:** v4.0 Monetization Foundation
 **Status:** Milestone complete
-Last activity: 2026-03-24
+Last activity: 2026-03-24 - Completed quick task 260324-tlt: Refactor Szybkie dodawanie navbar button
 
 [████████████████████] 6/6 phases — 13 plans completed
 
@@ -51,6 +51,7 @@ Previous milestone archived. See `.planning/milestones/v3.0-ROADMAP.md` for full
 |---|-------------|------|--------|-----------|
 | 260324-psh | Create dedicated SVG logo for Synco and replace inline SVGs in templates | 2026-03-24 | 03f92b3 | [260324-psh-create-dedicated-svg-logo-for-synco-and-](./quick/260324-psh-create-dedicated-svg-logo-for-synco-and-/) |
 | 260324-s45 | Fix pricing page showing authenticated nav items to unauthenticated users | 2026-03-24 | d15b454 | [260324-s45-fix-pricing-page-showing-authenticated-n](./quick/260324-s45-fix-pricing-page-showing-authenticated-n/) |
+| 260324-tlt | Refactor Szybkie dodawanie navbar button to open chooser modal (Event/Expense/Shopping) | 2026-03-24 | 97ba386 | [260324-tlt-refactor-szybkie-dodawanie-navbar-button](./quick/260324-tlt-refactor-szybkie-dodawanie-navbar-button/) |
 
 ### Pending Todos
 
