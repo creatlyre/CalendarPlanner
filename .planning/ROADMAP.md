@@ -149,7 +149,7 @@ Plans:
 **Plans:** 1 plan
 
 Plans:
-- [ ] 02-01-PLAN.md — Fix redirects, logout link, pricing toast + tests
+- [x] 02-01-PLAN.md — Fix redirects, logout link, pricing toast + tests
 
 ---
 
