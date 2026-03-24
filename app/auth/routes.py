@@ -184,11 +184,25 @@ async def oauth_callback(
     *,*::before,*::after{{box-sizing:border-box;margin:0;padding:0}}
     body{{
       font-family:'DM Sans',ui-sans-serif,system-ui,sans-serif;
-      background:linear-gradient(135deg,#0f0c29 0%,#1e1553 25%,#2d2463 50%,#1a2a6c 75%,#0d1b4b 100%) fixed;
+      background:#0f0a2e;
       min-height:100vh;display:flex;align-items:center;justify-content:center;
       color:rgba(255,255,255,.9);
+      position:relative;overflow:hidden;
+    }}
+    .bg-layer{{
+      position:fixed;inset:0;z-index:0;
+    }}
+    .bg-layer img{{width:100%;height:100%;object-fit:cover;opacity:.35;}}
+    .bg-layer .overlay{{
+      position:absolute;inset:0;
+      background:linear-gradient(180deg,rgba(15,10,46,.5) 0%,rgba(15,10,46,.85) 70%,#0f0a2e 100%);
+    }}
+    .bg-glow{{
+      position:fixed;inset:0;z-index:0;
+      background:radial-gradient(ellipse 80% 60% at 50% 30%,rgba(99,102,241,.18) 0%,rgba(139,92,246,.06) 40%,transparent 70%);
     }}
     .card{{
+      position:relative;z-index:1;
       text-align:center;padding:2.5rem 2rem;border-radius:1.25rem;
       background:rgba(255,255,255,.07);
       backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
@@ -201,7 +215,7 @@ async def oauth_callback(
       font-weight:700;font-size:1.5rem;letter-spacing:-.02em;
       margin-bottom:1.75rem;display:flex;align-items:center;justify-content:center;gap:.5rem;
     }}
-    .brand svg{{width:1.5rem;height:1.5rem;filter:drop-shadow(0 0 6px rgba(165,180,252,.5))}}
+    .brand img{{width:1.75rem;height:1.75rem;border-radius:.375rem;}}
     .spinner{{
       width:2.5rem;height:2.5rem;margin:0 auto 1.25rem;
       border:3px solid rgba(255,255,255,.12);
@@ -228,12 +242,14 @@ async def oauth_callback(
   </style>
 </head>
 <body>
+  <div class="bg-layer">
+    <img src="/static/images/hero-bg.webp" alt="" aria-hidden="true">
+    <div class="overlay"></div>
+  </div>
+  <div class="bg-glow"></div>
   <div class="card">
     <div class="brand">
-      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M12 2l2.09 6.26L20.18 9l-5.09 3.74L16.18 19 12 15.27 7.82 19l1.09-6.26L3.82 9l6.09-.74L12 2z" fill="url(#g)"/>
-        <defs><linearGradient id="g" x1="3.82" y1="2" x2="20.18" y2="19" gradientUnits="userSpaceOnUse"><stop stop-color="#a5b4fc"/><stop offset="1" stop-color="#67e8f9"/></linearGradient></defs>
-      </svg>
+      <img src="/static/images/logo-mark.webp" alt="" aria-hidden="true">
       {app_name}
     </div>
     <div class="spinner" id="spinner"></div>

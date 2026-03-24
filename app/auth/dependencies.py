@@ -103,12 +103,16 @@ async def get_current_user(
                 auth_token=session,
             )
             user = repo.update_user(user.id, {"calendar_id": calendar.id}, auth_token=session) or user
+            # Accept pending invitations for brand-new users.
+            try:
+                service = UserService(db)
+                service.accept_household_invitation(user.id)
+            except Exception:
+                pass
         else:
-            update_payload = {
-                "name": full_name or user.name,
-                "google_id": user.google_id or external_id,
-                "last_login": datetime.utcnow().isoformat(),
-            }
+            # Only update last_login if stale (>5 min) to avoid a PATCH + re-fetch on every request.
+            needs_update = False
+            update_payload = {}
             if not user.calendar_id:
                 calendar = repo.create_calendar(
                     {
@@ -119,14 +123,16 @@ async def get_current_user(
                     auth_token=session,
                 )
                 update_payload["calendar_id"] = calendar.id
-            user = repo.update_user(user.id, update_payload, auth_token=session) or user
-
-        # Best effort: failed invitation auto-accept must not break authentication.
-        try:
-            service = UserService(db)
-            service.accept_household_invitation(user.id)
-        except Exception:
-            pass
+                needs_update = True
+            now = datetime.utcnow()
+            last = getattr(user, "last_login", None)
+            if not last or (now - last).total_seconds() > 300:
+                update_payload["last_login"] = now.isoformat()
+                update_payload["name"] = full_name or user.name
+                update_payload["google_id"] = user.google_id or external_id
+                needs_update = True
+            if needs_update:
+                user = repo.update_user(user.id, update_payload, auth_token=session) or user
         return user
     except Exception:
         # Allow auth to continue when SQL connectivity is temporarily unavailable.

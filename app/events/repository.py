@@ -139,9 +139,17 @@ class EventRepository:
         return _to_event(row) if row else event
 
     def _all_active_for_calendar(self, calendar_id: str) -> list[Event]:
+        # Cache within this repository instance to avoid duplicate Supabase queries
+        # when multiple service methods (list_for_day, list_recurrence_roots_until)
+        # are called for the same calendar during a single request.
+        cache = getattr(self, "_active_cache", None)
+        if cache is not None and cache[0] == calendar_id:
+            return cache[1]
         rows = self.db.select("events", {"calendar_id": f"eq.{calendar_id}", "is_deleted": "eq.false"})
         events = [_to_event(item) for item in rows]
-        return [item for item in events if item.start_at is not None]
+        result = [item for item in events if item.start_at is not None]
+        self._active_cache = (calendar_id, result)
+        return result
 
     @staticmethod
     def _visible_to(events: list[Event], user_id: str | None) -> list[Event]:
