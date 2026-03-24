@@ -11,6 +11,7 @@ class SessionValidationMiddleware(BaseHTTPMiddleware):
 
         public_routes = {
             "/health",
+            "/health/ready",
             "/auth/login",
             "/auth/callback",
             "/auth/session",
@@ -22,6 +23,11 @@ class SessionValidationMiddleware(BaseHTTPMiddleware):
             "/docs",
             "/openapi.json",
             "/redoc",
+            "/",
+            "/pricing",
+            "/terms",
+            "/privacy",
+            "/refund",
         }
 
         if request.url.path in public_routes or request.url.path.startswith("/static"):

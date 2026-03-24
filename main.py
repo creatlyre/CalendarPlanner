@@ -20,6 +20,8 @@ from starlette.middleware.cors import CORSMiddleware
 from config import Settings
 
 from app.auth.dependencies import get_current_user, get_current_user_optional
+from app.billing.dependencies import get_user_plan_for_template
+from app.database.database import get_db
 from app.auth.routes import router as auth_router
 from app.events.routes import router as events_router
 from app.i18n import inject_template_i18n, set_locale_cookie_if_param
@@ -212,12 +214,13 @@ async def refund_page(request: Request):
 
 
 @app.get("/invite", response_class=HTMLResponse)
-async def invite_page(request: Request, user=Depends(get_current_user)):
+async def invite_page(request: Request, user=Depends(get_current_user), db=Depends(get_db)):
     context = inject_template_i18n(
         request,
         {
             "request": request,
             "user": user,
+            "user_plan": get_user_plan_for_template(user, db),
         },
     )
     response = templates.TemplateResponse(
@@ -229,7 +232,6 @@ async def invite_page(request: Request, user=Depends(get_current_user)):
 
 @app.get("/health")
 async def health():
-    from app.database.database import get_db
     checks = {"app": "ok"}
     try:
         db = next(get_db())

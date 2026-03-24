@@ -6,6 +6,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 from app.auth.dependencies import get_current_user
+from app.billing.dependencies import get_user_plan_for_template
 from app.database.database import get_db
 from app.events.repository import EventRepository
 from app.events.service import EventService
@@ -20,7 +21,7 @@ def _service(db) -> EventService:
 
 
 @router.get("", response_class=HTMLResponse)
-async def calendar_page(request: Request, user=Depends(get_current_user)):
+async def calendar_page(request: Request, user=Depends(get_current_user), db=Depends(get_db)):
     from datetime import datetime as dt
     context = inject_template_i18n(
         request,
@@ -28,6 +29,7 @@ async def calendar_page(request: Request, user=Depends(get_current_user)):
             "request": request,
             "user": user,
             "now": dt.utcnow(),
+            "user_plan": get_user_plan_for_template(user, db),
         },
     )
     response = templates.TemplateResponse(

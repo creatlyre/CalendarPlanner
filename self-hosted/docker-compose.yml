@@ -2,8 +2,7 @@ version: "3.8"
 
 services:
   app:
-    # TODO: Replace OWNER with the GitHub username/org
-    image: ghcr.io/OWNER/synco:latest
+    image: ghcr.io/creatlyre/calendarplanner:latest
     env_file: .env
     environment:
       - ENVIRONMENT=self-hosted

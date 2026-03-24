@@ -17,8 +17,7 @@ Complete guide to deploy Synco on your own server with Docker Compose.
 The production Docker image is published to GitHub Container Registry:
 
 ```bash
-# TODO: Replace OWNER with the GitHub username/org
-docker pull ghcr.io/OWNER/synco:latest
+docker pull ghcr.io/creatlyre/calendarplanner:latest
 ```
 
 ### 2. Extract the package

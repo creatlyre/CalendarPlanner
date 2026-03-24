@@ -199,7 +199,16 @@ def test_bulk_hours_invalid_year(authenticated_client: TestClient, test_db, test
 # ---------------------------------------------------------------------------
 
 def test_import_page_accessible(authenticated_client: TestClient, test_db, test_user_a):
-    """GET /budget/import returns 200 with the import page."""
+    """GET /budget/import returns 200 with the import page (requires pro plan)."""
+    import uuid
+    test_db.insert("subscriptions", {
+        "id": str(uuid.uuid4()),
+        "user_id": test_user_a.id,
+        "stripe_customer_id": "cus_test_import",
+        "plan": "pro",
+        "status": "active",
+        "cancel_at_period_end": False,
+    })
     res = authenticated_client.get("/budget/import")
     assert res.status_code == 200
     assert "import" in res.text.lower()

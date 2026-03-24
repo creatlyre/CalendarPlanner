@@ -3,6 +3,7 @@ from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
 from app.auth.dependencies import get_current_user
+from app.billing.dependencies import get_user_plan_for_template
 from app.database.database import get_db
 from app.i18n import inject_template_i18n, set_locale_cookie_if_param
 
@@ -21,6 +22,7 @@ async def income_page(
         {
             "request": request,
             "user": user,
+            "user_plan": get_user_plan_for_template(user, db),
         },
     )
     response = templates.TemplateResponse(request=request, name="budget_income.html", context=context)

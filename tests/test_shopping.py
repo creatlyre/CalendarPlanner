@@ -187,7 +187,16 @@ class TestShoppingServiceUnit:
 class TestShoppingViewPage:
     """Verify /shopping page renders."""
 
-    def test_shopping_page_loads(self, authenticated_client):
+    def test_shopping_page_loads(self, authenticated_client, test_db, test_user_a):
+        import uuid
+        test_db.insert("subscriptions", {
+            "id": str(uuid.uuid4()),
+            "user_id": test_user_a.id,
+            "stripe_customer_id": "cus_test_shop",
+            "plan": "pro",
+            "status": "active",
+            "cancel_at_period_end": False,
+        })
         res = authenticated_client.get("/shopping")
         assert res.status_code == 200
         assert "shopping" in res.text.lower()
