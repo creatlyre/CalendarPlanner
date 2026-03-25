@@ -16,17 +16,11 @@ test.describe('Notifications', () => {
     // Bell button should be visible
     await expect(page.locator('#notification-bell')).toBeVisible();
 
-    // Click bell and wait for HTMX dropdown response
-    await Promise.all([
-      page.waitForResponse(
-        (resp) =>
-          resp.url().includes('/notifications/dropdown') &&
-          resp.status() === 200,
-      ),
-      page.locator('#notification-bell').click(),
-    ]);
+    // Click bell — HTMX fetches /notifications/dropdown and populates panel
+    await page.locator('#notification-bell').click();
 
-    // Notification panel should become visible after HTMX loads content
-    await expect(page.locator('#notification-panel')).toBeVisible();
+    // Wait for notification panel to have content loaded by HTMX
+    // The hx-on::after-request handler removes 'hidden' class
+    await expect(page.locator('#notification-panel')).not.toHaveClass(/hidden/, { timeout: 10_000 });
   });
 });

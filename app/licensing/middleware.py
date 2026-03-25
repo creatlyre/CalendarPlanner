@@ -1,4 +1,4 @@
-"""License check middleware for Synco self-hosted deployments."""
+"""License check middleware for Dobry Plan self-hosted deployments."""
 
 import logging
 
@@ -15,8 +15,8 @@ _WARNING_BANNER = (
     '<div style="position:fixed;bottom:0;left:0;right:0;background:#dc2626;'
     "color:white;text-align:center;padding:12px;font-size:14px;z-index:9999;"
     '">'
-    "\u26a0\ufe0f Invalid or missing license key. Please set SYNCO_LICENSE_KEY "
-    'in your .env file. <a href="https://synco.app/pricing" '
+    "\u26a0\ufe0f Invalid or missing license key. Please set DOBRYPLAN_LICENSE_KEY "
+    'in your .env file. <a href="https://dobryplan.app/pricing" '
     'style="color:#fef08a;text-decoration:underline;">Purchase a license</a>'
     "</div>"
 )

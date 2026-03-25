@@ -55,8 +55,8 @@ class Settings(BaseSettings):
 
     ENVIRONMENT: str = "development"
     ALLOWED_ORIGINS: str = ""
-    SYNCO_LICENSE_KEY: str = ""
-    SYNCO_LICENSE_SECRET: str = ""
+    DOBRYPLAN_LICENSE_KEY: str = ""
+    DOBRYPLAN_LICENSE_SECRET: str = ""
     TELEMETRY_ENDPOINT: str = ""
     TELEMETRY_INTERVAL: int = 86400  # seconds between heartbeats (default 24h)
     LOG_LEVEL: str = "INFO"

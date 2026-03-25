@@ -62,7 +62,7 @@ from app.licensing.telemetry import (
 logger = logging.getLogger(__name__)
 
 app = FastAPI(
-    title="Synco",
+    title="Dobry Plan",
     description="Shared household calendar & budget planner with Google Calendar sync",
     version="1.0.0",
     debug=os.getenv("DEBUG", "false").lower() == "true",
@@ -170,8 +170,8 @@ app.add_exception_handler(UpgradeRedirect, _upgrade_redirect_handler)
 app.add_middleware(
     LicenseCheckMiddleware,
     environment=_settings.ENVIRONMENT,
-    license_key=_settings.SYNCO_LICENSE_KEY,
-    license_secret=_settings.SYNCO_LICENSE_SECRET,
+    license_key=_settings.DOBRYPLAN_LICENSE_KEY,
+    license_secret=_settings.DOBRYPLAN_LICENSE_SECRET,
 )
 app.add_middleware(SecurityHeadersMiddleware, environment=_settings.ENVIRONMENT)
 
@@ -229,10 +229,10 @@ def _start_telemetry():
 
     install_id = get_or_create_install_id()
     license_valid = False
-    if _settings.SYNCO_LICENSE_KEY and _settings.SYNCO_LICENSE_SECRET:
+    if _settings.DOBRYPLAN_LICENSE_KEY and _settings.DOBRYPLAN_LICENSE_SECRET:
         from app.licensing.keys import validate_license_key
         license_valid = validate_license_key(
-            _settings.SYNCO_LICENSE_KEY, _settings.SYNCO_LICENSE_SECRET
+            _settings.DOBRYPLAN_LICENSE_KEY, _settings.DOBRYPLAN_LICENSE_SECRET
         )
 
     # Fire an immediate heartbeat (non-blocking)

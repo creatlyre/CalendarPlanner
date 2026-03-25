@@ -112,7 +112,7 @@ class NotificationService:
             return False  # SMTP not configured, skip silently
         try:
             msg = EmailMessage()
-            msg["Subject"] = f"Synco: {actor_name} {action_type.replace('_', ' ')}"
+            msg["Subject"] = f"Dobry Plan: {actor_name} {action_type.replace('_', ' ')}"
             msg["From"] = settings.SMTP_FROM_ADDRESS
             msg["To"] = recipient_email
             body = f"{actor_name} {action_type.replace('_', ' ')}: {entity_title}\n"

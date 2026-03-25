@@ -1,8 +1,8 @@
-"""Installation telemetry for Synco license compliance tracking.
+"""Installation telemetry for Dobry Plan license compliance tracking.
 
 Generates a persistent installation fingerprint and periodically reports
 anonymised deployment data (installation ID, version, license status,
-integrity check results) to the Synco telemetry endpoint.
+integrity check results) to the Dobry Plan telemetry endpoint.
 
 All data is non-PII.  The AGPL-3.0 license requires source disclosure for
 network deployments — this module helps detect non-compliant installations.
@@ -24,7 +24,7 @@ import httpx
 
 logger = logging.getLogger(__name__)
 
-_INSTALL_ID_FILE = ".synco_install_id"
+_INSTALL_ID_FILE = ".dobryplan_install_id"
 
 # Critical files whose integrity we want to verify.  Paths are relative to
 # the project root (same directory as main.py).
