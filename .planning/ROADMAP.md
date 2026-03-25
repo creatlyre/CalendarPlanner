@@ -145,6 +145,16 @@ Plans:
 
 </details>
 
+### Phase 40: E2E test gate - all Playwright tests must pass
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 39
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 40 to break down)
+
 ---
 
 *Roadmap updated: 2026-03-25 — v5.1 Stripe E2E Verification roadmap created (Phases 36-39)*

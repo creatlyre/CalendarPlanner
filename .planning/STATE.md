@@ -48,6 +48,10 @@ Previous milestone archived. See `.planning/milestones/v5.0-ROADMAP.md` for full
 | 260324-tlt | Refactor Szybkie dodawanie navbar button to open chooser modal (Event/Expense/Shopping) | 2026-03-24 | 97ba386 | [260324-tlt-refactor-szybkie-dodawanie-navbar-button](./quick/260324-tlt-refactor-szybkie-dodawanie-navbar-button/) |
 | 260325-cyy | Add live Stripe purchase flow integration tests (checkout, portal, webhook) | 2026-03-25 | 7764574 | [260325-cyy-test-stripe-purchase-of-plan-with-fake-a](./quick/260325-cyy-test-stripe-purchase-of-plan-with-fake-a/) |
 
+### Roadmap Evolution
+
+- Phase 40 added: E2E test gate - all Playwright tests must pass
+
 ### Pending Todos
 
 - Add filtered one-time expenses to main dashboard (2026-03-24)
