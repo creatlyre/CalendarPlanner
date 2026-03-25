@@ -1,9 +1,30 @@
+# AI/planning tools
 .agents/
 .planning/
+.jules/
+skills-lock.json
+
+# Environment & secrets
 .env
 
+# Non-application docs
+MONETIZATION.md
+MONETIZATION.pdf
+AI_IMAGE_PROMPTS.md
+AI_IMAGE_PROMPTS.pdf
+COMMERCIAL-LICENSE.md
+LAUNCH.md
+*.pdf
+
+# Utility scripts (not part of app)
+_fix_calendar.py
+budget_compare.py
+i18n_check.py
+update_req.py
+
+# Dependencies & build
 package-lock.json
-skill-lock.json
 *.pyc
 __pycache__/
 node_modules/
+.pytest_cache/
