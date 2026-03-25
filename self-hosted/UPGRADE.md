@@ -1,12 +1,12 @@
-# Synco Self-Hosted — Upgrade Guide
+# Dobry Plan Self-Hosted — Upgrade Guide
 
-How to update your Synco self-hosted installation to a new version.
+How to update your Dobry Plan self-hosted installation to a new version.
 
 ## Before You Upgrade
 
 1. **Back up your database:**
    ```bash
-   docker compose exec db pg_dump -U postgres synco > backup_pre_upgrade.sql
+   docker compose exec db pg_dump -U postgres dobryplan > backup_pre_upgrade.sql
    ```
 
 2. **Check the changelog** for breaking changes:
@@ -71,7 +71,7 @@ docker compose down
 ```bash
 docker compose up -d db
 # Wait for db to start
-docker compose exec -T db psql -U postgres synco < backup_pre_upgrade.sql
+docker compose exec -T db psql -U postgres dobryplan < backup_pre_upgrade.sql
 ```
 
 ### 3. Start the previous version

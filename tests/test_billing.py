@@ -571,14 +571,14 @@ class TestStripeLiveAPI:
         import stripe
         stripe.api_key = os.environ["STRIPE_SECRET_KEY"]
         product = stripe.Product.retrieve(REAL_STRIPE_PRO_PRODUCT_ID)
-        assert product.name == "Synco Pro"
+        assert product.name == "Dobry Plan Pro"
         assert product.type == "service"
 
     def test_retrieve_family_plus_product(self):
         import stripe
         stripe.api_key = os.environ["STRIPE_SECRET_KEY"]
         product = stripe.Product.retrieve(REAL_STRIPE_FAMILY_PLUS_PRODUCT_ID)
-        assert product.name == "Synco Family Plus"
+        assert product.name == "Dobry Plan Family Plus"
         assert product.type == "service"
 
     def test_retrieve_pro_price(self):
@@ -601,7 +601,7 @@ class TestStripeLiveAPI:
         import stripe
         stripe.api_key = os.environ["STRIPE_SECRET_KEY"]
         customer = stripe.Customer.retrieve(REAL_STRIPE_TEST_CUSTOMER_ID)
-        assert customer.email == "test-validation@synco.app"
+        assert customer.email == "test-validation@dobryplan.app"
 
 
 # ── Stripe Live Purchase Flow Tests (require STRIPE_SECRET_KEY) ────────────
@@ -632,13 +632,13 @@ class TestStripeLivePurchaseFlow:
 
         # Create a test customer
         self._customer = stripe.Customer.create(
-            email="purchase-flow-test@synco.app",
+            email="purchase-flow-test@dobryplan.app",
             metadata={"purpose": "automated_test"},
         )
 
         # Create test products and prices (self-contained — no reliance on pre-existing data)
         self._pro_product = stripe.Product.create(
-            name="Test Synco Pro",
+            name="Test Dobry Plan Pro",
             metadata={"purpose": "automated_test"},
         )
         self._pro_price = stripe.Price.create(
@@ -648,7 +648,7 @@ class TestStripeLivePurchaseFlow:
             recurring={"interval": "month"},
         )
         self._family_product = stripe.Product.create(
-            name="Test Synco Family Plus",
+            name="Test Dobry Plan Family Plus",
             metadata={"purpose": "automated_test"},
         )
         self._family_price = stripe.Price.create(
@@ -678,8 +678,8 @@ class TestStripeLivePurchaseFlow:
             customer=self._customer.id,
             line_items=[{"price": self._pro_price.id, "quantity": 1}],
             payment_method_types=["card"],
-            success_url="https://test.synco.app/success",
-            cancel_url="https://test.synco.app/cancel",
+            success_url="https://test.dobryplan.app/success",
+            cancel_url="https://test.dobryplan.app/cancel",
         )
         try:
             assert session.url.startswith("https://checkout.stripe.com")
@@ -697,8 +697,8 @@ class TestStripeLivePurchaseFlow:
             customer=self._customer.id,
             line_items=[{"price": self._family_price.id, "quantity": 1}],
             payment_method_types=["card"],
-            success_url="https://test.synco.app/success",
-            cancel_url="https://test.synco.app/cancel",
+            success_url="https://test.dobryplan.app/success",
+            cancel_url="https://test.dobryplan.app/cancel",
         )
         try:
             assert session.url.startswith("https://checkout.stripe.com")
@@ -723,8 +723,8 @@ class TestStripeLivePurchaseFlow:
                 customer=self._customer.id,
                 line_items=[{"price": annual_price.id, "quantity": 1}],
                 payment_method_types=["card"],
-                success_url="https://test.synco.app/success",
-                cancel_url="https://test.synco.app/cancel",
+                success_url="https://test.dobryplan.app/success",
+                cancel_url="https://test.dobryplan.app/cancel",
             )
             try:
                 assert session.url.startswith("https://checkout.stripe.com")
@@ -740,7 +740,7 @@ class TestStripeLivePurchaseFlow:
 
         session = stripe.billing_portal.Session.create(
             customer=self._customer.id,
-            return_url="https://test.synco.app/billing/settings",
+            return_url="https://test.dobryplan.app/billing/settings",
         )
         assert session.url.startswith("https://billing.stripe.com")
 
@@ -753,8 +753,8 @@ class TestStripeLivePurchaseFlow:
             customer=self._customer.id,
             line_items=[{"price": self._pro_price.id, "quantity": 1}],
             payment_method_types=["card"],
-            success_url="https://test.synco.app/success",
-            cancel_url="https://test.synco.app/cancel",
+            success_url="https://test.dobryplan.app/success",
+            cancel_url="https://test.dobryplan.app/cancel",
         )
         try:
             assert session.id.startswith("cs_test_")
@@ -804,8 +804,8 @@ class TestStripeLivePurchaseFlow:
             customer=self._customer.id,
             line_items=[{"price": self._pro_price.id, "quantity": 1}],
             payment_method_types=["card"],
-            success_url="https://test.synco.app/success",
-            cancel_url="https://test.synco.app/cancel",
+            success_url="https://test.dobryplan.app/success",
+            cancel_url="https://test.dobryplan.app/cancel",
         )
         try:
             assert session.customer == self._customer.id

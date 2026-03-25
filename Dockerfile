@@ -17,9 +17,9 @@ RUN pip install --no-cache-dir --upgrade pip && \
 FROM python:3.12-slim AS runtime
 
 LABEL org.opencontainers.image.source="https://github.com/creatlyre/CalendarPlanner"
-LABEL org.opencontainers.image.description="Synco – shared household calendar, budget & shopping list"
+LABEL org.opencontainers.image.description="Dobry Plan – shared household calendar, budget & shopping list"
 LABEL org.opencontainers.image.licenses="AGPL-3.0-only"
-LABEL org.opencontainers.image.title="Synco"
+LABEL org.opencontainers.image.title="Dobry Plan"
 
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \

@@ -12,7 +12,7 @@ import os
 
 
 class TestManifestEndpoint:
-    """GET /manifest.json returns correct Synco PWA metadata."""
+    """GET /manifest.json returns correct Dobry Plan PWA metadata."""
 
     def test_manifest_returns_200(self, test_client):
         resp = test_client.get("/manifest.json")
@@ -24,8 +24,8 @@ class TestManifestEndpoint:
 
     def test_manifest_name(self, test_client):
         data = test_client.get("/manifest.json").json()
-        assert data["name"] == "Synco"
-        assert data["short_name"] == "Synco"
+        assert data["name"] == "Dobry Plan"
+        assert data["short_name"] == "Dobry Plan"
 
     def test_manifest_start_url(self, test_client):
         data = test_client.get("/manifest.json").json()
@@ -130,9 +130,9 @@ class TestOfflinePage:
         content = open("public/offline.html", encoding="utf-8").read()
         assert "offline" in content.lower()
 
-    def test_offline_html_has_synco_branding(self):
+    def test_offline_html_has_dobryplan_branding(self):
         content = open("public/offline.html", encoding="utf-8").read()
-        assert "Synco" in content
+        assert "Dobry Plan" in content
 
     def test_offline_html_has_inline_css(self):
         content = open("public/offline.html", encoding="utf-8").read()
@@ -190,7 +190,7 @@ class TestPwaPublicRoutes:
 
 
 class TestTwaConfig:
-    """android/twa-config.json is valid and has correct Synco metadata."""
+    """android/twa-config.json is valid and has correct Dobry Plan metadata."""
 
     def test_twa_config_exists(self):
         assert os.path.exists("android/twa-config.json")
@@ -203,9 +203,9 @@ class TestTwaConfig:
     def test_twa_config_metadata(self):
         with open("android/twa-config.json") as f:
             data = json.load(f)
-        assert data["name"] == "Synco"
+        assert data["name"] == "Dobry Plan"
         assert data["startUrl"] == "/dashboard"
-        assert data["packageId"] == "app.synco.twa"
+        assert data["packageId"] == "app.dobryplan.twa"
         assert data["display"] == "standalone"
 
     def test_twa_config_host(self):

@@ -1,6 +1,6 @@
-# Synco Android Distribution (TWA)
+# Dobry Plan Android Distribution (TWA)
 
-Synco uses a **Trusted Web Activity (TWA)** to wrap the PWA in a native Android shell.
+Dobry Plan uses a **Trusted Web Activity (TWA)** to wrap the PWA in a native Android shell.
 No custom Java/Kotlin code — Chrome renders the full app in standalone mode (no URL bar).
 
 ## Prerequisites
@@ -8,14 +8,14 @@ No custom Java/Kotlin code — Chrome renders the full app in standalone mode (n
 - Node.js 18+
 - Java JDK 11+
 - Android SDK (via Android Studio or standalone SDK tools)
-- A deployed Synco instance with HTTPS and valid manifest at `/manifest.json`
+- A deployed Dobry Plan instance with HTTPS and valid manifest at `/manifest.json`
 
 ## Quick Path: PWABuilder
 
 The fastest way to generate an Android package:
 
 1. Visit [pwabuilder.com](https://www.pwabuilder.com/)
-2. Enter your Synco URL (e.g., `https://synco.app`)
+2. Enter your Dobry Plan URL (e.g., `https://dobryplan.app`)
 3. Click **Start** — PWABuilder reads your manifest and service worker
 4. Select **Android** → **Generate**
 5. Download the generated APK/AAB
@@ -37,7 +37,7 @@ npm install -g @nicolo-ribaudo/nicolo-ribaudo--bubblewrap-cli
 
 ```bash
 cd android/
-bubblewrap init --manifest https://synco.app/manifest.json
+bubblewrap init --manifest https://dobryplan.app/manifest.json
 ```
 
 Bubblewrap reads the manifest and generates an Android project.
@@ -65,7 +65,7 @@ On first build, Bubblewrap creates a signing keystore. **Back up this keystore**
 
 ```bash
 # Extract SHA-256 fingerprint for Digital Asset Links
-keytool -list -v -keystore synco-keystore.jks -alias synco
+keytool -list -v -keystore dobryplan-keystore.jks -alias dobryplan
 ```
 
 Copy the `SHA256:` fingerprint value for the next step.
@@ -75,7 +75,7 @@ Copy the `SHA256:` fingerprint value for the next step.
 To verify app-to-site ownership (eliminates the Chrome URL bar), serve a JSON file at:
 
 ```
-https://synco.app/.well-known/assetlinks.json
+https://dobryplan.app/.well-known/assetlinks.json
 ```
 
 Contents:
@@ -85,7 +85,7 @@ Contents:
   "relation": ["delegate_permission/common.handle_all_urls"],
   "target": {
     "namespace": "android_app",
-    "package_name": "app.synco.twa",
+    "package_name": "app.dobryplan.twa",
     "sha256_cert_fingerprints": ["YOUR_SHA256_FINGERPRINT_HERE"]
   }
 }]
@@ -128,7 +128,7 @@ adb install app-release-signed.apk
 emulator -avd Pixel_6_API_33
 # Install and test
 adb install app-release-signed.apk
-adb shell am start -n app.synco.twa/.LauncherActivity
+adb shell am start -n app.dobryplan.twa/.LauncherActivity
 ```
 
 ## Requirements
@@ -160,8 +160,8 @@ Key fields:
 
 | Field | Value | Notes |
 |-------|-------|-------|
-| `host` | synco.app | Production domain |
-| `packageId` | app.synco.twa | Android package name |
+| `host` | dobryplan.app | Production domain |
+| `packageId` | app.dobryplan.twa | Android package name |
 | `startUrl` | /dashboard | Entry point |
 | `themeColor` | #1e1553 | Status bar color |
 | `minSdkVersion` | 24 | Android 7.0+ |

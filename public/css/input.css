@@ -2,7 +2,7 @@
 @source "../../app/templates";
 
 /* ══════════════════════════════════════════════════════════════
-   Synco Design System
+   Dobry Plan Design System
    ═════════════════════════════════════════════════════════════ */
 
 /* ── Design tokens ───────────────────────────────────────── */
@@ -50,6 +50,27 @@ html.light-mode {
   --shadow-raised: 0 8px 32px rgba(99, 102, 241, 0.14), 0 2px 6px rgba(0, 0, 0, 0.04);
   --shadow-modal: 0 24px 64px rgba(99, 102, 241, 0.2), 0 4px 12px rgba(0, 0, 0, 0.06);
   --shadow-dropdown: 0 10px 24px rgba(99, 102, 241, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04);
+}
+
+/* ── Brand name treatment ─────────────────────────────────── */
+.brand-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-style: italic;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@media (forced-colors: active) {
+  .brand-name {
+    -webkit-text-fill-color: CanvasText;
+    background: none;
+    font-style: italic;
+    font-weight: 800;
+  }
 }
 
 /* ── Dark mode (default) ─────────────────────────────────── */

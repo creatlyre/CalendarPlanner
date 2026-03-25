@@ -1,4 +1,4 @@
--- Telemetry: track Synco installations for license compliance
+-- Telemetry: track Dobry Plan installations for license compliance
 CREATE TABLE IF NOT EXISTS installations (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     installation_id TEXT NOT NULL,

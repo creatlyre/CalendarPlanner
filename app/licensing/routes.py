@@ -1,4 +1,4 @@
-"""API endpoint that receives telemetry heartbeats from Synco installations
+"""API endpoint that receives telemetry heartbeats from Dobry Plan installations
 and an admin-only endpoint for viewing tracked installations."""
 
 from __future__ import annotations

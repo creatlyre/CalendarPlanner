@@ -1,6 +1,6 @@
 {
-  "name": "Synco",
-  "short_name": "Synco",
+  "name": "Dobry Plan",
+  "short_name": "Dobry Plan",
   "description": "Smart household calendar & budget planner",
   "start_url": "/dashboard",
   "display": "standalone",

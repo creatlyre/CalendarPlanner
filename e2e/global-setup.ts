@@ -4,7 +4,7 @@ import { request } from '@playwright/test';
  * Warm up the Railway server before tests to avoid cold-start timeouts.
  */
 async function globalSetup() {
-  const baseURL = process.env.E2E_BASE_URL || 'https://synco-production-e9da.up.railway.app';
+  const baseURL = process.env.E2E_BASE_URL || 'https://dobryplan-production.up.railway.app';
 
   console.log(`Warming up server at ${baseURL}...`);
   const ctx = await request.newContext({ baseURL });

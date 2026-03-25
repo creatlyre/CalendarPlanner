@@ -1,4 +1,4 @@
-# Synco Self-Hosted Changelog
+# Dobry Plan Self-Hosted Changelog
 
 All notable changes to the self-hosted distribution package.
 

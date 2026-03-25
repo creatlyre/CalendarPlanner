@@ -1,4 +1,4 @@
-"""Generate a Synco self-hosted license key.
+"""Generate a Dobry Plan self-hosted license key.
 
 Usage: python -m app.licensing.generate <secret>
 """

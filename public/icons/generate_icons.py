@@ -1,4 +1,4 @@
-"""Generate PWA icons for Synco using pure Python (no Pillow dependency)."""
+"""Generate PWA icons for Dobry Plan using pure Python (no Pillow dependency)."""
 
 import struct
 import zlib
@@ -110,7 +110,7 @@ def create_png(width: int, height: int, bg_color: tuple, draw_calendar: bool = T
 
 
 def main():
-    # Synco brand indigo
+    # Dobry Plan brand indigo
     bg = (99, 102, 241)  # #6366f1
 
     sizes = [192, 512]

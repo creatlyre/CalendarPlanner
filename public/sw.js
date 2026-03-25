@@ -1,5 +1,5 @@
-// Synco Service Worker — offline shell with static asset caching
-var CACHE_NAME = 'synco-v2';
+// Dobry Plan Service Worker — offline shell with static asset caching
+var CACHE_NAME = 'dobryplan-v1';
 var OFFLINE_URL = '/static/offline.html';
 
 var PRECACHE_URLS = [

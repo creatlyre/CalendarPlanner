@@ -10,7 +10,7 @@ export default defineConfig({
   retries: 1,
   reporter: process.env.CI ? 'github' : 'html',
   use: {
-    baseURL: process.env.E2E_BASE_URL || 'https://synco-production-e9da.up.railway.app',
+    baseURL: process.env.E2E_BASE_URL || 'https://dobryplan-production.up.railway.app',
     screenshot: 'only-on-failure',
     trace: 'retain-on-failure',
     navigationTimeout: 60_000,

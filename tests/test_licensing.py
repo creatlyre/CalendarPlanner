@@ -1,4 +1,4 @@
-"""Tests for the Synco self-hosted license key system."""
+"""Tests for the Dobry Plan self-hosted license key system."""
 
 import os
 
@@ -14,10 +14,10 @@ from app.licensing.keys import generate_license_key, validate_license_key
 class TestGenerateLicenseKey:
     def test_format(self):
         key = generate_license_key("secret")
-        assert key.startswith("SYNCO-")
+        assert key.startswith("DOBRYPLAN-")
         parts = key.split("-")
         assert len(parts) == 6
-        assert parts[0] == "SYNCO"
+        assert parts[0] == "DOBRYPLAN"
         for part in parts[1:]:
             assert len(part) == 8, f"Part '{part}' is not 8 chars"
 
@@ -51,16 +51,16 @@ class TestValidateLicenseKey:
     def test_malformed_empty_string(self):
         assert validate_license_key("", "secret") is False
 
-    def test_malformed_synco_prefix_only(self):
-        assert validate_license_key("SYNCO-", "secret") is False
+    def test_malformed_dobryplan_prefix_only(self):
+        assert validate_license_key("DOBRYPLAN-", "secret") is False
 
     def test_malformed_partial_key(self):
-        assert validate_license_key("SYNCO-aabb", "secret") is False
+        assert validate_license_key("DOBRYPLAN-aabb", "secret") is False
 
     def test_tampered_key(self):
         secret = "tamper-test"
         key = generate_license_key(secret)
-        # Flip the first hex char after SYNCO-
+        # Flip the first hex char after DOBRYPLAN-
         parts = key.split("-")
         char = parts[1][0]
         flipped = "a" if char != "a" else "b"
@@ -134,7 +134,7 @@ class TestLicenseCheckMiddleware:
     def test_invalid_key_shows_banner(self):
         app = self._make_app(
             environment="self-hosted",
-            license_key="SYNCO-bad-key",
+            license_key="DOBRYPLAN-bad-key",
             license_secret="secret",
         )
         client = TestClient(app)
@@ -208,7 +208,7 @@ class TestInstallId:
             assert first == second
 
     def test_regenerates_if_corrupt(self, tmp_path):
-        id_file = tmp_path / ".synco_install_id"
+        id_file = tmp_path / ".dobryplan_install_id"
         id_file.write_text("not-a-uuid\n")
         with patch("app.licensing.telemetry._project_root", return_value=tmp_path):
             install_id = get_or_create_install_id()

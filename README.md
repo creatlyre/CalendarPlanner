@@ -1,12 +1,12 @@
 🌐 **Language / Język:** [🇬🇧 English](README.md) | [🇵🇱 Polski](README.pl.md)
 
-# Synco
+# Dobry Plan
 
 Shared household calendar, budget tracker, and shopping list for two-person households. Google sign-in, shared events with recurrence, Google Calendar sync, natural-language quick add, OCR event extraction, budget with multi-year tracking, store-section shopping lists, in-app notifications, and a dashboard home page.
 
 ## Why This Project
 
-Synco is built for a couple or household that wants one shared source of truth for scheduling, budgeting, and grocery shopping — with reminders delivered to phones through Google Calendar.
+Dobry Plan is built for a couple or household that wants one shared source of truth for scheduling, budgeting, and grocery shopping — with reminders delivered to phones through Google Calendar.
 
 ## Current Status
 
@@ -286,11 +286,11 @@ Milestone archives and planning artifacts live under `.planning/`.
 
 ## License
 
-Synco is open-source software licensed under the [GNU Affero General Public License v3.0](LICENSE) (AGPL-3.0).
+Dobry Plan is open-source software licensed under the [GNU Affero General Public License v3.0](LICENSE) (AGPL-3.0).
 
 **In short:**
-- You can freely use, modify, and self-host Synco for personal or household use.
-- If you modify Synco and run it as a network service, you must make your modified source code available under AGPL-3.0.
-- A **commercial license** is available for organizations that need to use Synco without AGPL obligations. See [COMMERCIAL-LICENSE.md](COMMERCIAL-LICENSE.md).
+- You can freely use, modify, and self-host Dobry Plan for personal or household use.
+- If you modify Dobry Plan and run it as a network service, you must make your modified source code available under AGPL-3.0.
+- A **commercial license** is available for organizations that need to use Dobry Plan without AGPL obligations. See [COMMERCIAL-LICENSE.md](COMMERCIAL-LICENSE.md).
 
 For a full explanation of what is free, what is paid, and how the dual-license model works, see [MONETIZATION.md](MONETIZATION.md).

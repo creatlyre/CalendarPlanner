@@ -1,6 +1,6 @@
-# Synco Self-Hosted Setup Guide
+# Dobry Plan Self-Hosted Setup Guide
 
-Complete guide to deploy Synco on your own server with Docker Compose.
+Complete guide to deploy Dobry Plan on your own server with Docker Compose.
 
 ## Prerequisites
 
@@ -8,7 +8,7 @@ Complete guide to deploy Synco on your own server with Docker Compose.
 - **A domain name** pointed at your server's IP (required for automatic HTTPS)
 - **Firewall** open on ports **80** (HTTP) and **443** (HTTPS)
 - **1 GB RAM minimum**, 2 GB recommended
-- A valid **Synco license key** from [synco.app/pricing](https://synco.app/pricing)
+- A valid **Dobry Plan license key** from [dobryplan.app/pricing](https://dobryplan.app/pricing)
 
 ## Quick Start
 
@@ -39,7 +39,7 @@ Edit `.env` and fill in:
 |----------|-------------|
 | `SECRET_KEY` | Random 64-character string (`openssl rand -hex 32`) |
 | `DB_ENCRYPTION_KEY` | Random 64-character string (`openssl rand -hex 32`) |
-| `SYNCO_LICENSE_KEY` | Your license key from purchase email |
+| `DOBRYPLAN_LICENSE_KEY` | Your license key from purchase email |
 | `POSTGRES_PASSWORD` | Strong database password |
 | `PGRST_JWT_SECRET` | Random base64 secret (`openssl rand -base64 32`) |
 | `SITE_DOMAIN` | Your domain (e.g., `calendar.example.com`) |
@@ -70,7 +70,7 @@ Navigate to `https://your-domain.com` and create your first user account.
 |----------|-------------|---------|
 | `SECRET_KEY` | Application secret for sessions and tokens | `openssl rand -hex 32` |
 | `DB_ENCRYPTION_KEY` | Encryption key for sensitive data at rest | `openssl rand -hex 32` |
-| `SYNCO_LICENSE_KEY` | License key from your purchase | `SYNCO-xxxxxxxx-...` |
+| `DOBRYPLAN_LICENSE_KEY` | License key from your purchase | `DOBRYPLAN-xxxxxxxx-...` |
 | `POSTGRES_PASSWORD` | PostgreSQL password | Strong random password |
 | `PGRST_JWT_SECRET` | JWT secret for PostgREST authentication | `openssl rand -base64 32` |
 | `SITE_DOMAIN` | Your domain name for HTTPS | `calendar.example.com` |
@@ -138,13 +138,13 @@ Caddy handles HTTPS automatically using Let's Encrypt. Just set `SITE_DOMAIN` in
 ### Create a backup
 
 ```bash
-docker compose exec db pg_dump -U postgres synco > backup_$(date +%Y%m%d).sql
+docker compose exec db pg_dump -U postgres dobryplan > backup_$(date +%Y%m%d).sql
 ```
 
 ### Restore from backup
 
 ```bash
-docker compose exec -T db psql -U postgres synco < backup_20260323.sql
+docker compose exec -T db psql -U postgres dobryplan < backup_20260323.sql
 ```
 
 ### Automated backups (optional)
@@ -154,20 +154,20 @@ Add a cron job:
 ```bash
 crontab -e
 # Add: daily backup at 2 AM
-0 2 * * * cd /path/to/self-hosted && docker compose exec -T db pg_dump -U postgres synco > /backups/synco_$(date +\%Y\%m\%d).sql
+0 2 * * * cd /path/to/self-hosted && docker compose exec -T db pg_dump -U postgres dobryplan > /backups/dobryplan_$(date +\%Y\%m\%d).sql
 ```
 
 ## Architecture
 
 ```
 ┌─────────┐     ┌──────────┐     ┌──────────────┐     ┌────────────┐
-│  Caddy   │────▶│  Synco   │────▶│  PostgREST   │────▶│ PostgreSQL │
+│  Caddy   │────▶│ Dobry Plan│────▶│  PostgREST   │────▶│ PostgreSQL │
 │ :80/:443 │     │   App    │     │   REST API   │     │     DB     │
 └─────────┘     └──────────┘     └──────────────┘     └────────────┘
 ```
 
 - **Caddy** — Reverse proxy with automatic HTTPS
-- **Synco App** — FastAPI application (gunicorn + uvicorn workers)
+- **Dobry Plan App** — FastAPI application (gunicorn + uvicorn workers)
 - **PostgREST** — Supabase-compatible REST API layer
 - **PostgreSQL** — Database (supabase/postgres image)
 
@@ -190,7 +190,7 @@ Stop the conflicting service or change ports in `docker-compose.yml`.
 If you see a red banner at the bottom of the page:
 
 1. Verify your license key in `.env` matches the one from your purchase email
-2. Ensure `SYNCO_LICENSE_KEY` has no extra spaces or quotes
+2. Ensure `DOBRYPLAN_LICENSE_KEY` has no extra spaces or quotes
 3. Restart: `docker compose restart app`
 
 ### Database connection issues
@@ -220,6 +220,6 @@ Ensure `GOOGLE_REDIRECT_URI` in your `.env` matches the authorized redirect URI 
 
 ## Support
 
-- **Email:** licensing@synco.app
-- **Documentation:** [synco.app/docs](https://synco.app/docs)
+- **Email:** licensing@dobryplan.app
+- **Documentation:** [dobryplan.app/docs](https://dobryplan.app/docs)
 - **Changelog:** See [CHANGELOG-SELFHOSTED.md](CHANGELOG-SELFHOSTED.md)

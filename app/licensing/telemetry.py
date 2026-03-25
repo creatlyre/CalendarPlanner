@@ -182,7 +182,7 @@ class TelemetryReporter:
     def start(self) -> None:
         if not self.endpoint:
             return
-        self._thread = threading.Thread(target=self._loop, daemon=True, name="synco-telemetry")
+        self._thread = threading.Thread(target=self._loop, daemon=True, name="dobryplan-telemetry")
         self._thread.start()
         logger.info("Telemetry reporter started (interval=%ds)", self.interval)
 

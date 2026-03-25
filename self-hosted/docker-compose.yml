@@ -14,7 +14,7 @@ services:
         condition: service_started
     restart: unless-stopped
     networks:
-      - synco-net
+      - dobryplan-net
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/ready')"]
       interval: 30s
@@ -26,12 +26,12 @@ services:
     image: supabase/postgres:15.8.1.80
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: synco
+      POSTGRES_DB: dobryplan
     volumes:
-      - synco-db:/var/lib/postgresql/data
+      - dobryplan-db:/var/lib/postgresql/data
     restart: unless-stopped
     networks:
-      - synco-net
+      - dobryplan-net
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -41,7 +41,7 @@ services:
   rest:
     image: postgrest/postgrest:v12.2.3
     environment:
-      PGRST_DB_URI: postgres://postgres:${POSTGRES_PASSWORD}@db:5432/synco
+      PGRST_DB_URI: postgres://postgres:${POSTGRES_PASSWORD}@db:5432/dobryplan
       PGRST_DB_SCHEMAS: public
       PGRST_DB_ANON_ROLE: anon
       PGRST_JWT_SECRET: ${PGRST_JWT_SECRET}
@@ -50,7 +50,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
     networks:
-      - synco-net
+      - dobryplan-net
 
   caddy:
     image: caddy:2-alpine
@@ -66,13 +66,13 @@ services:
         condition: service_healthy
     restart: unless-stopped
     networks:
-      - synco-net
+      - dobryplan-net
 
 volumes:
-  synco-db:
+  dobryplan-db:
   caddy-data:
   caddy-config:
 
 networks:
-  synco-net:
+  dobryplan-net:
     driver: bridge
