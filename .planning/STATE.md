@@ -51,6 +51,14 @@ Previous milestone archived. See `.planning/milestones/v5.0-ROADMAP.md` for full
 ### Roadmap Evolution
 
 - Phase 40 added: E2E test gate - all Playwright tests must pass
+- Phase 41 added: i18n and copy fixes - hardcoded Polish text, landing mockup localization, meta description i18n, brand name tagline
+- Phase 42 added: Landing page copy and messaging overhaul - hero badge, CTAs, trust copy, pricing descriptions, feature outcome framing, brand narrative
+- Phase 43 added: Social proof and comparison section - founder story, GitHub stars badge, Why Dobry Plan vs alternatives table
+- Phase 44 added: SEO and structured data - JSON-LD schemas, sitemap.xml, robots.txt, canonical URLs, OG screenshot cards
+- Phase 45 added: Brand guide and visual identity cleanup - BRAND.md, favicon.ico, icon consolidation, inline styles to design tokens
+- Phase 46 added: Landing page UX improvements - features nav link, mobile hamburger nav, login tagline, footer social links, contrast audit
+- Phase 47 added: Pricing tier clarification - tier differentiation, benefit-oriented feature lists, currency display, annual savings reframe
+- Phase 48 added: Version and consistency sync - README version, service worker cache version, Stripe statement descriptors
 
 ### Pending Todos
 

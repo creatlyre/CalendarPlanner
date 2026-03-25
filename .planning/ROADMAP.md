@@ -9,16 +9,25 @@
 - [x] v3.0 milestone — Dashboard, Notifications & Categories - Phases 23-27 shipped 2026-03-23 (331 tests passing). Archive: .planning/milestones/v3.0-ROADMAP.md
 - [x] v4.0 milestone — Monetization Foundation (SaaS primary + self-hosted purchase option) - Phases 28-33 shipped 2026-03-23 (446 tests passing). Archive: .planning/milestones/v5.0-ROADMAP.md (v4.0 archived as part of v5.0 snapshot)
 - [x] v5.0 milestone — Growth & Conversion - Phases 34-35 shipped 2026-03-25 (593 tests passing). Archive: .planning/milestones/v5.0-ROADMAP.md
-- [ ] v5.1 milestone — Stripe E2E Verification - Phases 36-39 (Playwright browser tests for full app verification)
+- [ ] v5.1 milestone — E2E Verification & Brand Marketing — Phases 36-48 (Playwright tests + brand/copy/SEO/UX audit fixes)
 
 ## Phases
 
-### v5.1 Stripe E2E Verification (Phases 36-39)
+### v5.1 E2E Verification & Brand Marketing (Phases 36-48)
 
 - [ ] **Phase 36: E2E Test Infrastructure** - Playwright setup, app server fixture, authenticated contexts, CI config
 - [ ] **Phase 37: Core App E2E Tests** - Auth, calendar, dashboard, and notification browser tests
 - [ ] **Phase 38: Gated Features & Entitlements E2E** - Budget, shopping, sync, and plan access control tests
 - [ ] **Phase 39: Billing, Stripe & Error Resilience E2E** - Pricing, checkout flow, billing portal, and error handling tests
+- [ ] **Phase 40: E2E Test Gate** - All Playwright tests must pass
+- [ ] **Phase 41: i18n & Copy Fixes** - Hardcoded Polish text, landing mockup localization, meta description i18n, brand tagline
+- [ ] **Phase 42: Landing Page Copy Overhaul** - Hero badge, CTAs, trust copy, pricing descriptions, feature outcome framing, brand narrative
+- [ ] **Phase 43: Social Proof & Comparison** - Founder story, GitHub stars badge, Why Dobry Plan vs alternatives table
+- [ ] **Phase 44: SEO & Structured Data** - JSON-LD schemas, sitemap.xml, robots.txt, canonical URLs, OG screenshot cards
+- [ ] **Phase 45: Brand Guide & Visual Identity** - BRAND.md, favicon.ico, icon consolidation, inline styles to design tokens
+- [ ] **Phase 46: Landing Page UX** - Features nav link, mobile hamburger nav, login tagline, footer social links, contrast audit
+- [ ] **Phase 47: Pricing Tier Clarification** - Tier differentiation, benefit-oriented feature lists, currency display, annual savings
+- [ ] **Phase 48: Version & Consistency Sync** - README version, SW cache version, Stripe statement descriptors
 
 ## Phase Details
 
@@ -154,6 +163,86 @@ Plans:
 
 Plans:
 - [ ] TBD (run /gsd-plan-phase 40 to break down)
+
+### Phase 41: i18n and copy fixes - hardcoded Polish text, landing mockup localization, meta description i18n, brand name tagline
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 40
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 41 to break down)
+
+### Phase 42: Landing page copy and messaging overhaul - hero badge, CTAs, trust copy, pricing descriptions, feature outcome framing, brand narrative
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 41
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 42 to break down)
+
+### Phase 43: Social proof and comparison section - founder story, GitHub stars badge, Why Dobry Plan vs alternatives table
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 42
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 43 to break down)
+
+### Phase 44: SEO and structured data - JSON-LD schemas, sitemap.xml, robots.txt, canonical URLs, OG screenshot cards
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 43
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 44 to break down)
+
+### Phase 45: Brand guide and visual identity cleanup - BRAND.md, favicon.ico, icon consolidation, inline styles to design tokens
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 44
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 45 to break down)
+
+### Phase 46: Landing page UX improvements - features nav link, mobile hamburger nav, login tagline, footer social links, contrast audit
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 45
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 46 to break down)
+
+### Phase 47: Pricing tier clarification - tier differentiation, benefit-oriented feature lists, currency display, annual savings reframe
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 46
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 47 to break down)
+
+### Phase 48: Version and consistency sync - README version, service worker cache version, Stripe statement descriptors
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 47
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 48 to break down)
 
 ---
 
