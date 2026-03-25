@@ -1,11 +1,17 @@
 {
   "scripts": {
-    "build:css": "npx @tailwindcss/cli -i ./public/css/input.css -o ./public/css/style.css --minify"
+    "build:css": "npx @tailwindcss/cli -i ./public/css/input.css -o ./public/css/style.css --minify",
+    "e2e": "npx playwright test --config=e2e/playwright.config.ts",
+    "e2e:setup": "npx playwright test --config=e2e/playwright.config.ts --project=setup",
+    "e2e:free": "npx playwright test --config=e2e/playwright.config.ts --project=free",
+    "e2e:pro": "npx playwright test --config=e2e/playwright.config.ts --project=pro",
+    "e2e:family-plus": "npx playwright test --config=e2e/playwright.config.ts --project=family-plus"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.99.2"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@tailwindcss/cli": "^4.2.2",
     "tailwindcss": "^4.2.2"
   }
