@@ -49,9 +49,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css?v={{ asset_version }}">
     <style>
+        :root {
+            --brand-bg: #0f0a2e;
+            --brand-bg-rgb: 15, 10, 46;
+            --brand-card-rgb: 26, 20, 68;
+            --brand-primary: #6366f1;
+            --brand-primary-rgb: 99, 102, 241;
+            --brand-accent: #8b5cf6;
+            --brand-accent-rgb: 139, 92, 246;
+        }
         html { scroll-behavior: smooth; }
         body { font-family: 'DM Sans', sans-serif; }
         .font-display { font-family: 'Plus Jakarta Sans', sans-serif; }
+        .bg-brand { background: var(--brand-bg); }
+        .bg-brand-nav { background: rgba(var(--brand-bg-rgb), 0.85); backdrop-filter: blur(16px); }
+        .bg-brand-card { background: linear-gradient(180deg, rgba(var(--brand-card-rgb), 0.5) 0%, rgba(var(--brand-bg-rgb), 0.4) 100%); }
+        .bg-brand-card-strong { background: linear-gradient(180deg, rgba(var(--brand-card-rgb), 0.7) 0%, rgba(var(--brand-bg-rgb), 0.8) 100%); backdrop-filter: blur(12px); }
+        .bg-brand-card-light { background: linear-gradient(180deg, rgba(var(--brand-card-rgb), 0.4) 0%, rgba(var(--brand-bg-rgb), 0.3) 100%); }
+        .glow-orb-primary { background: radial-gradient(circle, rgba(var(--brand-primary-rgb), 0.4), transparent 70%); }
+        .glow-orb-accent { background: radial-gradient(circle, rgba(var(--brand-accent-rgb), 0.4), transparent 70%); }
+        .hero-overlay { background: linear-gradient(180deg, rgba(var(--brand-bg-rgb), 0.5) 0%, rgba(var(--brand-bg-rgb), 0.85) 70%, var(--brand-bg) 100%); }
+        .feature-img-fade { background: linear-gradient(180deg, transparent 30%, rgba(var(--brand-bg-rgb), 0.9) 100%); }
         @keyframes fadeInUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
         @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 20px rgba(99,102,241,0.3); } 50% { box-shadow: 0 0 40px rgba(99,102,241,0.5); } }
@@ -80,10 +98,10 @@
         .text-gradient { background: linear-gradient(135deg, #c7d2fe 0%, #a5b4fc 30%, #818cf8 70%, #c084fc 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     </style>
 </head>
-<body class="min-h-screen text-white" style="background: #0f0a2e;">
+<body class="min-h-screen text-white bg-brand">
 
     {# Top bar #}
-    <nav class="sticky top-0 z-40 border-b border-white/10" style="background: rgba(15,10,46,0.85); backdrop-filter: blur(16px);">
+    <nav class="sticky top-0 z-40 border-b border-white/10 bg-brand-nav">
         <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
             <a href="/" class="text-xl font-bold tracking-wide font-display flex items-center gap-2" style="letter-spacing: -0.02em;">
                 <img src="/static/images/logo-mark.webp" alt="" class="w-7 h-7 rounded-md" aria-hidden="true">
@@ -101,11 +119,11 @@
         {# Hero background image #}
         <div class="absolute inset-0 z-0">
             <img src="/static/images/hero-bg.webp" alt="" class="w-full h-full object-cover opacity-40" aria-hidden="true" loading="eager">
-            <div class="absolute inset-0" style="background: linear-gradient(180deg, rgba(15,10,46,0.5) 0%, rgba(15,10,46,0.85) 70%, #0f0a2e 100%);"></div>
+            <div class="absolute inset-0 hero-overlay"></div>
         </div>
         {# Background decorative orbs #}
-        <div class="absolute top-20 left-[10%] w-72 h-72 rounded-full opacity-20 blur-3xl" style="background: radial-gradient(circle, rgba(99,102,241,0.4), transparent 70%);"></div>
-        <div class="absolute top-40 right-[10%] w-56 h-56 rounded-full opacity-15 blur-3xl" style="background: radial-gradient(circle, rgba(139,92,246,0.4), transparent 70%);"></div>
+        <div class="absolute top-20 left-[10%] w-72 h-72 rounded-full opacity-20 blur-3xl glow-orb-primary"></div>
+        <div class="absolute top-40 right-[10%] w-56 h-56 rounded-full opacity-15 blur-3xl glow-orb-accent"></div>
 
         <div class="relative mx-auto max-w-7xl px-4 sm:px-6 pt-16 pb-20 md:pt-24 md:pb-28">
             <div class="max-w-3xl mx-auto text-center space-y-8 animate-in">
@@ -138,7 +156,7 @@
 
             {# Mockup — richer app preview #}
             <div class="mt-14 md:mt-20 mx-auto max-w-2xl animate-in animate-delay-2">
-                <div class="rounded-2xl border border-white/10 p-5 md:p-6 mockup-glow" style="background: linear-gradient(180deg, rgba(26,20,68,0.7) 0%, rgba(15,10,46,0.8) 100%); backdrop-filter: blur(12px);">
+                <div class="rounded-2xl border border-white/10 p-5 md:p-6 mockup-glow bg-brand-card-strong">
                     {# Browser chrome #}
                     <div class="flex items-center gap-2 mb-4 pb-3 border-b border-white/5">
                         <div class="flex gap-1.5">
@@ -250,10 +268,10 @@
                     ('landing.feat_pwa_title', 'landing.feat_pwa_desc', '#8b5cf6', 'M10.5 1.5H8.25A2.25 2.25 0 0 0 6 3.75v16.5a2.25 2.25 0 0 0 2.25 2.25h7.5A2.25 2.25 0 0 0 18 20.25V3.75a2.25 2.25 0 0 0-2.25-2.25H13.5m-3 0V3h3V1.5m-3 0h3m-6 18h6', ['landing.feat_pwa_b1','landing.feat_pwa_b2','landing.feat_pwa_b3'], 'feature-pwa.webp')
                 ] %}
                 {% for title_key, desc_key, color, icon_path, bullets, img in features %}
-                <div class="feature-card rounded-2xl border border-white/[0.07] overflow-hidden cursor-pointer select-none" style="background: linear-gradient(180deg, rgba(26,20,68,0.5) 0%, rgba(15,10,46,0.4) 100%);" onclick="this.classList.toggle('is-expanded')">
+                <div class="feature-card rounded-2xl border border-white/[0.07] overflow-hidden cursor-pointer select-none bg-brand-card" onclick="this.classList.toggle('is-expanded')">
                     <div class="w-full h-40 overflow-hidden relative">
                         <img src="/static/images/{{ img }}" alt="" class="w-full h-full object-cover" loading="lazy" aria-hidden="true">
-                        <div class="absolute inset-0" style="background: linear-gradient(180deg, transparent 30%, rgba(15,10,46,0.9) 100%);"></div>
+                        <div class="absolute inset-0 feature-img-fade"></div>
                     </div>
                     <div class="p-6 md:p-7">
                     <div class="flex items-start justify-between gap-3">
@@ -294,7 +312,7 @@
                 ] %}
                 {% for num, title_key, desc_key, icon_path, color in steps %}
                 <div class="step-connector text-center md:text-left">
-                    <div class="rounded-2xl border border-white/[0.07] p-6 md:p-7 h-full" style="background: linear-gradient(180deg, rgba(26,20,68,0.4) 0%, rgba(15,10,46,0.3) 100%);">
+                    <div class="rounded-2xl border border-white/[0.07] p-6 md:p-7 h-full bg-brand-card-light">
                         <div class="flex items-center gap-3 mb-4">
                             <div class="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold" style="background: {{ color }}18; border: 1px solid {{ color }}30; color: {{ color }};">
                                 {{ num }}
@@ -319,7 +337,7 @@
                 <h2 class="text-3xl md:text-4xl font-extrabold font-display tracking-tight mb-4">{{ t('landing.compare_title') }}</h2>
                 <p class="text-gray-400 text-lg max-w-lg mx-auto">{{ t('landing.compare_subtitle') }}</p>
             </div>
-            <div class="overflow-x-auto rounded-2xl border border-white/[0.07]" style="background: linear-gradient(180deg, rgba(26,20,68,0.5) 0%, rgba(15,10,46,0.4) 100%);">
+            <div class="overflow-x-auto rounded-2xl border border-white/[0.07] bg-brand-card">
                 <table class="w-full text-sm" role="table">
                     <thead>
                         <tr class="border-b border-white/10">
@@ -367,7 +385,7 @@
                 <p class="text-sm font-medium text-indigo-400 mb-3 uppercase tracking-wider">{{ t('landing.founder_label') }}</p>
                 <h2 class="text-3xl md:text-4xl font-extrabold font-display tracking-tight">{{ t('landing.founder_title') }}</h2>
             </div>
-            <div class="rounded-2xl border border-white/[0.07] p-8 md:p-10" style="background: linear-gradient(180deg, rgba(26,20,68,0.5) 0%, rgba(15,10,46,0.4) 100%);">
+            <div class="rounded-2xl border border-white/[0.07] p-8 md:p-10 bg-brand-card">
                 <blockquote class="text-gray-300 text-base md:text-lg leading-relaxed italic mb-6">
                     "{{ t('landing.founder_text') }}"
                 </blockquote>
@@ -397,7 +415,7 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6 items-stretch">
                 {# Free #}
-                <div class="rounded-2xl border border-white/[0.07] p-6 md:p-7 flex flex-col" style="background: linear-gradient(180deg, rgba(26,20,68,0.5) 0%, rgba(15,10,46,0.4) 100%);">
+                <div class="rounded-2xl border border-white/[0.07] p-6 md:p-7 flex flex-col bg-brand-card">
                     <h3 class="text-lg font-bold font-display mb-1">{{ t('pricing.free_title') }}</h3>
                     <div class="text-3xl font-extrabold mb-1">0 <span class="text-sm font-normal text-gray-400">zł</span></div>
                     <p class="text-xs text-gray-500 mb-5">{{ t('landing.pricing_free_note') }}</p>
@@ -422,7 +440,7 @@
                     <a href="/pricing" class="cta-primary rounded-xl px-4 py-3 text-center text-sm font-bold transition-all duration-300 block">{{ t('pricing.get_started') }}</a>
                 </div>
                 {# Family Plus #}
-                <div class="rounded-2xl border border-white/[0.07] p-6 md:p-7 flex flex-col" style="background: linear-gradient(180deg, rgba(26,20,68,0.5) 0%, rgba(15,10,46,0.4) 100%);">
+                <div class="rounded-2xl border border-white/[0.07] p-6 md:p-7 flex flex-col bg-brand-card">
                     <h3 class="text-lg font-bold font-display mb-1">{{ t('pricing.family_title') }}</h3>
                     <div class="text-3xl font-extrabold mb-1">29 <span class="text-sm font-normal text-gray-400">zł{{ t('pricing.per_month') }}</span></div>
                     <p class="text-xs text-gray-500 mb-5">{{ t('landing.pricing_family_note') }}</p>
