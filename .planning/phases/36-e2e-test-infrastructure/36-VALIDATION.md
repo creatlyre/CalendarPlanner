@@ -1,10 +1,11 @@
 ---
 phase: 36
 slug: e2e-test-infrastructure
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: complete
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-03-25
+validated: 2026-03-25
 ---
 
 # Phase 36 — Validation Strategy
@@ -38,10 +39,10 @@ created: 2026-03-25
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 36-01-01 | 01 | 1 | INFRA-01 | config | `test -f e2e/playwright.config.ts` | ❌ W0 | ⬜ pending |
-| 36-01-02 | 01 | 1 | INFRA-02 | e2e | `npx playwright test --project=setup` | ❌ W0 | ⬜ pending |
-| 36-02-01 | 02 | 2 | INFRA-03, INFRA-04 | e2e | `npx playwright test` | ❌ W0 | ⬜ pending |
-| 36-02-02 | 02 | 2 | INFRA-05 | config | `cat .github/workflows/e2e.yml` | ❌ W0 | ⬜ pending |
+| 36-01-01 | 01 | 1 | INFRA-01 | config | `test -f e2e/playwright.config.ts` | ✅ | ✅ green |
+| 36-01-02 | 01 | 1 | INFRA-02 | e2e | `npx playwright test --project=setup` | ✅ | ✅ green |
+| 36-02-01 | 02 | 2 | INFRA-03, INFRA-04 | e2e | `npx playwright test` | ✅ | ✅ green |
+| 36-02-02 | 02 | 2 | INFRA-05 | config | `cat .github/workflows/e2e.yml` | ✅ | ✅ green |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -49,11 +50,11 @@ created: 2026-03-25
 
 ## Wave 0 Requirements
 
-- [ ] `e2e/playwright.config.ts` — Playwright config with setup project and 3 role projects
-- [ ] `e2e/auth.setup.ts` — Login all 3 accounts and save storage state
-- [ ] `@playwright/test` devDependency — install via `npm install -D @playwright/test`
+- [x] `e2e/playwright.config.ts` — Playwright config with setup project and 3 role projects
+- [x] `e2e/auth.setup.ts` — Login all 3 accounts and save storage state
+- [x] `@playwright/test` devDependency — installed
 
-*Framework installation is part of plan tasks — no separate Wave 0 needed since this IS the infrastructure phase.*
+*All Wave 0 requirements satisfied.*
 
 ---
 
@@ -67,11 +68,23 @@ created: 2026-03-25
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 30s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references
+- [x] No watch-mode flags
+- [x] Feedback latency < 30s
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** validated 2026-03-25
+
+---
+
+## Validation Audit 2026-03-25
+
+| Metric | Count |
+|--------|-------|
+| Gaps found | 0 |
+| Resolved | 0 |
+| Escalated | 0 |
+
+All 5 requirements (INFRA-01 through INFRA-05) verified against on-disk artifacts. Commits confirmed: `6458d52`, `0785397`, `2caa555`.
