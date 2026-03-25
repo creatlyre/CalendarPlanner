@@ -10,8 +10,8 @@ Dobry Plan is built for a couple or household that wants one shared source of tr
 
 ## Current Status
 
-- **Version:** v3.0 (shipped 2026-03-23)
-- **Tests:** 331 passing across 17 test files
+- **Version:** v5.1 (shipped 2026-03-25)
+- **Tests:** 581 passing across 22 test files
 - **Languages:** Polish (default), English
 - **Milestones shipped:**
   - v1.0 — Core calendar + Google sync
@@ -19,6 +19,9 @@ Dobry Plan is built for a couple or household that wants one shared source of tr
   - v2.0 — Budget tracker
   - v2.1 — Privacy, reminders, multi-year budget
   - v3.0 — Dashboard, notifications, categories, shopping list
+  - v4.0 — Monetization (billing, Stripe, pricing, self-hosted)
+  - v5.0 — Growth & conversion (landing page, SEO)
+  - v5.1 — E2E verification & brand marketing
 
 ## Feature Highlights
 
@@ -269,6 +272,9 @@ pytest -q tests/test_shopping.py tests/test_dashboard.py
 
 | Version | Date | Highlights |
 |---------|------|-----------|
+| v5.1 | 2026-03-25 | E2E Playwright tests, brand guide, SEO, landing UX, pricing clarity |
+| v5.0 | 2026-03-25 | Hero landing page, social proof, copy overhaul |
+| v4.0 | 2026-03-23 | Billing, Stripe, pricing tiers, PWA, Android wrapper, self-hosted |
 | v3.0 | 2026-03-23 | Dashboard, notifications, event/expense categories, shopping list |
 | v2.1 | 2026-03-22 | Event privacy, reminders, multi-year budget, historical import |
 | v2.0 | 2026-03-20 | Budget tracker (income, expenses, overview, stats) |

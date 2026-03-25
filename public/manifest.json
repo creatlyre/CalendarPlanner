@@ -1,7 +1,7 @@
 {
   "name": "Dobry Plan",
   "short_name": "Dobry Plan",
-  "description": "Smart household calendar & budget planner",
+  "description": "Shared household calendar, budget planner & shopping list",
   "start_url": "/dashboard",
   "display": "standalone",
   "background_color": "#0f0a2e",

@@ -66,6 +66,16 @@ class BillingService:
             )
 
         mode = "payment" if plan == "self_hosted" else "subscription"
+        extra = {}
+        if mode == "subscription":
+            extra["subscription_data"] = {
+                "metadata": {"user_id": user_id, "plan": plan},
+            }
+        else:
+            extra["payment_intent_data"] = {
+                "statement_descriptor": "DOBRYPLAN",
+            }
+
         session = stripe.checkout.Session.create(
             mode=mode,
             customer=stripe_customer_id,
@@ -73,6 +83,7 @@ class BillingService:
             success_url=success_url,
             cancel_url=cancel_url,
             metadata={"user_id": user_id, "plan": plan},
+            **extra,
         )
         return session.url
 
