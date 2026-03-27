@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Milestone:** None (v5.1 shipped 2026-03-25)
 **Status:** Idle — ready for next milestone
-Last activity: 2026-03-27 - Completed quick task 260327-h6o: Quick Add modal — Event and Expense options from top navbar button
+Last activity: 2026-03-27 - Completed quick task 260327-jbv: PWA install help and quick-add expense widget for Android homescreen
 
 ## Accumulated Context
 
@@ -46,6 +46,7 @@ Previous milestones archived. See `.planning/milestones/` for full history.
 | 260325-cyy | Add live Stripe purchase flow integration tests (checkout, portal, webhook) | 2026-03-25 | 7764574 | [260325-cyy-test-stripe-purchase-of-plan-with-fake-a](./quick/260325-cyy-test-stripe-purchase-of-plan-with-fake-a/) |
 | 260327-gf9 | Add household management options on admin dashboard - merge households, transfer members between households | 2026-03-27 | 01c6bb5 | [260327-gf9-add-household-management-options-on-admi](./quick/260327-gf9-add-household-management-options-on-admi/) |
 | 260327-h6o | Quick Add modal: Event and Expense options from top navbar button | 2026-03-27 | 7d0f8b1 | [260327-h6o-quick-add-modal-event-and-expense-option](./quick/260327-h6o-quick-add-modal-event-and-expense-option/) |
+| 260327-jbv | Add PWA install help and quick-add expense widget for Android homescreen | 2026-03-27 | ff2540a | [260327-jbv-add-pwa-install-help-and-quick-add-expen](./quick/260327-jbv-add-pwa-install-help-and-quick-add-expen/) |
 
 ### Pending Todos
 
