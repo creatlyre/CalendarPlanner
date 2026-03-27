@@ -101,25 +101,40 @@
 <body class="min-h-screen text-white bg-brand">
 
     {# Top bar #}
-    <nav class="sticky top-0 z-40 border-b border-white/10 bg-brand-nav">
+    <nav class="sticky top-0 z-40 border-b border-white/10 bg-brand-nav" aria-label="Main navigation">
         <div class="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
             <a href="/" class="text-xl font-bold tracking-wide font-display flex items-center gap-2" style="letter-spacing: -0.02em;">
                 <img src="/static/images/logo-mark.webp" alt="" class="w-7 h-7 rounded-md" aria-hidden="true">
                 {{ t('app.name') }}
             </a>
-            <div class="flex items-center gap-4">
-                <a href="#features" class="text-sm text-gray-300 hover:text-white transition-colors hidden sm:inline">{{ t('landing.nav_features') }}</a>
-                <a href="/pricing" class="text-sm text-gray-300 hover:text-white transition-colors hidden sm:inline">{{ t('landing.nav_pricing') }}</a>
-                <a href="/auth/login" class="rounded-xl px-4 py-2 text-sm font-medium border border-white/20 hover:bg-white/10 transition-all duration-200 hidden sm:inline-flex">{{ t('landing.nav_sign_in') }}</a>
-                <button class="sm:hidden p-2 text-gray-300 hover:text-white transition-colors" onclick="const m=document.getElementById('mobile-menu');m.classList.toggle('hidden');this.setAttribute('aria-expanded',m.classList.contains('hidden')?'false':'true')" aria-expanded="false" aria-controls="mobile-menu" aria-label="Menu">
-                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+            {# Desktop nav — always visible on sm+ #}
+            <div class="hidden sm:flex items-center gap-4">
+                <a href="#features" class="text-sm text-gray-300 hover:text-white transition-colors">{{ t('landing.nav_features') }}</a>
+                <a href="/pricing" class="text-sm text-gray-300 hover:text-white transition-colors">{{ t('landing.nav_pricing') }}</a>
+                <a href="/auth/login" class="rounded-xl px-5 py-2.5 text-sm font-semibold border border-white/20 hover:bg-white/10 transition-all duration-200 inline-flex items-center">{{ t('landing.nav_sign_in') }}</a>
+            </div>
+            {# Mobile: Sign In button always visible + burger for extra links #}
+            <div class="flex items-center gap-3 sm:hidden">
+                <a href="/auth/login" class="rounded-xl px-4 py-2 text-sm font-semibold border border-indigo-400/40 bg-indigo-500/15 text-indigo-200 hover:bg-indigo-500/25 transition-all duration-200">{{ t('landing.nav_sign_in') }}</a>
+                <button id="mobile-menu-btn" class="p-2 min-h-[44px] min-w-[44px] flex items-center justify-center rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-colors" onclick="const m=document.getElementById('mobile-menu');const open=m.classList.toggle('hidden');this.setAttribute('aria-expanded',!open)" aria-expanded="false" aria-controls="mobile-menu" aria-label="Toggle menu">
+                    <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
                 </button>
             </div>
         </div>
-        <div id="mobile-menu" class="hidden sm:hidden border-t border-white/10 px-4 pb-4 pt-2 space-y-2">
-            <a href="#features" class="block text-sm text-gray-300 hover:text-white transition-colors py-2">{{ t('landing.nav_features') }}</a>
-            <a href="/pricing" class="block text-sm text-gray-300 hover:text-white transition-colors py-2">{{ t('landing.nav_pricing') }}</a>
-            <a href="/auth/login" class="block rounded-xl px-4 py-2 text-sm font-medium border border-white/20 hover:bg-white/10 transition-all duration-200 text-center">{{ t('landing.nav_sign_in') }}</a>
+        {# Mobile dropdown — solid background, no transparency bleed #}
+        <div id="mobile-menu" class="hidden sm:hidden border-t border-white/10 px-4 pb-4 pt-3 space-y-1" style="background: var(--brand-bg);">
+            <a href="#features" class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-gray-200 hover:text-white hover:bg-white/10 transition-colors min-h-[44px]" onclick="document.getElementById('mobile-menu').classList.add('hidden');document.getElementById('mobile-menu-btn').setAttribute('aria-expanded','false')">
+                <svg class="w-5 h-5 text-indigo-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 2 3.09 6.26L22 9.27l-5 4.87L18.18 22 12 18.27 5.82 22 7 14.14 2 9.27l6.91-1.01z"/></svg>
+                {{ t('landing.nav_features') }}
+            </a>
+            <a href="/pricing" class="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-gray-200 hover:text-white hover:bg-white/10 transition-colors min-h-[44px]">
+                <svg class="w-5 h-5 text-indigo-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+                {{ t('landing.nav_pricing') }}
+            </a>
+            <a href="/auth/register" class="flex items-center justify-center gap-2 rounded-xl px-4 py-3 text-sm font-semibold text-white min-h-[44px] mt-2 transition-all duration-200" style="background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);">
+                {{ t('landing.hero_cta') }}
+                <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+            </a>
         </div>
     </nav>
 

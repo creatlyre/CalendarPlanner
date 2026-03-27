@@ -1,19 +1,19 @@
-<div class="glass rounded-2xl p-4">
-    <div class="mb-4 flex items-center justify-between">
-        <button class="glass-btn-secondary rounded-xl px-4 py-2 text-sm min-h-[44px]" hx-get="/calendar/month?year={{ prev_year }}&month={{ prev_month }}" hx-target="#month-grid" hx-swap="innerHTML" onclick="setMonthState({{ prev_year }}, {{ prev_month }})">&larr; {{ t('month.prev') }}</button>
-        <h3 class="text-section-title text-white">{{ display_month_name }} {{ display_year }}</h3>
-        <button class="glass-btn-secondary rounded-xl px-4 py-2 text-sm min-h-[44px]" hx-get="/calendar/month?year={{ next_year }}&month={{ next_month }}" hx-target="#month-grid" hx-swap="innerHTML" onclick="setMonthState({{ next_year }}, {{ next_month }})">{{ t('month.next') }} &rarr;</button>
+<div class="glass rounded-2xl p-3 sm:p-4">
+    <div class="mb-3 sm:mb-4 flex items-center justify-between gap-2">
+        <button class="glass-btn-secondary rounded-xl px-3 py-2 text-xs sm:text-sm min-h-[44px]" hx-get="/calendar/month?year={{ prev_year }}&month={{ prev_month }}" hx-target="#month-grid" hx-swap="innerHTML" onclick="setMonthState({{ prev_year }}, {{ prev_month }})">&larr; {{ t('month.prev') }}</button>
+        <h3 class="text-section-title text-white text-center">{{ display_month_name }} {{ display_year }}</h3>
+        <button class="glass-btn-secondary rounded-xl px-3 py-2 text-xs sm:text-sm min-h-[44px]" hx-get="/calendar/month?year={{ next_year }}&month={{ next_month }}" hx-target="#month-grid" hx-swap="innerHTML" onclick="setMonthState({{ next_year }}, {{ next_month }})">{{ t('month.next') }} &rarr;</button>
     </div>
     <div class="grid grid-cols-7 gap-1 sm:gap-2 text-xs font-semibold uppercase text-white/50 mb-1">
         <div>{{ t('weekday.mon') }}</div><div>{{ t('weekday.tue') }}</div><div>{{ t('weekday.wed') }}</div><div>{{ t('weekday.thu') }}</div><div>{{ t('weekday.fri') }}</div>
         <div class="text-indigo-300/70">{{ t('weekday.sat') }}</div><div class="text-indigo-300/70">{{ t('weekday.sun') }}</div>
     </div>
-    <div class="mt-1 grid grid-cols-7 gap-1 sm:gap-2 text-xs">
+    <div class="mt-1 grid grid-cols-7 gap-0.5 sm:gap-2 text-xs">
         {% for week in weeks %}
             {% for day in week %}
             {% set key = day.isoformat() %}
             {% set items = event_map.get(key, []) %}
-            <button class="min-h-[84px] sm:min-h-[100px] rounded-xl border p-2 text-left transition-all duration-150 cursor-pointer {{ 'bg-indigo-500/30 border-indigo-400/60 shadow-lg' if day == today else 'bg-white/[0.04] border-white/10 hover:bg-white/[0.11] hover:border-white/22' }}" data-year="{{ day.year }}" data-month="{{ day.month }}" data-day="{{ day.day }}" onclick="loadDay({{ day.year }}, {{ day.month }}, {{ day.day }})" aria-label="{{ day.day }}/{{ day.month }}/{{ day.year }} – {{ items|length }} {{ t('month.more') }}">
+            <button class="min-h-[68px] sm:min-h-[100px] rounded-lg sm:rounded-xl border p-1 sm:p-2 text-left transition-all duration-150 cursor-pointer {{ 'bg-indigo-500/30 border-indigo-400/60 shadow-lg' if day == today else 'bg-white/[0.04] border-white/10 hover:bg-white/[0.11] hover:border-white/22' }}" data-year="{{ day.year }}" data-month="{{ day.month }}" data-day="{{ day.day }}" onclick="loadDay({{ day.year }}, {{ day.month }}, {{ day.day }})" aria-label="{{ day.day }}/{{ day.month }}/{{ day.year }} – {{ items|length }} {{ t('month.more') }}">
                 <div class="font-semibold {{ 'text-indigo-200' if day == today else 'text-white/75' }}">{{ day.day }}</div>
                 {% for event in items[:2] %}
                 {% set cat = category_map.get(event.category_id) if event.category_id else None %}

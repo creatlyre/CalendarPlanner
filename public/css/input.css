@@ -826,6 +826,28 @@ html.light-mode .glass-interactive:hover {
     min-height: 44px;
   }
 
+  /* ── Top nav: compact on mobile ──────────────────────── */
+  nav.glass .mx-auto {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    height: auto;
+    min-height: 3.5rem;
+  }
+  nav.glass .mx-auto .text-xl {
+    font-size: 1rem;
+  }
+  nav.glass .mx-auto .text-xl img {
+    width: 1.375rem;
+    height: 1.375rem;
+  }
+
+  /* ── Main content: tighter horizontal padding ────────── */
+  main.mx-auto {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    padding-top: 1rem;
+  }
+
   /* Stack quick-add modal buttons vertically on small screens */
   #qa-text-entry .mt-4.flex {
     flex-direction: column;
@@ -849,15 +871,58 @@ html.light-mode .glass-interactive:hover {
     margin: 0.5rem;
   }
 
-  /* Budget sidebar: always vertical on mobile */
+  /* ── Budget sidebar: horizontal scroll pills on mobile ── */
   nav .flex.lg\:flex-col {
-    flex-direction: column;
+    flex-direction: row;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 0.375rem;
+    padding-bottom: 0.25rem;
+  }
+  nav .flex.lg\:flex-col::-webkit-scrollbar {
+    display: none;
+  }
+  nav .flex.lg\:flex-col a,
+  nav .flex.lg\:flex-col div {
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-size: 0.75rem;
+    padding: 0.5rem 0.75rem;
   }
 
   /* Larger table rows for touch */
   table th, table td {
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
+  }
+
+  /* ── Budget overview table: card-like rows on mobile ──── */
+  #overview-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: rgba(15, 12, 41, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  html.light-mode #overview-table thead {
+    background: rgba(255, 255, 255, 0.95);
+  }
+  #overview-table th {
+    font-size: 0.625rem;
+    padding: 0.375rem 0.25rem;
+    letter-spacing: 0.03em;
+  }
+  #overview-table td {
+    font-size: 0.75rem;
+    padding: 0.5rem 0.25rem;
+  }
+  /* Narrower first column so numbers get more space */
+  #overview-table th:first-child,
+  #overview-table td:first-child {
+    min-width: 4.5rem;
+    max-width: 5.5rem;
   }
 
   /* Prevent iOS zoom on input focus (font-size >= 16px) */
@@ -872,10 +937,93 @@ html.light-mode .glass-interactive:hover {
 
   /* Budget tables: horizontal scroll on small screens */
   .table-responsive {
-    margin-left: -0.5rem;
-    margin-right: -0.5rem;
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
+    margin-left: -0.25rem;
+    margin-right: -0.25rem;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ── Calendar grid: compact cells on mobile ──────────── */
+  #month-grid .grid.grid-cols-7 button {
+    min-height: 64px;
+    padding: 0.25rem;
+    font-size: 0.625rem;
+    border-radius: 0.5rem;
+  }
+  #month-grid .grid.grid-cols-7 button .font-semibold {
+    font-size: 0.75rem;
+  }
+  #month-grid .grid.grid-cols-7 button .truncate {
+    font-size: 0.5625rem;
+    padding: 0.125rem 0.25rem;
+    line-height: 1.3;
+  }
+  /* Calendar day header labels */
+  #month-grid .grid.grid-cols-7.text-xs {
+    font-size: 0.5625rem;
+  }
+  /* Month nav buttons */
+  #month-grid .flex.items-center.justify-between {
+    gap: 0.5rem;
+  }
+  #month-grid .flex.items-center.justify-between .text-section-title {
+    font-size: 0.875rem;
+  }
+  #month-grid .flex.items-center.justify-between button {
+    padding: 0.375rem 0.625rem;
+    font-size: 0.75rem;
+  }
+
+  /* ── Calendar sidebar: move below grid on mobile ─────── */
+  .grid.grid-cols-1.lg\:grid-cols-4 {
+    display: flex;
+    flex-direction: column;
+  }
+  .grid.grid-cols-1.lg\:grid-cols-4 > aside {
+    order: 2;
+  }
+
+  /* ── Day events: stack edit/delete buttons ─────────────── */
+  #day-events li .flex.items-center.justify-between {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  #day-events li .flex.gap-2.ml-2 {
+    margin-left: 0;
+    width: 100%;
+  }
+  #day-events li .flex.gap-2.ml-2 button {
+    flex: 1;
+  }
+
+  /* ── Dashboard: full-width cards ──────────────────────── */
+  .grid.grid-cols-1.lg\:grid-cols-2 {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Dashboard quick-add: stack buttons ──────────────── */
+  .grid.grid-cols-1.sm\:grid-cols-3 {
+    gap: 0.5rem;
+  }
+
+  /* ── 7-day preview: tighter spacing ──────────────────── */
+  .space-y-1 .ml-\[56px\] {
+    margin-left: 2.75rem;
+  }
+
+  /* ── FAB: account for bottom nav ──────────────────────── */
+  #qa-fab {
+    bottom: 5rem;
+  }
+
+  /* ── Footer: tighter on mobile ───────────────────────── */
+  footer {
+    margin-bottom: 0;
+    padding-bottom: 1rem;
   }
 
   /* Bottom mobile nav */
@@ -887,16 +1035,16 @@ html.light-mode .glass-interactive:hover {
     z-index: 40;
     display: flex;
     justify-content: space-around;
-    padding: 0.5rem 0;
-    padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+    padding: 0.375rem 0;
+    padding-bottom: max(0.375rem, env(safe-area-inset-bottom));
     backdrop-filter: blur(24px);
     -webkit-backdrop-filter: blur(24px);
-    background: rgba(15, 12, 41, 0.85);
+    background: rgba(15, 12, 41, 0.92);
     border-top: 1px solid rgba(255, 255, 255, 0.12);
     box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.3);
   }
   html.light-mode .mobile-bottom-nav {
-    background: rgba(255, 255, 255, 0.88);
+    background: rgba(255, 255, 255, 0.92);
     border-top: 1px solid rgba(99, 102, 241, 0.15);
     box-shadow: 0 -4px 24px rgba(99, 102, 241, 0.08);
   }
@@ -905,14 +1053,15 @@ html.light-mode .glass-interactive:hover {
     flex-direction: column;
     align-items: center;
     gap: 0.125rem;
-    font-size: 0.625rem;
-    font-weight: 500;
+    font-size: 0.5625rem;
+    font-weight: 600;
     color: rgba(255, 255, 255, 0.5);
-    min-width: 64px;
+    min-width: 56px;
     min-height: 44px;
     justify-content: center;
     text-decoration: none;
     transition: color 0.2s;
+    letter-spacing: 0.01em;
   }
   html.light-mode .mobile-bottom-nav a { color: rgba(55, 65, 81, 0.5); }
   .mobile-bottom-nav a.active { color: var(--color-primary-light); }
@@ -934,14 +1083,94 @@ html.light-mode .glass-interactive:hover {
   /* Add padding at bottom to account for mobile nav */
   body { padding-bottom: 4.5rem; }
 
-  /* Mobile hero stat card: full-width & more breathing room */
+  /* Mobile hero stat card: better padding */
   .glass-hero {
-    padding: 1.25rem;
+    padding: 1rem;
   }
 
   /* Glass subtle for nested cards on mobile: reduce padding */
   .glass-subtle {
+    padding: 0.625rem;
+  }
+
+  /* Glass panels: tighter padding on mobile */
+  .glass.rounded-2xl {
+    padding: 1rem;
+    border-radius: 1rem;
+  }
+
+  /* Glass elevated cards: tighter on mobile */
+  .glass-elevated {
+    padding: 1rem;
+    border-radius: 1rem;
+  }
+
+  /* ── Typography scale-down for mobile ────────────────── */
+  .text-page-title {
+    font-size: 1.375rem;
+  }
+  .text-section-title {
+    font-size: 1rem;
+  }
+  .text-stat {
+    font-size: inherit; /* let utility classes control */
+  }
+
+  /* ── Shopping page: tighter layout ───────────────────── */
+  #shopping-content .flex.items-center.justify-between h2 {
+    font-size: 1.125rem;
+  }
+
+  /* ── Budget stats summary cards: 2 columns ───────────── */
+  #summary-cards {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.5rem;
+  }
+  #summary-cards .glass {
     padding: 0.75rem;
+  }
+  #summary-cards .text-lg {
+    font-size: 0.9375rem;
+  }
+
+  /* ── Pie chart: smaller on mobile ────────────────────── */
+  #category-pie {
+    width: 10rem;
+    height: 10rem;
+  }
+  #category-pie > div:first-child {
+    width: 6rem;
+    height: 6rem;
+  }
+}
+
+/* ── Extra-small screens (≤ 374px, e.g. iPhone SE) ─────── */
+@media (max-width: 374px) {
+  main.mx-auto {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  /* Even more compact calendar cells */
+  #month-grid .grid.grid-cols-7 button {
+    min-height: 52px;
+    padding: 0.125rem;
+  }
+  #month-grid .grid.grid-cols-7 button .truncate {
+    display: none; /* hide event preview in tiny cells */
+  }
+
+  /* Bottom nav: narrower items */
+  .mobile-bottom-nav a {
+    min-width: 48px;
+    font-size: 0.5rem;
+  }
+
+  /* Budget sidebar pills: smaller */
+  nav .flex.lg\:flex-col a,
+  nav .flex.lg\:flex-col div {
+    font-size: 0.6875rem;
+    padding: 0.375rem 0.5rem;
   }
 }
 

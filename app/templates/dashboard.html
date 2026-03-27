@@ -43,9 +43,9 @@
                 <span class="cat-dot bg-white/30"></span>
               {% endif %}
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium truncate">{{ event.title }}</p>
+                <p class="text-sm font-medium truncate" title="{{ event.title }}">{{ event.title }}</p>
               </div>
-              <span class="text-caption opacity-60 flex-shrink-0 font-mono">{{ event.start_at.strftime('%H:%M') }} – {{ event.end_at.strftime('%H:%M') }}</span>
+              <span class="text-caption opacity-60 flex-shrink-0 font-mono whitespace-nowrap">{{ event.start_at.strftime('%H:%M') }} – {{ event.end_at.strftime('%H:%M') }}</span>
             </div>
           {% endfor %}
           {% if today_overflow > 0 %}
