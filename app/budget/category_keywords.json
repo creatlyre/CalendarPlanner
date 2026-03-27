@@ -7,19 +7,27 @@
   "Pets": [
     "karma psy", "karma kot", "karma dla", "dog food", "cat food", "pet food",
     "strzyzenie psy", "grooming",
-    "szampon dla psow", "szampon dla ps",
     "worki dla psow", "worki dla ps",
     "weterynarz", "weterynar", "veterinar", "vet visit",
     "smycz", "obroza", "kaganiec",
     "kuweta", "zwirek", "legowisko",
     "szczepienie psa", "szczepienie kota",
     "zwierzeta", "pet shop", "petshop",
-    "zooplus", "kakadu", "maxi zoo", "maxizoo"
+    "zooplus", "kakadu", "maxi zoo", "maxizoo",
+    "royal canin", "purina", "whiskas", "pedigree", "brit",
+    "akwarium", "aquarium", "terrarium",
+    "transporter dla", "kojec"
   ],
 
   "Loan": [
     "pozyczka", "pozyczki",
-    "splata pozyczki"
+    "splata pozyczki",
+    "rata", "raty", "splata", "dlug",
+    "chwilowka", "windykacja", "komornik",
+    "refinansowanie", "splacanie",
+    "loan", "installment", "repayment",
+    "debt", "financing", "credit payment",
+    "monthly payment"
   ],
 
   "Garden": [
@@ -68,7 +76,11 @@
     "adapter", "przejsciowka",
     "listwa zasilajaca",
     "tablet", "smartwatch", "gopro",
-    "ryza a4", "papier do drukarki"
+    "ryza a4", "papier do drukarki",
+    "smartfon", "smartphone",
+    "telewizor", "television",
+    "apple", "samsung", "xiaomi", "huawei",
+    "konsola do gier"
   ],
 
   "Children": [
@@ -113,7 +125,14 @@
     "nusia",
     "pilka gabi",
     "akcesoria baby",
-    "tekturowy domek"
+    "tekturowy domek",
+    "dziecko", "butelka", "smoczek",
+    "fotelik samochodowy", "fotelik",
+    "mleko modyfikowane", "formula", "baby formula",
+    "child", "kids", "toddler",
+    "coccodrillo", "51015",
+    "wycieczka szkolna", "szkolna wplata",
+    "babyshower", "baby shower", "wyprawka"
   ],
 
   "Personal Care": [
@@ -145,7 +164,10 @@
     "majtki", "underwear",
     "podklady do przewijania",
     "szampony ewa",
-    "miarka"
+    "miarka",
+    "manicure", "pedicure", "paznokcie", "depilacja",
+    "spa", "masaz", "massage", "salon kosmetyczny",
+    "skincare", "wax", "nail polish"
   ],
 
   "Clothing": [
@@ -179,7 +201,10 @@
     "sinsay", "reserved", "zara", "naoko", "hm",
     "vinted", "next natalia",
     "ciuszki", "ciuchy",
-    "body dla julki"
+    "body dla julki",
+    "deichmann", "ccc", "halfprice",
+    "tkmaxx", "tk maxx", "zalando", "modivo", "aboutyou",
+    "nike", "adidas", "new balance", "puma"
   ],
 
   "Events": [
@@ -212,7 +237,10 @@
     "zadatek za sesje",
     "koryto",
     "adwentowy", "kalendarz adwentowy",
-    "urodizny"
+    "urodizny",
+    "zaproszenie", "invitation",
+    "dekoracje", "decoration",
+    "balony", "balloon"
   ],
 
   "Savings & Finance": [
@@ -247,7 +275,11 @@
     "oplata konto", "oplaty konto",
     "ewa brak wyplaty",
     "zaliczka auto",
-    "wplata wstepna"
+    "wplata wstepna",
+    "inwestycja", "investment", "fundusz", "fund",
+    "lokata", "obligacje", "bonds",
+    "akcje", "stocks", "prowizja", "commission",
+    "broker", "makler", "dywidenda", "dividend"
   ],
 
   "Travel": [
@@ -266,7 +298,13 @@
     "zaliczka wakacje",
     "osobne koszty rezygnacji",
     "worek na walizki",
-    "oslona przeciwdeszczowa"
+    "oslona przeciwdeszczowa",
+    "ryanair", "wizzair", "wizz air", "easyjet", "lot polish",
+    "wycieczka", "kemping", "camping", "namiot",
+    "turystyka", "wczasy", "agroturystyka",
+    "kolonie", "oboz", "kurorz", "all inclusive",
+    "cruise", "excursion", "resort", "tour guide",
+    "souvenir", "itinerary"
   ],
 
   "Groceries": [
@@ -306,7 +344,12 @@
     "czipsy jablkowe",
     "maselniczka",
     "opiekacz",
-    "foremki ceramiczne"
+    "foremki ceramiczne",
+    "piekarnia", "bakery", "masarnia", "butcher",
+    "delikatesy", "warzywniak",
+    "obiad", "sniadanie", "kolacja",
+    "lunch", "dinner", "breakfast",
+    "napoje", "alkohol"
   ],
 
   "Rent": [
@@ -316,7 +359,12 @@
     "czynsz", "najem", "najm", "wynajem", "mieszkanie",
     "administracja", "wspolnota",
     "spoldzielnia", "kaucja", "lokal",
-    "kawalerka", "pokoj", "nieruchomosc"
+    "kawalerka", "pokoj", "nieruchomosc",
+    "fundusz remontowy", "podatek od nieruchomosci",
+    "oplata za mieszkanie", "zarzadca",
+    "wspolnota mieszkaniowa", "administrator budynku",
+    "property tax", "HOA", "maintenance fee",
+    "homeowners", "strata fee"
   ],
 
   "Utilities": [
@@ -337,7 +385,8 @@
     "oczyszczalnia", "czyszczenie oczyszczalni",
     "prad na rok",
     "tabletki solne",
-    "filtry sznurkowy", "filtr piankowy"
+    "filtry sznurkowy", "filtr piankowy",
+    "swiatlowod", "fiber optic", "5g", "lte"
   ],
 
   "Transport": [
@@ -363,7 +412,11 @@
     "zestaw do mycia auta",
     "plyn do spryskiwaczy",
     "naprawa kluczy do samochodu",
-    "wymiana opon", "nowe opony"
+    "wymiana opon", "nowe opony",
+    "e-toll", "viatoll", "jakdojade", "koleo", "e-podroznik",
+    "mandat", "laweta", "holowanie",
+    "bilet miesieczny", "car sharing",
+    "panek", "traficar"
   ],
 
   "Health": [
@@ -402,7 +455,11 @@
     "innofer", "aromactiv",
     "uroginekologia", "ginekolog",
     "kompresy", "dicoflor", "inovitum",
-    "wyprawka apteka"
+    "wyprawka apteka",
+    "gemini", "doz", "dbam o zdrowie", "apteka melissa",
+    "stomatologia", "protetyka", "korona zebowa",
+    "implant", "orteza", "kule ortopedyczne",
+    "apap", "ibuprom", "paracetamol", "nurofen", "rutinoscorbin"
   ],
 
   "Education": [
@@ -434,7 +491,10 @@
     "zadania", "naklejkami",
     "ksiazki pakiet",
     "ksiazki edukacyjne",
-    "zapis szkola"
+    "zapis szkola",
+    "szkola jezykowa", "kurs online", "korepetycje",
+    "e-learning", "online course", "tutorial",
+    "lekcje muzyki", "lekcje plywania"
   ],
 
   "Entertainment": [
@@ -472,7 +532,9 @@
     "ogrod swiatel",
     "bilety teatr", "bilter kino",
     "pizza po basenie",
-    "kawiarnia po butach"
+    "kawiarnia po butach",
+    "laser tag", "paintball", "karaoke",
+    "bilard", "dart", "darts"
   ],
 
   "Home": [
@@ -548,7 +610,9 @@
     "duzy walek",
     "golarka do ubran",
     "sprzet agd", "agd",
-    "podkladki"
+    "podkladki",
+    "remont", "renovation",
+    "malowanie", "tapeta", "wallpaper"
   ],
 
   "Shopping": [
@@ -573,7 +637,10 @@
     "rtv euro agd",
     "komputronik",
     "x-kom", "xkom",
-    "morele"
+    "morele",
+    "inpost", "paczkomat", "kurier",
+    "dhl", "dpd", "ups kurier",
+    "paczka", "przesylka", "zamowienie"
   ],
 
   "Other": []
