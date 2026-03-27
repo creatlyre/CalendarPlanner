@@ -35,10 +35,17 @@
   "orientation": "any",
   "shortcuts": [
     {
-      "name": "Quick Add Expense",
-      "short_name": "Expense",
-      "description": "Quickly add a one-time expense",
+      "name": "Szybki wydatek",
+      "short_name": "Wydatek",
+      "description": "Szybko dodaj jednorazowy wydatek",
       "url": "/budget/quick-expense",
+      "icons": [{ "src": "/static/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
+    },
+    {
+      "name": "Podgląd budżetu",
+      "short_name": "Budżet",
+      "description": "Przejdź do przeglądu budżetu",
+      "url": "/budget/overview",
       "icons": [{ "src": "/static/icons/icon-192.png", "sizes": "192x192", "type": "image/png" }]
     }
   ]

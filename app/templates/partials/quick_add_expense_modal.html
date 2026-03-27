@@ -128,6 +128,8 @@
 
 <!-- Mobile: override to full-screen -->
 <style>
+  /* Fieldsets have implicit min-width: min-content that can overflow on mobile */
+  .qa-expense-row { min-width: 0; }
   @media (max-width: 640px) {
     #qa-expense-panel {
       max-width: 100%;
