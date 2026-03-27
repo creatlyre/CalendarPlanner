@@ -214,19 +214,16 @@
         </div>
         <div class="flex flex-col gap-3 px-6 py-5">
           <button id="qa-chooser-event" type="button"
-                  onclick="var c=document.getElementById('qa-chooser-modal');c.classList.add('hidden');c.classList.remove('flex');if(window.qaOpenModal)window.qaOpenModal();else window.location.href='/calendar'"
                   class="glass-btn-primary rounded-xl px-4 py-4 text-sm font-medium min-h-[56px] flex items-center justify-center gap-2 w-full">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
             {{ t('qa.chooser_event') }}
           </button>
           <button id="qa-chooser-expense" type="button"
-                  onclick="var c=document.getElementById('qa-chooser-modal');c.classList.add('hidden');c.classList.remove('flex');window.location.href='/calendar?open=expense'"
                   class="glass-btn-info rounded-xl px-4 py-4 text-sm font-medium min-h-[56px] flex items-center justify-center gap-2 w-full">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
             {{ t('qa.chooser_expense') }}
           </button>
           <button id="qa-chooser-shopping" type="button"
-                  onclick="var c=document.getElementById('qa-chooser-modal');c.classList.add('hidden');c.classList.remove('flex');window.location.href='/shopping'"
                   class="glass-btn-secondary rounded-xl px-4 py-4 text-sm font-medium min-h-[56px] flex items-center justify-center gap-2 w-full">
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
             {{ t('qa.chooser_shopping') }}
@@ -236,6 +233,7 @@
     </div>
 
     {% include "partials/quick_add_modal.html" %}
+    {% include "partials/quick_add_expense_modal.html" %}
     {% endif %}
 
     <script>
@@ -243,6 +241,14 @@
     Object.assign(I18N, {
       eventSaved: {{ t('events.saved')|tojson }},
       failedSaveEvent: {{ t('errors.save_event_failed')|tojson }},
+      expenseSaved: {{ t('qa.expense_saved')|tojson }},
+      expenseSavedMulti: {{ t('qa.expense_saved_multi')|tojson }},
+      expenseNameRequired: {{ t('qa.expense_name_required')|tojson }},
+      expenseAmountRequired: {{ t('qa.expense_amount_required')|tojson }},
+      expenseSaveFailed: {{ t('qa.expense_save_failed')|tojson }},
+      expenseNetworkError: {{ t('qa.expense_network_error')|tojson }},
+      expenseCategoryNone: {{ t('qa.expense_category_none')|tojson }},
+      expenseRemoveRow: {{ t('qa.expense_remove_row')|tojson }},
       errPastWhat: {{ t('qa.err_past_what')|tojson }},
       errPastWhy: {{ t('qa.err_past_why')|tojson }},
       errPastFix: {{ t('qa.err_past_fix')|tojson }},
@@ -1047,12 +1053,277 @@
       });
       document.getElementById('qa-chooser-expense')?.addEventListener('click', () => {
         closeChooser();
-        window.location.href = '/calendar?open=expense';
+        if (window.qaOpenExpenseModal) window.qaOpenExpenseModal();
+        else window.location.href = '/calendar?open=expense';
       });
       document.getElementById('qa-chooser-shopping')?.addEventListener('click', () => {
         closeChooser();
         window.location.href = '/shopping';
       });
+    })();
+    </script>
+
+    <!-- Quick-Add Expense Modal Logic -->
+    <script>
+    (function() {
+      const modal = document.getElementById('qa-expense-modal');
+      if (!modal) return;
+
+      const rowsContainer = document.getElementById('qa-expense-rows');
+      const addRowBtn = document.getElementById('qa-expense-add-row-btn');
+      const saveCloseBtn = document.getElementById('qa-expense-save-close-btn');
+      const saveAnotherBtn = document.getElementById('qa-expense-save-another-btn');
+      const closeBtn = document.getElementById('qa-expense-close-btn');
+      const errorEl = document.getElementById('qa-expense-error');
+      const srStatus = document.getElementById('qa-expense-sr-status');
+
+      let expenseCategoriesCache = [];
+      let _expenseSaving = false;
+
+      // ── Category loading ─────────────────────────────────────────
+      async function loadExpenseCategories() {
+        if (expenseCategoriesCache.length > 0) return;
+        try {
+          const res = await fetch('/api/budget/expenses/categories');
+          if (res.ok) {
+            const data = await res.json();
+            expenseCategoriesCache = data.data || data || [];
+            populateExpenseCategoryDropdowns();
+          }
+        } catch (_) {}
+      }
+
+      function populateExpenseCategoryDropdowns() {
+        modal.querySelectorAll('.qa-expense-category').forEach(sel => {
+          const current = sel.value;
+          sel.innerHTML = '<option value="">' + (I18N.expenseCategoryNone || 'No category') + '</option>';
+          expenseCategoriesCache.forEach(cat => {
+            const opt = document.createElement('option');
+            opt.value = cat.id;
+            opt.textContent = cat.name;
+            if (cat.color) opt.style.color = cat.color;
+            sel.appendChild(opt);
+          });
+          if (current) sel.value = current;
+        });
+      }
+
+      // ── Open / Close ─────────────────────────────────────────────
+      function openExpenseModal() {
+        resetExpenseForm();
+        loadExpenseCategories();
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+        const firstInput = modal.querySelector('.qa-expense-name');
+        if (firstInput) firstInput.focus();
+      }
+
+      function closeExpenseModal() {
+        if (_expenseSaving) return;
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        resetExpenseForm();
+      }
+
+      window.qaOpenExpenseModal = openExpenseModal;
+
+      function resetExpenseForm() {
+        // Keep only the first row, remove extras
+        const rows = rowsContainer.querySelectorAll('.qa-expense-row');
+        rows.forEach((row, i) => { if (i > 0) row.remove(); });
+        // Clear first row fields
+        const firstRow = rowsContainer.querySelector('.qa-expense-row');
+        if (firstRow) {
+          firstRow.querySelector('.qa-expense-name').value = '';
+          firstRow.querySelector('.qa-expense-amount').value = '';
+          firstRow.querySelector('.qa-expense-category').value = '';
+          const now = new Date();
+          firstRow.querySelector('.qa-expense-month').value = String(now.getMonth() + 1);
+          firstRow.querySelector('.qa-expense-year').value = String(now.getFullYear());
+        }
+        hideExpenseError();
+        _expenseSaving = false;
+      }
+
+      // ── Add / Remove rows ────────────────────────────────────────
+      function createExpenseRow() {
+        const firstRow = rowsContainer.querySelector('.qa-expense-row');
+        const newRow = firstRow.cloneNode(true);
+        const count = rowsContainer.querySelectorAll('.qa-expense-row').length + 1;
+        newRow.setAttribute('aria-label', (I18N.expenseCategoryNone ? 'Expense' : 'Expense') + ' ' + count);
+        newRow.querySelector('legend').textContent = 'Expense ' + count;
+        newRow.querySelector('.qa-expense-name').value = '';
+        newRow.querySelector('.qa-expense-amount').value = '';
+        newRow.querySelector('.qa-expense-category').value = '';
+        // Keep same month/year as first
+        const now = new Date();
+        newRow.querySelector('.qa-expense-month').value = String(now.getMonth() + 1);
+        newRow.querySelector('.qa-expense-year').value = String(now.getFullYear());
+        // Add remove button
+        const removeBtn = document.createElement('button');
+        removeBtn.type = 'button';
+        removeBtn.className = 'absolute top-2 right-2 text-red-400 hover:text-red-300 rounded-lg p-1 min-h-[32px] min-w-[32px] flex items-center justify-center';
+        removeBtn.setAttribute('aria-label', I18N.expenseRemoveRow || 'Remove');
+        removeBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>';
+        removeBtn.addEventListener('click', () => {
+          newRow.remove();
+          renumberRows();
+        });
+        newRow.style.position = 'relative';
+        newRow.appendChild(removeBtn);
+        // Populate categories
+        populateExpenseCategoryDropdowns();
+        rowsContainer.appendChild(newRow);
+        newRow.querySelector('.qa-expense-name').focus();
+      }
+
+      function renumberRows() {
+        rowsContainer.querySelectorAll('.qa-expense-row').forEach((row, i) => {
+          row.setAttribute('aria-label', 'Expense ' + (i + 1));
+          row.querySelector('legend').textContent = 'Expense ' + (i + 1);
+        });
+      }
+
+      addRowBtn.addEventListener('click', createExpenseRow);
+
+      // ── Error handling ────────────────────────────────────────────
+      function showExpenseError(msg) {
+        errorEl.textContent = msg;
+        errorEl.classList.remove('hidden');
+        srStatus.textContent = msg;
+      }
+
+      function hideExpenseError() {
+        errorEl.textContent = '';
+        errorEl.classList.add('hidden');
+      }
+
+      // ── Validation ────────────────────────────────────────────────
+      function validateRows() {
+        const rows = rowsContainer.querySelectorAll('.qa-expense-row');
+        const expenses = [];
+        for (const row of rows) {
+          const name = row.querySelector('.qa-expense-name').value.trim();
+          const amountStr = row.querySelector('.qa-expense-amount').value;
+          const amount = parseFloat(amountStr);
+          const month = parseInt(row.querySelector('.qa-expense-month').value, 10);
+          const year = parseInt(row.querySelector('.qa-expense-year').value, 10);
+          const categoryId = row.querySelector('.qa-expense-category').value || null;
+
+          if (!name) {
+            row.querySelector('.qa-expense-name').focus();
+            return { ok: false, msg: I18N.expenseNameRequired };
+          }
+          if (!amountStr || isNaN(amount) || amount === 0) {
+            row.querySelector('.qa-expense-amount').focus();
+            return { ok: false, msg: I18N.expenseAmountRequired };
+          }
+          expenses.push({
+            name: name,
+            amount: Math.round(amount * 100) / 100,
+            month: month,
+            year: year,
+            recurring: false,
+            category_id: categoryId
+          });
+        }
+        return { ok: true, expenses: expenses };
+      }
+
+      // ── Save ──────────────────────────────────────────────────────
+      async function saveExpenses(keepOpen) {
+        hideExpenseError();
+        const result = validateRows();
+        if (!result.ok) {
+          showExpenseError(result.msg);
+          return;
+        }
+
+        _expenseSaving = true;
+        saveCloseBtn.disabled = true;
+        saveAnotherBtn.disabled = true;
+
+        try {
+          let res;
+          if (result.expenses.length === 1) {
+            res = await fetch('/api/budget/expenses', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(result.expenses[0])
+            });
+          } else {
+            res = await fetch('/api/budget/expenses/bulk', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ expenses: result.expenses })
+            });
+          }
+
+          if (!res.ok) {
+            const err = await res.json().catch(() => ({}));
+            showExpenseError(err.detail || I18N.expenseSaveFailed);
+            return;
+          }
+
+          const msg = result.expenses.length > 1 ? I18N.expenseSavedMulti : I18N.expenseSaved;
+          if (typeof showToast === 'function') showToast(msg);
+          srStatus.textContent = msg;
+
+          if (keepOpen) {
+            resetExpenseForm();
+            loadExpenseCategories();
+            modal.querySelector('.qa-expense-name')?.focus();
+          } else {
+            closeExpenseModal();
+            if (window.refreshPanels) window.refreshPanels();
+          }
+        } catch (_) {
+          showExpenseError(I18N.expenseNetworkError);
+        } finally {
+          _expenseSaving = false;
+          saveCloseBtn.disabled = false;
+          saveAnotherBtn.disabled = false;
+        }
+      }
+
+      saveCloseBtn.addEventListener('click', () => saveExpenses(false));
+      saveAnotherBtn.addEventListener('click', () => saveExpenses(true));
+      closeBtn.addEventListener('click', closeExpenseModal);
+
+      // Click outside closes
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal && !_expenseSaving) closeExpenseModal();
+      });
+
+      // Escape closes
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && !modal.classList.contains('hidden') && !_expenseSaving) {
+          closeExpenseModal();
+        }
+      });
+
+      // ── Focus Trap ────────────────────────────────────────────────
+      const focusableSelector = 'button:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])';
+      document.addEventListener('keydown', (e) => {
+        if (modal.classList.contains('hidden') || _expenseSaving) return;
+        if (e.key !== 'Tab') return;
+        const focusable = Array.from(modal.querySelectorAll(focusableSelector)).filter(el => {
+          const r = el.getBoundingClientRect();
+          return r.width > 0 && r.height > 0 && !el.closest('.hidden');
+        });
+        if (focusable.length === 0) return;
+        const idx = focusable.indexOf(document.activeElement);
+        if (e.shiftKey) {
+          if (idx <= 0) { focusable[focusable.length - 1].focus(); e.preventDefault(); }
+        } else {
+          if (idx >= focusable.length - 1) { focusable[0].focus(); e.preventDefault(); }
+        }
+      });
+
+      // Set defaults on page load
+      const now = new Date();
+      modal.querySelectorAll('.qa-expense-month').forEach(sel => sel.value = String(now.getMonth() + 1));
+      modal.querySelectorAll('.qa-expense-year').forEach(inp => inp.value = String(now.getFullYear()));
     })();
     </script>
 

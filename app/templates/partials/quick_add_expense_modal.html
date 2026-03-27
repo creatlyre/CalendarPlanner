@@ -1,0 +1,136 @@
+<!-- Quick Add Expense Modal: inline form for one-time expenses -->
+<div id="qa-expense-modal"
+     class="fixed inset-0 z-50 hidden items-center justify-center bg-black/60 backdrop-blur-sm"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="qa-expense-title">
+
+  <div id="qa-expense-panel"
+       class="relative glass shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-2xl mx-4">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between border-b border-white/20 px-6 py-4">
+      <h2 id="qa-expense-title" class="text-section-title text-white">{{ t('qa.expense_title') }}</h2>
+      <button id="qa-expense-close-btn" type="button"
+              class="rounded-lg p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-white/50 hover:bg-white/10 hover:text-white"
+              aria-label="{{ t('qa.close_modal') }}">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+          <path fill-rule="evenodd"
+                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                clip-rule="evenodd" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Form body -->
+    <div class="px-6 py-4">
+      <!-- Expense rows container -->
+      <div id="qa-expense-rows" class="space-y-4">
+        <!-- Row 1 (always present) -->
+        <fieldset class="qa-expense-row space-y-3 rounded-xl border border-white/10 p-4" aria-label="{{ t('qa.chooser_expense') }} 1">
+          <legend class="sr-only">{{ t('qa.chooser_expense') }} 1</legend>
+          <div>
+            <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-white/60">
+              {{ t('qa.expense_name') }} <span class="text-red-400">*</span>
+            </label>
+            <input type="text"
+                   class="qa-expense-name glass-input"
+                   placeholder="{{ t('qa.expense_name_placeholder') }}"
+                   required
+                   autocomplete="off" />
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-white/60">
+                {{ t('qa.expense_amount') }} <span class="text-red-400">*</span>
+              </label>
+              <input type="number"
+                     class="qa-expense-amount glass-input"
+                     step="0.01"
+                     min="0.01"
+                     placeholder="0.00"
+                     required />
+            </div>
+            <div>
+              <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-white/60">
+                {{ t('qa.expense_category') }}
+              </label>
+              <select class="qa-expense-category glass-input">
+                <option value="">{{ t('qa.expense_category_none') }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-white/60">
+                {{ t('qa.expense_month') }}
+              </label>
+              <select class="qa-expense-month glass-input">
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+              </select>
+            </div>
+            <div>
+              <label class="mb-1 block text-xs font-medium uppercase tracking-wide text-white/60">
+                {{ t('qa.expense_year') }}
+              </label>
+              <input type="number"
+                     class="qa-expense-year glass-input"
+                     min="2020"
+                     max="2100" />
+            </div>
+          </div>
+        </fieldset>
+      </div>
+
+      <!-- Add row button -->
+      <button id="qa-expense-add-row-btn" type="button"
+              class="mt-3 text-sm text-cyan-300 hover:text-cyan-200 transition-colors">
+        {{ t('qa.expense_add_row') }}
+      </button>
+
+      <!-- Error area -->
+      <div id="qa-expense-error" class="hidden mt-3 rounded-xl border border-red-400/30 bg-red-900/20 px-3 py-2 text-xs text-red-300"
+           role="alert" aria-live="assertive"></div>
+
+      <!-- Status for screen readers -->
+      <div id="qa-expense-sr-status" aria-live="polite" class="sr-only"></div>
+
+      <!-- Action buttons -->
+      <div class="mt-4 flex gap-2">
+        <button id="qa-expense-save-close-btn" type="button"
+                class="flex-1 glass-btn-primary rounded-xl px-4 py-2.5 text-sm font-medium min-h-[44px] disabled:opacity-50">
+          {{ t('qa.expense_save_close') }}
+        </button>
+        <button id="qa-expense-save-another-btn" type="button"
+                class="flex-1 glass-btn-secondary rounded-xl px-4 py-2.5 text-sm font-medium min-h-[44px] disabled:opacity-50">
+          {{ t('qa.expense_save_another') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Mobile: override to full-screen -->
+<style>
+  @media (max-width: 640px) {
+    #qa-expense-panel {
+      max-width: 100%;
+      max-height: 100vh;
+      min-height: 100vh;
+      border-radius: 0;
+      margin: 0;
+    }
+    #qa-expense-modal { padding: 0; }
+  }
+</style>
