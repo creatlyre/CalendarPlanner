@@ -1,5 +1,5 @@
 // Dobry Plan Service Worker — offline shell with static asset caching
-var CACHE_NAME = 'dobryplan-v5.1';
+var CACHE_NAME = 'dobryplan-v5.2';
 var OFFLINE_URL = '/static/offline.html';
 
 var PRECACHE_URLS = [

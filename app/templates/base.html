@@ -1458,8 +1458,8 @@
     (function() {
       var helpModal = document.getElementById('pwa-help-modal');
       var helpBtn = document.getElementById('pwa-help-btn');
-      function openHelp() { helpModal.classList.remove('hidden'); helpModal.classList.add('flex'); }
-      function closeHelp() { helpModal.classList.add('hidden'); helpModal.classList.remove('flex'); }
+      function openHelp() { helpModal.classList.remove('hidden'); }
+      function closeHelp() { helpModal.classList.add('hidden'); }
       if (helpBtn && helpModal) {
         helpBtn.addEventListener('click', openHelp);
         document.getElementById('pwa-help-close-btn').addEventListener('click', closeHelp);
