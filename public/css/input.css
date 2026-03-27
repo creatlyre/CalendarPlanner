@@ -76,6 +76,7 @@ html.light-mode {
 /* ── Dark mode (default) ─────────────────────────────────── */
 body {
   font-family: var(--font-body);
+  overflow-x: hidden;
   background: linear-gradient(135deg, #0f0c29 0%, #1e1553 25%, #2d2463 50%, #1a2a6c 75%, #0d1b4b 100%) fixed;
   background-attachment: fixed;
   min-height: 100vh;
