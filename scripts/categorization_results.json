@@ -1,0 +1,121 @@
+{
+  "generated_at": "2026-03-27T13:47:41.503954+00:00",
+  "total_items": 1000,
+  "categorized_correctly": 1000,
+  "aggregate_hit_rate": 1.0,
+  "per_list_rates": [
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0,
+    1.0
+  ],
+  "per_category_stats": {
+    "Children": {
+      "total": 50,
+      "hit": 50,
+      "miss": 0
+    },
+    "Clothing": {
+      "total": 50,
+      "hit": 50,
+      "miss": 0
+    },
+    "Education": {
+      "total": 30,
+      "hit": 30,
+      "miss": 0
+    },
+    "Electronics": {
+      "total": 20,
+      "hit": 20,
+      "miss": 0
+    },
+    "Entertainment": {
+      "total": 60,
+      "hit": 60,
+      "miss": 0
+    },
+    "Events": {
+      "total": 30,
+      "hit": 30,
+      "miss": 0
+    },
+    "Garden": {
+      "total": 20,
+      "hit": 20,
+      "miss": 0
+    },
+    "Groceries": {
+      "total": 200,
+      "hit": 200,
+      "miss": 0
+    },
+    "Health": {
+      "total": 60,
+      "hit": 60,
+      "miss": 0
+    },
+    "Home": {
+      "total": 100,
+      "hit": 100,
+      "miss": 0
+    },
+    "Loan": {
+      "total": 10,
+      "hit": 10,
+      "miss": 0
+    },
+    "Personal Care": {
+      "total": 40,
+      "hit": 40,
+      "miss": 0
+    },
+    "Pets": {
+      "total": 20,
+      "hit": 20,
+      "miss": 0
+    },
+    "Rent": {
+      "total": 20,
+      "hit": 20,
+      "miss": 0
+    },
+    "Savings & Finance": {
+      "total": 30,
+      "hit": 30,
+      "miss": 0
+    },
+    "Shopping": {
+      "total": 20,
+      "hit": 20,
+      "miss": 0
+    },
+    "Transport": {
+      "total": 80,
+      "hit": 80,
+      "miss": 0
+    },
+    "Travel": {
+      "total": 10,
+      "hit": 10,
+      "miss": 0
+    },
+    "Utilities": {
+      "total": 80,
+      "hit": 80,
+      "miss": 0
+    },
+    "_uncategorizable": {
+      "total": 70,
+      "hit": 70,
+      "miss": 0
+    }
+  },
+  "misses": []
+}

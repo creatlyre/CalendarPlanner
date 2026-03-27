@@ -126,13 +126,10 @@
     "pilka gabi",
     "akcesoria baby",
     "tekturowy domek",
-    "dziecko", "butelka", "smoczek",
-    "fotelik samochodowy", "fotelik",
-    "mleko modyfikowane", "formula", "baby formula",
-    "child", "kids", "toddler",
+    "butelka dziecieca", "smoczek",
+    "fotelik samochodowy", "fotelik dzieciecy",
     "coccodrillo", "51015",
-    "wycieczka szkolna", "szkolna wplata",
-    "babyshower", "baby shower", "wyprawka"
+    "babyshower", "baby shower"
   ],
 
   "Personal Care": [
@@ -276,7 +273,7 @@
     "ewa brak wyplaty",
     "zaliczka auto",
     "wplata wstepna",
-    "inwestycja", "investment", "fundusz", "fund",
+    "inwestycja", "investment", "fundusz",
     "lokata", "obligacje", "bonds",
     "akcje", "stocks", "prowizja", "commission",
     "broker", "makler", "dywidenda", "dividend"
@@ -386,7 +383,7 @@
     "prad na rok",
     "tabletki solne",
     "filtry sznurkowy", "filtr piankowy",
-    "swiatlowod", "fiber optic", "5g", "lte"
+    "swiatlowod", "fiber optic"
   ],
 
   "Transport": [
