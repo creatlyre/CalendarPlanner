@@ -8,6 +8,9 @@
     "e2e:family-plus": "npx playwright test --config=e2e/playwright.config.ts --project=family-plus"
   },
   "dependencies": {
+    "@capacitor/android": "^8.3.0",
+    "@capacitor/cli": "^8.3.0",
+    "@capacitor/core": "^8.3.0",
     "@supabase/supabase-js": "^2.99.2"
   },
   "devDependencies": {
