@@ -200,7 +200,7 @@
 
     <!-- Mobile More Menu (fixed, above bottom nav) -->
     {% if user is defined %}
-    <div id="mobile-more-panel" class="fixed right-3 hidden w-56 rounded-xl overflow-hidden shadow-2xl border border-white/15 lg:hidden" role="menu" style="bottom:calc(4.5rem + 8px);z-index:50;background:rgba(15,10,46,0.97);backdrop-filter:blur(20px);">
+    <div id="mobile-more-panel" class="hidden w-56 rounded-xl overflow-hidden shadow-2xl border border-white/15" role="menu" style="position:fixed;bottom:calc(4.5rem + 8px);right:1rem;z-index:50;background:rgba(15,10,46,0.97);backdrop-filter:blur(20px);">
       <a href="/billing/settings" class="flex items-center gap-3 px-4 py-3.5 text-sm hover:bg-white/10 transition-colors min-h-[48px]" role="menuitem">
         <svg class="w-5 h-5 text-indigo-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         {{ t('billing.nav_link') if t('billing.nav_link') != 'billing.nav_link' else 'Plan & Updates' }}
