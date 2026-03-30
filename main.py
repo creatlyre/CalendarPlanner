@@ -133,6 +133,14 @@ async def pwa_service_worker():
     )
 
 
+@app.get("/.well-known/assetlinks.json", include_in_schema=False)
+async def asset_links():
+    return FileResponse(
+        "public/.well-known/assetlinks.json",
+        media_type="application/json",
+    )
+
+
 SITE_URL = "https://dobryplan.app"
 
 

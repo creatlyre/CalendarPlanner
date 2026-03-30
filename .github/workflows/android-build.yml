@@ -1,0 +1,96 @@
+# Build Android APK (TWA wrapper) via Bubblewrap
+#
+# Required GitHub Secrets:
+#   KEYSTORE_BASE64    — base64-encoded android/dobryplan-keystore.jks
+#   KEYSTORE_PASSWORD  — keystore password
+#   KEY_PASSWORD       — signing key password
+
+name: Build Android APK
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'android/**'
+      - 'public/manifest.json'
+      - 'public/sw.js'
+      - 'pyproject.toml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Bubblewrap CLI
+        run: npm install -g @nicolo-ribaudo/nicolo-ribaudo--bubblewrap-cli
+
+      - name: Accept Android SDK licenses
+        run: yes | sdkmanager --licenses || true
+
+      - name: Decode keystore
+        run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/dobryplan-keystore.jks
+
+      - name: Extract version from pyproject.toml
+        run: |
+          APP_VERSION=$(grep '^version' pyproject.toml | head -1 | sed 's/.*"\(.*\)"/\1/')
+          VERSION_CODE=$(echo "$APP_VERSION" | awk -F. '{printf "%d%02d%02d", $1, $2, $3}')
+          echo "APP_VERSION=$APP_VERSION" >> "$GITHUB_ENV"
+          echo "VERSION_CODE=$VERSION_CODE" >> "$GITHUB_ENV"
+
+      - name: Update twa-config.json with version
+        run: |
+          cd android
+          jq --arg v "$APP_VERSION" --argjson vc "$VERSION_CODE" \
+            '.appVersion = $v | .appVersionCode = $vc' twa-config.json > twa-config-updated.json
+          mv twa-config-updated.json twa-config.json
+
+      - name: Build APK with Bubblewrap
+        run: |
+          cd android
+          bubblewrap build --skipPwaValidation
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dobryplan-apk
+          path: android/app-release-signed.apk
+          retention-days: 90
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: android-v${{ env.APP_VERSION }}
+          name: Dobry Plan Android v${{ env.APP_VERSION }}
+          body: |
+            Android APK build from commit ${{ github.sha }}
+            Version: ${{ env.APP_VERSION }} (code: ${{ env.VERSION_CODE }})
+
+            Install: Download dobryplan.apk and sideload on your Android device.
+          files: android/app-release-signed.apk
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
