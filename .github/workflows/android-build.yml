@@ -9,7 +9,7 @@ name: Build Android APK
 
 on:
   push:
-    branches: [main]
+    branches: [master]
     paths:
       - 'android/**'
       - 'public/manifest.json'
