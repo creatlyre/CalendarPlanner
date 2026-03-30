@@ -1,6 +1,9 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version='1.0' encoding='utf-8'?>
 <resources>
     <string name="app_name">Dobry Plan</string>
+    <string name="title_activity_main">Dobry Plan</string>
+    <string name="package_name">app.dobryplan.twa</string>
+    <string name="custom_url_scheme">app.dobryplan.twa</string>
     <string name="asset_statements">
         [{
             \"relation\": [\"delegate_permission/common.handle_all_urls\"],
