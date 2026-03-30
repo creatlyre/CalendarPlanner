@@ -17,7 +17,7 @@ self.addEventListener('install', function(event) {
   self.skipWaiting();
 });
 
-// Activate — clean up old caches
+// Activate — clean up old caches and notify clients of updates
 self.addEventListener('activate', function(event) {
   event.waitUntil(
     caches.keys().then(function(cacheNames) {
@@ -26,6 +26,16 @@ self.addEventListener('activate', function(event) {
           .filter(function(name) { return name !== CACHE_NAME; })
           .map(function(name) { return caches.delete(name); })
       );
+    }).then(function() {
+      // Notify all clients that a new version is available
+      return self.clients.matchAll({ type: 'window' }).then(function(clients) {
+        clients.forEach(function(client) {
+          client.postMessage({
+            type: 'APP_UPDATED',
+            version: CACHE_NAME
+          });
+        });
+      });
     })
   );
   self.clients.claim();

@@ -141,6 +141,35 @@ async def asset_links():
     )
 
 
+@app.get("/api/version", include_in_schema=False)
+async def api_version():
+    import importlib.metadata
+
+    try:
+        app_version = importlib.metadata.version("dobryplan")
+    except importlib.metadata.PackageNotFoundError:
+        # Fallback: read from pyproject.toml when not installed as package
+        import re
+
+        with open("pyproject.toml") as f:
+            match = re.search(r'^version\s*=\s*"([^"]+)"', f.read(), re.MULTILINE)
+        app_version = match.group(1) if match else "0.0.0"
+    twa_config_path = os.path.join("android", "twa-config.json")
+    apk_version = "1.0.0"
+    apk_version_code = 1
+    if os.path.exists(twa_config_path):
+        with open(twa_config_path) as f:
+            twa = json.load(f)
+        apk_version = twa.get("appVersion", "1.0.0")
+        apk_version_code = twa.get("appVersionCode", 1)
+    return {
+        "version": app_version,
+        "apk_version": apk_version,
+        "apk_version_code": apk_version_code,
+        "apk_download_url": "https://github.com/creatlyre/CalendarPlanner/releases/latest/download/app-release-signed.apk",
+    }
+
+
 SITE_URL = "https://dobryplan.app"
 
 

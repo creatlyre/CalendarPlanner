@@ -245,3 +245,30 @@ class TestNativeDeferral:
     def test_native_deferral_explicit(self):
         content = self._read_monetization()
         assert "deferred" in content.lower()
+
+
+# ── Version API Endpoint ───────────────────────────────────────────────────
+
+
+class TestVersionEndpoint:
+    """GET /api/version returns current app and APK version info."""
+
+    def test_version_returns_200(self, test_client):
+        resp = test_client.get("/api/version")
+        assert resp.status_code == 200
+
+    def test_version_has_required_fields(self, test_client):
+        data = test_client.get("/api/version").json()
+        assert "version" in data
+        assert "apk_version" in data
+        assert "apk_version_code" in data
+        assert "apk_download_url" in data
+
+    def test_version_download_url_format(self, test_client):
+        data = test_client.get("/api/version").json()
+        assert "github.com" in data["apk_download_url"]
+        assert data["apk_download_url"].endswith(".apk")
+
+    def test_version_apk_version_code_is_int(self, test_client):
+        data = test_client.get("/api/version").json()
+        assert isinstance(data["apk_version_code"], int)
