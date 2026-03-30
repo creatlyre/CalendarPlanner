@@ -1,7 +1,6 @@
-# Build Android APK (TWA wrapper) via Gradle
+# Build Android APK (Capacitor native shell)
 #
-# Uses a standard Android project with androidbrowserhelper library
-# instead of Bubblewrap CLI, for reliable non-interactive CI builds.
+# Uses Capacitor to sync web assets, then Gradle to build the signed APK.
 #
 # Required GitHub Secrets:
 #   KEYSTORE_BASE64    — base64-encoded android/dobryplan-keystore.jks
@@ -15,10 +14,13 @@ on:
     branches: [master]
     paths:
       - 'android/**'
+      - 'www/**'
+      - 'capacitor.config.ts'
       - 'public/manifest.json'
       - 'public/sw.js'
       - 'public/icons/**'
       - 'pyproject.toml'
+      - 'package.json'
   workflow_dispatch:
 
 permissions:
@@ -52,6 +54,15 @@ jobs:
         with:
           gradle-version: '8.5'
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
       - name: Decode keystore
         run: echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 -d > android/dobryplan-keystore.jks
 
@@ -62,16 +73,12 @@ jobs:
           echo "APP_VERSION=$APP_VERSION" >> "$GITHUB_ENV"
           echo "VERSION_CODE=$VERSION_CODE" >> "$GITHUB_ENV"
 
-      - name: Prepare Android resources
-        run: |
-          mkdir -p android/app/src/main/res/mipmap-xxxhdpi
-          mkdir -p android/app/src/main/res/drawable
-          cp public/icons/icon-192.png android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
-          cp public/icons/icon-512.png android/app/src/main/res/drawable/splash.png
+      - name: Sync Capacitor web assets
+        run: npx cap sync android
 
       - name: Build release APK
         working-directory: android
-        run: gradle assembleRelease -PappVersionName="$APP_VERSION" -PappVersionCode="$VERSION_CODE"
+        run: ./gradlew assembleRelease -PappVersionName="$APP_VERSION" -PappVersionCode="$VERSION_CODE"
         env:
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
