@@ -3,6 +3,6 @@
   "target": {
     "namespace": "android_app",
     "package_name": "app.dobryplan.twa",
-    "sha256_cert_fingerprints": ["__SHA256_FINGERPRINT_PLACEHOLDER__"]
+    "sha256_cert_fingerprints": ["42:DA:F4:21:9B:38:86:B4:6A:1D:17:35:9E:9B:58:76:45:14:79:A3:01:B7:24:94:AB:7D:69:72:BD:57:AC:3D"]
   }
 }]
