@@ -117,6 +117,16 @@ Plans:
 Plans:
 - [ ] TBD (run /gsd-plan-phase 2 to break down)
 
+### Phase 3: Migrate TWA to Capacitor Native Shell with MCP-Verified Build
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 2
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 3 to break down)
+
 ---
 
 *Roadmap updated: 2026-03-30 — v6.0 milestone started*
