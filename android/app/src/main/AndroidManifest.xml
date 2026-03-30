@@ -31,7 +31,7 @@
 
             <meta-data
                 android:name="android.support.customtabs.trusted.DEFAULT_URL"
-                android:value="https://dobryplan.app/dashboard" />
+                android:value="https://synco-production-e9da.up.railway.app/dashboard" />
 
             <meta-data
                 android:name="android.support.customtabs.trusted.SPLASH_IMAGE_DRAWABLE"
@@ -60,7 +60,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data
                     android:scheme="https"
-                    android:host="dobryplan.app" />
+                    android:host="synco-production-e9da.up.railway.app" />
             </intent-filter>
         </activity>
     </application>

@@ -6,7 +6,7 @@
             \"relation\": [\"delegate_permission/common.handle_all_urls\"],
             \"target\": {
                 \"namespace\": \"web\",
-                \"site\": \"https://dobryplan.app\"}
+                \"site\": \"https://synco-production-e9da.up.railway.app\"}
         }]
     </string>
 </resources>
