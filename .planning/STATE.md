@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: null
 milestone_name: null
 status: idle
-last_updated: "2026-03-25T18:00:00.000Z"
-last_activity: 2026-03-25
+last_updated: "2026-03-30T08:14:16.000Z"
+last_activity: 2026-03-30
 progress:
   total_phases: 0
   completed_phases: 0
@@ -26,7 +26,7 @@ See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Milestone:** None (v5.1 shipped 2026-03-25)
 **Status:** Idle — ready for next milestone
-Last activity: 2026-03-27 - Completed quick task 260327-jg3: Expense categorization coverage research + validation (100% hit rate)
+Last activity: 2026-03-30 - Completed quick task 260330-e7w: Fix PWA session persistence — 7d session, 30d refresh cookies, auto-detect secure flag
 
 ## Accumulated Context
 
@@ -50,6 +50,7 @@ Previous milestones archived. See `.planning/milestones/` for full history.
 | 260327-jif | Full coverage shopping item categorization for Biedronka | 2026-03-27 | 6216426 | [260327-jif-full-coverage-shopping-item-categorizati](./quick/260327-jif-full-coverage-shopping-item-categorizati/) |
 | 260327-jg3 | Expense categorization coverage research — 120 keywords added, 100% hit rate on 1000 test items | 2026-03-27 | 952e08e | [260327-jg3-expense-categorization-coverage-research](./quick/260327-jg3-expense-categorization-coverage-research/) |
 | 260327-ko6 | Fix mobile navigation tabs overflow — raise breakpoints from md to lg (1024px) | 2026-03-27 | 7b56ff4 | [260327-ko6-fix-mobile-navigation-tabs-overflow-tab-](./quick/260327-ko6-fix-mobile-navigation-tabs-overflow-tab-/) |
+| 260330-e7w | Fix PWA session persistence — 7d session cookie, 30d refresh cookie, auto-detect secure flag | 2026-03-30 | 34ff0f2 | [260330-e7w-fix-pwa-session-persistence-extend-auth-](./quick/260330-e7w-fix-pwa-session-persistence-extend-auth-/) |
 
 ### Pending Todos
 
