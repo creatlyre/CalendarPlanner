@@ -26,6 +26,7 @@
 
         <activity
             android:name="com.google.androidbrowserhelper.trusted.LauncherActivity"
+            android:exported="true"
             android:theme="@android:style/Theme.Translucent.NoTitleBar">
 
             <meta-data
