@@ -43,7 +43,7 @@ jobs:
           node-version: '20'
 
       - name: Install Bubblewrap CLI
-        run: npm install -g @nicolo-ribaudo/nicolo-ribaudo--bubblewrap-cli
+        run: npm install -g @bubblewrap/cli
 
       - name: Accept Android SDK licenses
         run: yes | sdkmanager --licenses || true

@@ -30,7 +30,7 @@ For full control over the build process:
 ### 1. Install Bubblewrap
 
 ```bash
-npm install -g @nicolo-ribaudo/nicolo-ribaudo--bubblewrap-cli
+npm install -g @bubblewrap/cli
 ```
 
 ### 2. Initialize from Manifest
