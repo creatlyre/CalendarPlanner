@@ -10,6 +10,7 @@
 - [x] v4.0 milestone — Monetization Foundation (SaaS primary + self-hosted purchase option) - Phases 28-33 shipped 2026-03-23 (446 tests passing). Archive: .planning/milestones/v5.0-ROADMAP.md (v4.0 archived as part of v5.0 snapshot)
 - [x] v5.0 milestone — Growth & Conversion - Phases 34-35 shipped 2026-03-25 (593 tests passing). Archive: .planning/milestones/v5.0-ROADMAP.md
 - [x] v5.1 milestone — E2E Verification & Brand Marketing — Phases 36-50 shipped 2026-03-25 (126 E2E tests passing). Archive: .planning/milestones/v5.1-ROADMAP.md
+- [ ] v6.0 milestone — Android APK Distribution & Auto-Update — Phase 1+
 
 ## Phases
 
@@ -92,6 +93,20 @@
 
 </details>
 
+### v6.0 — Android APK Distribution & Auto-Update
+
+### Phase 1: Android APK Distribution and Auto-Update Pipeline
+
+**Goal:** Build and distribute a signed Android APK (TWA wrapper) with a GitHub Actions CI/CD pipeline that automatically rebuilds on master branch changes, publishes release artifacts, and supports OTA-style version detection so the Android app can prompt or auto-install updates.
+**Requirements**: TBD
+**Depends on:** Phase 32 (Mobile Distribution Path — PWA + Android Wrapper)
+**Plans:** 3 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — GitHub Actions CI/CD pipeline + Digital Asset Links
+- [ ] 01-02-PLAN.md — Version API endpoint + service worker update notifications
+- [ ] 01-03-PLAN.md — Checkpoint: configure secrets, build APK, install on device
+
 ---
 
-*Roadmap updated: 2026-03-25 — v5.1 milestone shipped*
+*Roadmap updated: 2026-03-30 — v6.0 milestone started*

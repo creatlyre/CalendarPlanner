@@ -1,16 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: null
-milestone_name: null
-status: idle
-last_updated: "2026-03-30T08:14:16.000Z"
+milestone: v6.0
+milestone_name: — Android APK Distribution & Auto-Update
+status: executing
+last_updated: "2026-03-30T09:27:14.940Z"
 last_activity: 2026-03-30
 progress:
-  total_phases: 0
+  total_phases: 1
   completed_phases: 0
-  total_plans: 0
+  total_plans: 3
   completed_plans: 0
-  percent: 0
 ---
 
 # Session State
@@ -20,17 +19,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** A shared calendar both partners can edit that stays in sync with Google Calendar.
-**Current focus:** Planning next milestone
+**Current focus:** Phase 01 — android-apk-distribution-and-auto-update-pipeline
 
 ## Position
 
-**Milestone:** None (v5.1 shipped 2026-03-25)
-**Status:** Idle — ready for next milestone
-Last activity: 2026-03-30 - Completed quick task 260330-e7w: Fix PWA session persistence — 7d session, 30d refresh cookies, auto-detect secure flag
+**Milestone:** v6.0 — Android APK Distribution & Auto-Update
+**Status:** Executing Phase 01
+Last activity: 2026-03-30
 
 ## Accumulated Context
 
 Previous milestones archived. See `.planning/milestones/` for full history.
+
+### Roadmap Evolution
+
+- Phase 1 added: Android APK Distribution and Auto-Update Pipeline (build signed APK via GitHub Actions CI/CD, auto-rebuild on master push, OTA version detection for update prompts)
 
 ### Decisions
 
