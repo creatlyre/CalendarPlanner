@@ -10,10 +10,12 @@ from app.events.schemas import (
     EventResponse,
 )
 
+
 def test_category_create_valid():
     category = CategoryCreate(name="Work", color="#ff0000")
     assert category.name == "Work"
     assert category.color == "#ff0000"
+
 
 def test_category_create_invalid_name():
     with pytest.raises(ValidationError):
@@ -21,6 +23,7 @@ def test_category_create_invalid_name():
 
     with pytest.raises(ValidationError):
         CategoryCreate(name="a" * 51, color="#ff0000")
+
 
 def test_category_create_invalid_color():
     with pytest.raises(ValidationError):
@@ -32,6 +35,7 @@ def test_category_create_invalid_color():
     with pytest.raises(ValidationError):
         CategoryCreate(name="Work", color="#gg0000")
 
+
 def test_event_create_valid():
     start = datetime.now(timezone.utc)
     end = datetime.now(timezone.utc)
@@ -42,6 +46,7 @@ def test_event_create_valid():
     assert event.timezone == "UTC"
     assert event.visibility == "shared"
 
+
 def test_event_create_invalid_title():
     start = datetime.now(timezone.utc)
     end = datetime.now(timezone.utc)
@@ -51,26 +56,35 @@ def test_event_create_invalid_title():
     with pytest.raises(ValidationError):
         EventCreate(title="a" * 256, start_at=start, end_at=end)
 
+
 def test_event_create_reminder_minutes_list():
     start = datetime.now(timezone.utc)
     end = datetime.now(timezone.utc)
 
     # Valid
-    event = EventCreate(title="Meeting", start_at=start, end_at=end, reminder_minutes_list=[10, 60])
+    event = EventCreate(
+        title="Meeting", start_at=start, end_at=end, reminder_minutes_list=[10, 60]
+    )
     assert event.reminder_minutes_list == [10, 60]
 
     # Invalid negative
     with pytest.raises(ValidationError, match="reminder minutes must be non-negative"):
-        EventCreate(title="Meeting", start_at=start, end_at=end, reminder_minutes_list=[-10])
+        EventCreate(
+            title="Meeting", start_at=start, end_at=end, reminder_minutes_list=[-10]
+        )
 
     # Invalid too large
     with pytest.raises(ValidationError, match="reminder minutes cannot exceed 40320"):
-        EventCreate(title="Meeting", start_at=start, end_at=end, reminder_minutes_list=[50000])
+        EventCreate(
+            title="Meeting", start_at=start, end_at=end, reminder_minutes_list=[50000]
+        )
+
 
 def test_event_update_valid():
     event = EventUpdate(title="New Meeting")
     assert event.title == "New Meeting"
     assert event.description is None
+
 
 def test_event_update_invalid_title():
     with pytest.raises(ValidationError):
@@ -78,6 +92,7 @@ def test_event_update_invalid_title():
 
     with pytest.raises(ValidationError):
         EventUpdate(title="a" * 256)
+
 
 def test_category_response_from_attributes():
     class DummyModel:
@@ -93,6 +108,7 @@ def test_category_response_from_attributes():
     assert cat_resp.id == "cat-123"
     assert cat_resp.name == "Personal"
     assert cat_resp.is_preset is True
+
 
 def test_event_response_from_attributes():
     class DummyModel:

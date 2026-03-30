@@ -1,7 +1,16 @@
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    HTTPException,
+    Query,
+    Request,
+    UploadFile,
+    status,
+)
 from pydantic import BaseModel
 
 from app.auth.dependencies import get_current_user
@@ -9,7 +18,13 @@ from app.database.database import get_db
 from app.events.nlp import NLPService, ParseResult
 from app.events.ocr import OCRService
 from app.events.repository import EventRepository
-from app.events.schemas import CategoryCreate, CategoryResponse, EventCreate, EventResponse, EventUpdate
+from app.events.schemas import (
+    CategoryCreate,
+    CategoryResponse,
+    EventCreate,
+    EventResponse,
+    EventUpdate,
+)
 from app.events.service import EventService
 from app.i18n import resolve_locale, translate
 from app.notifications.repository import NotificationRepository
@@ -89,7 +104,12 @@ def _resolve_timezone(user, db) -> str:
 
 
 @router.post("/parse", response_model=ParseEventResponse)
-async def parse_event(payload: ParseEventRequest, request: Request, user=Depends(get_current_user), db=Depends(get_db)):
+async def parse_event(
+    payload: ParseEventRequest,
+    request: Request,
+    user=Depends(get_current_user),
+    db=Depends(get_db),
+):
     """Parse natural language text into structured event data."""
     # Determine context date
     context_date = None
@@ -98,10 +118,12 @@ async def parse_event(payload: ParseEventRequest, request: Request, user=Depends
         try:
             context_date = datetime.fromisoformat(payload.context_date)
         except ValueError:
-            raise HTTPException(status_code=400, detail=_msg(user_locale, "events.invalid_context_date")) from None
-    
+            raise HTTPException(
+                status_code=400, detail=_msg(user_locale, "events.invalid_context_date")
+            ) from None
+
     timezone = _resolve_timezone(user, db)
-    
+
     # Parse the text
     nlp = NLPService()
     result = nlp.parse(payload.text, timezone, context_date, locale=user_locale)
@@ -135,17 +157,23 @@ async def parse_event_from_image(
     user_locale = resolve_locale(request)
     image_bytes = await image.read()
     if not image_bytes:
-        raise HTTPException(status_code=400, detail=_msg(user_locale, "events.upload_empty"))
+        raise HTTPException(
+            status_code=400, detail=_msg(user_locale, "events.upload_empty")
+        )
 
     parsed_context = None
     if context_date:
         try:
             parsed_context = datetime.fromisoformat(context_date)
         except ValueError:
-            raise HTTPException(status_code=400, detail=_msg(user_locale, "events.invalid_context_date")) from None
+            raise HTTPException(
+                status_code=400, detail=_msg(user_locale, "events.invalid_context_date")
+            ) from None
 
     timezone = _resolve_timezone(user, db)
-    result = OCRService().parse_image(image_bytes, timezone, parsed_context, locale=user_locale)
+    result = OCRService().parse_image(
+        image_bytes, timezone, parsed_context, locale=user_locale
+    )
 
     return OCRParseResponse(
         title=result.title,
@@ -167,8 +195,12 @@ async def list_categories(user=Depends(get_current_user), db=Depends(get_db)):
     return categories
 
 
-@router.post("/categories", response_model=CategoryResponse, status_code=status.HTTP_201_CREATED)
-async def create_category(payload: CategoryCreate, user=Depends(get_current_user), db=Depends(get_db)):
+@router.post(
+    "/categories", response_model=CategoryResponse, status_code=status.HTTP_201_CREATED
+)
+async def create_category(
+    payload: CategoryCreate, user=Depends(get_current_user), db=Depends(get_db)
+):
     service = _service(db)
     category = service.create_category(user.calendar_id, payload)
     return category
@@ -176,7 +208,9 @@ async def create_category(payload: CategoryCreate, user=Depends(get_current_user
 
 @router.post("", response_model=EventResponse, status_code=status.HTTP_201_CREATED)
 @router.post("/", response_model=EventResponse, status_code=status.HTTP_201_CREATED)
-async def create_event(payload: EventCreate, user=Depends(get_current_user), db=Depends(get_db)):
+async def create_event(
+    payload: EventCreate, user=Depends(get_current_user), db=Depends(get_db)
+):
     service = _service(db)
     try:
         event = service.create_event(user.calendar_id, user.id, payload)
@@ -188,14 +222,21 @@ async def create_event(payload: EventCreate, user=Depends(get_current_user), db=
     except Exception:
         pass
     try:
-        _notify_svc(db).create_for_partner(user.id, user.calendar_id, "event_created", "event", event.id, event.title)
+        _notify_svc(db).create_for_partner(
+            user.id, user.calendar_id, "event_created", "event", event.id, event.title
+        )
     except Exception:
         pass
     return event
 
 
 @router.put("/{event_id}", response_model=EventResponse)
-async def update_event(event_id: str, payload: EventUpdate, user=Depends(get_current_user), db=Depends(get_db)):
+async def update_event(
+    event_id: str,
+    payload: EventUpdate,
+    user=Depends(get_current_user),
+    db=Depends(get_db),
+):
     service = _service(db)
     try:
         event = service.update_event(event_id, user.calendar_id, user.id, payload)
@@ -207,14 +248,18 @@ async def update_event(event_id: str, payload: EventUpdate, user=Depends(get_cur
     except Exception:
         pass
     try:
-        _notify_svc(db).create_for_partner(user.id, user.calendar_id, "event_updated", "event", event.id, event.title)
+        _notify_svc(db).create_for_partner(
+            user.id, user.calendar_id, "event_updated", "event", event.id, event.title
+        )
     except Exception:
         pass
     return event
 
 
 @router.delete("/{event_id}")
-async def delete_event(event_id: str, request: Request, user=Depends(get_current_user), db=Depends(get_db)):
+async def delete_event(
+    event_id: str, request: Request, user=Depends(get_current_user), db=Depends(get_db)
+):
     service = _service(db)
     try:
         event = service.delete_event(event_id, user.calendar_id, user.id)
@@ -226,7 +271,9 @@ async def delete_event(event_id: str, request: Request, user=Depends(get_current
     except Exception:
         pass
     try:
-        _notify_svc(db).create_for_partner(user.id, user.calendar_id, "event_deleted", "event", event.id, event.title)
+        _notify_svc(db).create_for_partner(
+            user.id, user.calendar_id, "event_deleted", "event", event.id, event.title
+        )
     except Exception:
         pass
     return {"message": _msg(resolve_locale(request), "events.deleted")}
@@ -241,7 +288,9 @@ async def list_day(
     db=Depends(get_db),
 ):
     service = _service(db)
-    return service.list_day(user.calendar_id, year, month, day, requesting_user_id=user.id)
+    return service.list_day(
+        user.calendar_id, year, month, day, requesting_user_id=user.id
+    )
 
 
 @router.get("/month", response_model=list[EventResponse])

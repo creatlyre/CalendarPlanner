@@ -33,7 +33,12 @@ class TestDashboardLoads:
         html = response.text
         assert "today_events" in html or "Today" in html or "Dzisiejsze" in html
         assert "week_preview" in html or "7 Days" in html or "7 dni" in html
-        assert "budget_snapshot" in html or "Budget" in html or "budżetu" in html.lower() or "bud" in html.lower()
+        assert (
+            "budget_snapshot" in html
+            or "Budget" in html
+            or "budżetu" in html.lower()
+            or "bud" in html.lower()
+        )
 
 
 class TestDashboardTodayEvents:
@@ -41,7 +46,9 @@ class TestDashboardTodayEvents:
         now = datetime.utcnow().replace(microsecond=0)
         start = now.replace(hour=14, minute=0, second=0)
         end = now.replace(hour=15, minute=0, second=0)
-        authenticated_client.post("/api/events", json=_event_payload("Dashboard Test Event", start, end))
+        authenticated_client.post(
+            "/api/events", json=_event_payload("Dashboard Test Event", start, end)
+        )
 
         response = authenticated_client.get("/dashboard")
         assert response.status_code == 200
@@ -71,7 +78,9 @@ class TestDashboardTodayEvents:
         for i in range(7):
             start = now.replace(hour=8 + i, minute=0, second=0)
             end = now.replace(hour=8 + i, minute=30, second=0)
-            authenticated_client.post("/api/events", json=_event_payload(f"Ev{i}", start, end))
+            authenticated_client.post(
+                "/api/events", json=_event_payload(f"Ev{i}", start, end)
+            )
 
         response = authenticated_client.get("/dashboard")
         html = response.text
@@ -93,7 +102,9 @@ class TestDashboardWeekPreview:
         tomorrow = datetime.utcnow().replace(microsecond=0) + timedelta(days=1)
         start = tomorrow.replace(hour=9, minute=0, second=0)
         end = tomorrow.replace(hour=10, minute=0, second=0)
-        authenticated_client.post("/api/events", json=_event_payload("Tomorrow Meeting", start, end))
+        authenticated_client.post(
+            "/api/events", json=_event_payload("Tomorrow Meeting", start, end)
+        )
 
         response = authenticated_client.get("/dashboard")
         assert "Tomorrow Meeting" in response.text
@@ -103,7 +114,9 @@ class TestDashboardWeekPreview:
         for i in range(5):
             start = tomorrow.replace(hour=8 + i, minute=0, second=0)
             end = tomorrow.replace(hour=8 + i, minute=30, second=0)
-            authenticated_client.post("/api/events", json=_event_payload(f"WkEv{i}", start, end))
+            authenticated_client.post(
+                "/api/events", json=_event_payload(f"WkEv{i}", start, end)
+            )
 
         response = authenticated_client.get("/dashboard")
         # Should show +2 for overflow in the week preview
@@ -136,14 +149,17 @@ class TestDashboardBudgetSnapshot:
         test_db.add(settings)
 
         # Add monthly hours so has_data=True
-        test_db.insert("monthly_hours", {
-            "calendar_id": test_user_a.calendar_id,
-            "year": now.year,
-            "month": now.month,
-            "rate_1_hours": 160.0,
-            "rate_2_hours": 160.0,
-            "rate_3_hours": 160.0,
-        })
+        test_db.insert(
+            "monthly_hours",
+            {
+                "calendar_id": test_user_a.calendar_id,
+                "year": now.year,
+                "month": now.month,
+                "rate_1_hours": 160.0,
+                "rate_2_hours": 160.0,
+                "rate_3_hours": 160.0,
+            },
+        )
 
         response = authenticated_client.get("/dashboard")
         html = response.text

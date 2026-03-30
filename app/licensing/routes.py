@@ -16,6 +16,7 @@ router = APIRouter(tags=["telemetry"])
 
 # ── Heartbeat receiver (public — called by remote installations) ──────────
 
+
 class HeartbeatPayload(BaseModel):
     installation_id: str = Field(..., min_length=1, max_length=64)
     version: str = Field(default="unknown", max_length=32)
@@ -66,6 +67,7 @@ async def receive_heartbeat(payload: HeartbeatPayload, db=Depends(get_db)):
 
 
 # ── Admin endpoints ──────────────────────────────────────────────────────
+
 
 @router.get("/api/admin/installations")
 async def list_installations(

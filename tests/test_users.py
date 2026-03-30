@@ -20,7 +20,9 @@ def test_accept_invitation(test_db, test_user_a, test_user_b):
     result = service.accept_household_invitation(test_user_b.id)
 
     assert result.calendar_id == test_user_a.calendar_id
-    saved_rows = test_db.select("calendar_invitations", {"id": f"eq.{invitation.id}", "limit": "1"})
+    saved_rows = test_db.select(
+        "calendar_invitations", {"id": f"eq.{invitation.id}", "limit": "1"}
+    )
     saved_invite = CalendarInvitation(**saved_rows[0]) if saved_rows else None
     assert saved_invite is not None
     assert saved_invite.status == "accepted"
@@ -52,7 +54,9 @@ def test_cannot_invite_twice(test_db, test_user_a, test_user_b):
         service.invite_user(test_user_a.id, test_user_b.email)
 
 
-def test_invite_user_resolves_inviter_by_email_when_id_is_external(test_db, test_user_a, test_user_b):
+def test_invite_user_resolves_inviter_by_email_when_id_is_external(
+    test_db, test_user_a, test_user_b
+):
     service = UserService(test_db)
 
     invitation = service.invite_user(
@@ -69,7 +73,11 @@ def test_invite_user_resolves_inviter_by_email_when_id_is_external(test_db, test
 
 def test_invite_user_resolves_inviter_by_external_id(test_db, test_user_a, test_user_b):
     service = UserService(test_db)
-    test_db.update("users", {"id": f"eq.{test_user_a.id}"}, {"google_id": "supabase-external-id-456"})
+    test_db.update(
+        "users",
+        {"id": f"eq.{test_user_a.id}"},
+        {"google_id": "supabase-external-id-456"},
+    )
 
     invitation = service.invite_user(
         inviter_id="supabase-external-id-456",
@@ -81,7 +89,9 @@ def test_invite_user_resolves_inviter_by_external_id(test_db, test_user_a, test_
     assert invitation.inviter_user_id == test_user_a.id
 
 
-def test_invite_user_includes_explicit_invitation_id_in_insert_payload(test_db, test_user_a, test_user_b, monkeypatch):
+def test_invite_user_includes_explicit_invitation_id_in_insert_payload(
+    test_db, test_user_a, test_user_b, monkeypatch
+):
     service = UserService(test_db)
     original_insert = test_db.insert
     captured_payload: dict[str, object] = {}

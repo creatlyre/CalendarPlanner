@@ -35,7 +35,8 @@ async def import_month(
     service = GoogleSyncService(db)
     result = await run_in_threadpool(service.import_month, user, year, month)
     requires_reauth = any(
-        "insufficientPermissions" in err or "insufficient authentication scopes" in err.lower()
+        "insufficientPermissions" in err
+        or "insufficient authentication scopes" in err.lower()
         for err in result.errors
     )
     return {
@@ -49,10 +50,20 @@ async def import_month(
 
 @router.get("/status")
 async def sync_status(user=Depends(get_current_user), db=Depends(get_db)):
-    household_size = db.count("users", {"calendar_id": f"eq.{user.calendar_id}"}) if user.calendar_id else 0
+    household_size = (
+        db.count("users", {"calendar_id": f"eq.{user.calendar_id}"})
+        if user.calendar_id
+        else 0
+    )
     settings = Settings()
-    google_connected = bool(getattr(user, "google_refresh_token", None) or getattr(user, "google_access_token", None))
-    oauth_configured = bool(getattr(settings, "GOOGLE_CLIENT_ID", None) and getattr(settings, "GOOGLE_CLIENT_SECRET", None))
+    google_connected = bool(
+        getattr(user, "google_refresh_token", None)
+        or getattr(user, "google_access_token", None)
+    )
+    oauth_configured = bool(
+        getattr(settings, "GOOGLE_CLIENT_ID", None)
+        and getattr(settings, "GOOGLE_CLIENT_SECRET", None)
+    )
     calendar_last_sync = None
 
     if user.calendar_id:

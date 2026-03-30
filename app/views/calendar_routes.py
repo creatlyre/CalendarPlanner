@@ -21,8 +21,11 @@ def _service(db) -> EventService:
 
 
 @router.get("", response_class=HTMLResponse)
-async def calendar_page(request: Request, user=Depends(get_current_user), db=Depends(get_db)):
+async def calendar_page(
+    request: Request, user=Depends(get_current_user), db=Depends(get_db)
+):
     from datetime import datetime as dt
+
     context = inject_template_i18n(
         request,
         {
@@ -48,7 +51,9 @@ async def month_grid(
     db=Depends(get_db),
 ):
     service = _service(db)
-    events = service.list_month_expanded(user.calendar_id, year, month, requesting_user_id=user.id)
+    events = service.list_month_expanded(
+        user.calendar_id, year, month, requesting_user_id=user.id
+    )
     categories = service.list_categories(user.calendar_id)
     category_map = {cat.id: cat for cat in categories}
 
@@ -80,7 +85,9 @@ async def month_grid(
         },
     )
 
-    return templates.TemplateResponse(request=request, name="partials/month_grid.html", context=context)
+    return templates.TemplateResponse(
+        request=request, name="partials/month_grid.html", context=context
+    )
 
 
 @router.get("/day", response_class=HTMLResponse)
@@ -93,7 +100,9 @@ async def day_events(
     db=Depends(get_db),
 ):
     service = _service(db)
-    events = service.list_day_expanded(user.calendar_id, year, month, day, requesting_user_id=user.id)
+    events = service.list_day_expanded(
+        user.calendar_id, year, month, day, requesting_user_id=user.id
+    )
     categories = service.list_categories(user.calendar_id)
     category_map = {cat.id: cat for cat in categories}
 
@@ -107,4 +116,6 @@ async def day_events(
         },
     )
 
-    return templates.TemplateResponse(request=request, name="partials/day_events.html", context=context)
+    return templates.TemplateResponse(
+        request=request, name="partials/day_events.html", context=context
+    )

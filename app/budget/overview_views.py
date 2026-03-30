@@ -30,7 +30,9 @@ async def overview_page(
             "user_plan": get_user_plan_for_template(user, db),
         },
     )
-    response = templates.TemplateResponse(request=request, name="budget_overview.html", context=context)
+    response = templates.TemplateResponse(
+        request=request, name="budget_overview.html", context=context
+    )
     set_locale_cookie_if_param(response, request)
     return response
 
@@ -64,8 +66,14 @@ async def import_page(
 ):
     context = inject_template_i18n(
         request,
-        {"request": request, "user": user, "user_plan": get_user_plan_for_template(user, db)},
+        {
+            "request": request,
+            "user": user,
+            "user_plan": get_user_plan_for_template(user, db),
+        },
     )
-    response = templates.TemplateResponse(request=request, name="budget_import.html", context=context)
+    response = templates.TemplateResponse(
+        request=request, name="budget_import.html", context=context
+    )
     set_locale_cookie_if_param(response, request)
     return response

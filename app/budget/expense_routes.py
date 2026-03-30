@@ -40,20 +40,33 @@ async def list_expense_categories(user=Depends(get_current_user), db=Depends(get
         raise HTTPException(status_code=400, detail="No calendar linked")
     service = _service(db)
     categories = service.list_categories(user.calendar_id)
-    return {"data": [ExpenseCategoryResponse.model_validate(c, from_attributes=True).model_dump() for c in categories]}
+    return {
+        "data": [
+            ExpenseCategoryResponse.model_validate(c, from_attributes=True).model_dump()
+            for c in categories
+        ]
+    }
 
 
 @router.post("/categories", status_code=201)
-async def create_expense_category(payload: ExpenseCategoryCreate, user=Depends(get_current_user), db=Depends(get_db)):
+async def create_expense_category(
+    payload: ExpenseCategoryCreate, user=Depends(get_current_user), db=Depends(get_db)
+):
     if not user.calendar_id:
         raise HTTPException(status_code=400, detail="No calendar linked")
     service = _service(db)
     category = service.create_category(user.calendar_id, payload.name, payload.color)
-    return {"data": ExpenseCategoryResponse.model_validate(category, from_attributes=True).model_dump()}
+    return {
+        "data": ExpenseCategoryResponse.model_validate(
+            category, from_attributes=True
+        ).model_dump()
+    }
 
 
 @router.get("/by-category")
-async def get_expenses_by_category(year: int, user=Depends(get_current_user), db=Depends(get_db)):
+async def get_expenses_by_category(
+    year: int, user=Depends(get_current_user), db=Depends(get_db)
+):
     if not user.calendar_id:
         raise HTTPException(status_code=400, detail="No calendar linked")
     service = _service(db)
@@ -62,7 +75,9 @@ async def get_expenses_by_category(year: int, user=Depends(get_current_user), db
 
 
 @router.post("/auto-categorize")
-async def auto_categorize_expenses(year: int, user=Depends(get_current_user), db=Depends(get_db)):
+async def auto_categorize_expenses(
+    year: int, user=Depends(get_current_user), db=Depends(get_db)
+):
     if not user.calendar_id:
         raise HTTPException(status_code=400, detail="No calendar linked")
     service = _service(db)
@@ -90,10 +105,21 @@ async def create_expense(
     service = _service(db)
     expense = service.create_expense(user.calendar_id, payload)
     try:
-        _notify_svc(db).create_for_partner(user.id, user.calendar_id, "expense_created", "expense", expense.id, expense.name)
+        _notify_svc(db).create_for_partner(
+            user.id,
+            user.calendar_id,
+            "expense_created",
+            "expense",
+            expense.id,
+            expense.name,
+        )
     except Exception:
         pass
-    return {"data": ExpenseResponse.model_validate(expense, from_attributes=True).model_dump()}
+    return {
+        "data": ExpenseResponse.model_validate(
+            expense, from_attributes=True
+        ).model_dump()
+    }
 
 
 @router.post("/bulk")
@@ -106,7 +132,12 @@ async def bulk_create_expenses(
         raise HTTPException(status_code=400, detail="No calendar linked")
     service = _service(db)
     expenses = service.bulk_create(user.calendar_id, payload.expenses)
-    return {"data": [ExpenseResponse.model_validate(e, from_attributes=True).model_dump() for e in expenses]}
+    return {
+        "data": [
+            ExpenseResponse.model_validate(e, from_attributes=True).model_dump()
+            for e in expenses
+        ]
+    }
 
 
 @router.put("/{expense_id}")
@@ -121,10 +152,21 @@ async def update_expense(
     if not expense:
         raise HTTPException(status_code=404, detail="Expense not found")
     try:
-        _notify_svc(db).create_for_partner(user.id, user.calendar_id, "expense_updated", "expense", expense.id, expense.name)
+        _notify_svc(db).create_for_partner(
+            user.id,
+            user.calendar_id,
+            "expense_updated",
+            "expense",
+            expense.id,
+            expense.name,
+        )
     except Exception:
         pass
-    return {"data": ExpenseResponse.model_validate(expense, from_attributes=True).model_dump()}
+    return {
+        "data": ExpenseResponse.model_validate(
+            expense, from_attributes=True
+        ).model_dump()
+    }
 
 
 @router.delete("/bulk")
@@ -155,7 +197,9 @@ async def delete_expense(
     if not deleted:
         raise HTTPException(status_code=404, detail="Expense not found")
     try:
-        _notify_svc(db).create_for_partner(user.id, user.calendar_id, "expense_deleted", "expense", None, "")
+        _notify_svc(db).create_for_partner(
+            user.id, user.calendar_id, "expense_deleted", "expense", None, ""
+        )
     except Exception:
         pass
     return {"ok": True}

@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field, field_validator
 
 class CategoryCreate(BaseModel):
     name: str = Field(min_length=1, max_length=50)
-    color: str = Field(pattern=r'^#[0-9a-fA-F]{6}$')
+    color: str = Field(pattern=r"^#[0-9a-fA-F]{6}$")
 
 
 class CategoryResponse(BaseModel):

@@ -18,7 +18,9 @@ templates = Jinja2Templates(directory="app/templates")
 @public_router.get("/pricing", response_class=HTMLResponse)
 async def pricing_page(request: Request):
     context = inject_template_i18n(request, {"request": request})
-    response = templates.TemplateResponse(request=request, name="pricing.html", context=context)
+    response = templates.TemplateResponse(
+        request=request, name="pricing.html", context=context
+    )
     set_locale_cookie_if_param(response, request)
     return response
 
@@ -52,7 +54,9 @@ async def billing_settings_page(
     )
 
     response = templates.TemplateResponse(
-        request=request, name="billing_settings.html", context=context,
+        request=request,
+        name="billing_settings.html",
+        context=context,
     )
     set_locale_cookie_if_param(response, request)
     return response

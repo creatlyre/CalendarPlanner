@@ -39,6 +39,7 @@ _VERSION = "1.0.0"
 
 # ── helpers ──────────────────────────────────────────────────────────────
 
+
 def _project_root() -> Path:
     """Return the project root (parent of app/)."""
     return Path(__file__).resolve().parent.parent.parent
@@ -98,6 +99,7 @@ def _host_fingerprint() -> str:
 
 # ── payload ──────────────────────────────────────────────────────────────
 
+
 def build_heartbeat_payload(
     *,
     install_id: str,
@@ -121,6 +123,7 @@ def build_heartbeat_payload(
 
 # ── sender ───────────────────────────────────────────────────────────────
 
+
 def send_heartbeat(
     endpoint: str,
     payload: dict[str, Any],
@@ -134,7 +137,10 @@ def send_heartbeat(
     try:
         resp = httpx.post(endpoint, json=payload, timeout=timeout)
         if resp.status_code < 300:
-            logger.info("Telemetry heartbeat sent (install=%s)", payload.get("installation_id", "")[:8])
+            logger.info(
+                "Telemetry heartbeat sent (install=%s)",
+                payload.get("installation_id", "")[:8],
+            )
             return True
         logger.warning("Telemetry endpoint returned %s", resp.status_code)
     except httpx.HTTPError as exc:
@@ -149,6 +155,7 @@ def send_heartbeat_async(endpoint: str, payload: dict[str, Any]) -> None:
 
 
 # ── periodic background reporter ─────────────────────────────────────────
+
 
 class TelemetryReporter:
     """Sends a heartbeat on start and then every *interval* seconds."""
@@ -182,7 +189,9 @@ class TelemetryReporter:
     def start(self) -> None:
         if not self.endpoint:
             return
-        self._thread = threading.Thread(target=self._loop, daemon=True, name="dobryplan-telemetry")
+        self._thread = threading.Thread(
+            target=self._loop, daemon=True, name="dobryplan-telemetry"
+        )
         self._thread.start()
         logger.info("Telemetry reporter started (interval=%ds)", self.interval)
 

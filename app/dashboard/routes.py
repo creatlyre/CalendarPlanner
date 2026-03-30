@@ -43,25 +43,44 @@ async def dashboard_page(
 
     # Build category name → i18n key map for translation
     _CAT_I18N_SLUGS = {
-        "Groceries": "groceries", "Rent": "rent", "Utilities": "utilities",
-        "Transport": "transport", "Entertainment": "entertainment",
-        "Health": "health", "Education": "education", "Home": "home",
-        "Clothing": "clothing", "Children": "children",
-        "Personal Care": "personal_care", "Pets": "pets",
-        "Events": "events", "Savings & Finance": "savings",
-        "Travel": "travel", "Shopping": "shopping",
-        "Electronics": "electronics", "Garden": "garden",
-        "Loan": "loan", "Other": "other",
+        "Groceries": "groceries",
+        "Rent": "rent",
+        "Utilities": "utilities",
+        "Transport": "transport",
+        "Entertainment": "entertainment",
+        "Health": "health",
+        "Education": "education",
+        "Home": "home",
+        "Clothing": "clothing",
+        "Children": "children",
+        "Personal Care": "personal_care",
+        "Pets": "pets",
+        "Events": "events",
+        "Savings & Finance": "savings",
+        "Travel": "travel",
+        "Shopping": "shopping",
+        "Electronics": "electronics",
+        "Garden": "garden",
+        "Loan": "loan",
+        "Other": "other",
     }
 
     from datetime import datetime
 
     now = datetime.utcnow()
     month_keys = [
-        "budget.income_month_jan", "budget.income_month_feb", "budget.income_month_mar",
-        "budget.income_month_apr", "budget.income_month_may", "budget.income_month_jun",
-        "budget.income_month_jul", "budget.income_month_aug", "budget.income_month_sep",
-        "budget.income_month_oct", "budget.income_month_nov", "budget.income_month_dec",
+        "budget.income_month_jan",
+        "budget.income_month_feb",
+        "budget.income_month_mar",
+        "budget.income_month_apr",
+        "budget.income_month_may",
+        "budget.income_month_jun",
+        "budget.income_month_jul",
+        "budget.income_month_aug",
+        "budget.income_month_sep",
+        "budget.income_month_oct",
+        "budget.income_month_nov",
+        "budget.income_month_dec",
     ]
 
     context = inject_template_i18n(
@@ -94,7 +113,9 @@ async def dashboard_page(
         }
 
     response = templates.TemplateResponse(
-        request=request, name="dashboard.html", context=context,
+        request=request,
+        name="dashboard.html",
+        context=context,
     )
     set_locale_cookie_if_param(response, request)
     return response

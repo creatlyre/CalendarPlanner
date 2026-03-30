@@ -3,12 +3,12 @@ Tests for SaaS production hardening (Phase 30).
 
 Tests security headers, CORS, rate limiting, health checks, and structured logging.
 """
+
 import os
 from unittest.mock import patch
 
 import pytest
 from fastapi.testclient import TestClient
-
 
 # ── Security Headers Tests ─────────────────────────────────────────────────
 
@@ -79,7 +79,10 @@ class TestSecurityHeaders:
 
         client = TestClient(test_app)
         resp = client.get("/test")
-        assert resp.headers.get("Strict-Transport-Security") == "max-age=63072000; includeSubDomains"
+        assert (
+            resp.headers.get("Strict-Transport-Security")
+            == "max-age=63072000; includeSubDomains"
+        )
 
 
 # ── Health Endpoint Tests ──────────────────────────────────────────────────
@@ -129,6 +132,7 @@ class TestRateLimiting:
     def test_rate_limiter_installed(self, test_client):
         """SlowAPI middleware is active (app.state.limiter exists)."""
         from main import app
+
         assert hasattr(app.state, "limiter")
         assert app.state.limiter is not None
 
@@ -161,6 +165,7 @@ class TestCORS:
     def test_cors_middleware_configured_from_settings(self):
         """CORSMiddleware reads from Settings.ALLOWED_ORIGINS."""
         from config import Settings
+
         s = Settings(_env_file=None)
         # ALLOWED_ORIGINS default is empty — CORS not active
         assert hasattr(s, "ALLOWED_ORIGINS")
@@ -229,26 +234,31 @@ class TestProductionConfig:
 
     def test_environment_default(self):
         from config import Settings
+
         s = Settings(_env_file=None)
         assert s.ENVIRONMENT == "development"
 
     def test_log_level_default(self):
         from config import Settings
+
         s = Settings(_env_file=None)
         assert s.LOG_LEVEL == "INFO"
 
     def test_allowed_origins_default_empty(self):
         from config import Settings
+
         s = Settings(_env_file=None)
         assert s.ALLOWED_ORIGINS == ""
 
     def test_sentry_dsn_default_empty(self):
         from config import Settings
+
         s = Settings(_env_file=None)
         assert s.SENTRY_DSN == ""
 
     def test_stripe_keys_exist_in_config(self):
         from config import Settings
+
         s = Settings(_env_file=None)
         assert hasattr(s, "STRIPE_SECRET_KEY")
         assert hasattr(s, "STRIPE_WEBHOOK_SECRET")
@@ -265,11 +275,13 @@ class TestStructuredLogging:
 
     def test_json_formatter_exists(self):
         from main import JSONFormatter
+
         fmt = JSONFormatter()
         assert fmt is not None
 
     def test_setup_logging_callable(self):
         from main import setup_logging
+
         # Should not throw
         setup_logging()
 
@@ -283,7 +295,14 @@ class TestMiddlewareOrder:
     def test_all_middleware_registered(self):
         """All required middleware classes are in the app."""
         from main import app
-        middleware_classes = [m.cls.__name__ if hasattr(m, 'cls') else str(m) for m in app.user_middleware]
+
+        middleware_classes = [
+            m.cls.__name__ if hasattr(m, "cls") else str(m) for m in app.user_middleware
+        ]
         # Check key middleware is present
         class_names = " ".join(str(m) for m in middleware_classes)
-        assert "SecurityHeaders" in class_names or "Security" in class_names.lower() or any("security" in str(m).lower() for m in app.user_middleware)
+        assert (
+            "SecurityHeaders" in class_names
+            or "Security" in class_names.lower()
+            or any("security" in str(m).lower() for m in app.user_middleware)
+        )

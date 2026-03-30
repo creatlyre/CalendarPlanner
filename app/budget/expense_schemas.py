@@ -104,7 +104,7 @@ class BulkExpenseCreate(BaseModel):
 
 class ExpenseCategoryCreate(BaseModel):
     name: str = Field(min_length=1, max_length=50)
-    color: str = Field(pattern=r'^#[0-9a-fA-F]{6}$')
+    color: str = Field(pattern=r"^#[0-9a-fA-F]{6}$")
 
 
 class ExpenseCategoryResponse(BaseModel):

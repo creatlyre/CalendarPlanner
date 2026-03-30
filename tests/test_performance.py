@@ -1,4 +1,5 @@
 """PERF-01, PERF-02, and PERF-03: Performance optimization validation tests."""
+
 import pathlib
 
 from fastapi.testclient import TestClient
@@ -28,7 +29,9 @@ class TestNoCDN:
         for template in templates_dir.rglob("*.html"):
             content = template.read_text(encoding="utf-8")
             for pattern in cdn_patterns:
-                assert pattern not in content, f"CDN reference found in {template}: {pattern}"
+                assert (
+                    pattern not in content
+                ), f"CDN reference found in {template}: {pattern}"
 
     def test_prebuilt_css_file_exists(self):
         """Verify the prebuilt CSS file exists and is non-empty."""
@@ -90,6 +93,7 @@ class TestCacheControlHeaders:
         cache = resp.headers.get("Cache-Control", "")
         assert "max-age=604800" not in cache
 
+
 class TestConcurrentImport:
     """PERF-04: Validate concurrent upserts."""
 
@@ -102,21 +106,31 @@ class TestConcurrentImport:
             def select(self, *args, **kwargs):
                 time.sleep(0.005)
                 return []
+
             def insert(self, *args, **kwargs):
                 time.sleep(0.005)
                 return {"id": "fake"}
+
             def update(self, *args, **kwargs):
                 time.sleep(0.005)
                 return {"id": "fake"}
 
         service = GoogleSyncService(FakeDB())
-        service.user_repo = None # prevent lookup
+        service.user_repo = None  # prevent lookup
 
         # Override extract methods so they don't break with fake event
         monkeypatch.setattr(service, "_extract_cp_event_id", lambda x: None)
         monkeypatch.setattr(service, "_extract_cp_visibility", lambda x: "shared")
 
-        items = [{"id": f"g_event_{i}", "summary": f"Event {i}", "start": {"dateTime": "2026-03-18T10:00:00Z"}, "end": {"dateTime": "2026-03-18T11:00:00Z"}} for i in range(50)]
+        items = [
+            {
+                "id": f"g_event_{i}",
+                "summary": f"Event {i}",
+                "start": {"dateTime": "2026-03-18T10:00:00Z"},
+                "end": {"dateTime": "2026-03-18T11:00:00Z"},
+            }
+            for i in range(50)
+        ]
 
         # We test speed sequentially vs using the internal thread pool logic
         # But wait, import_month is a big method. Let's just verify the function runs fast.
@@ -127,8 +141,10 @@ class TestConcurrentImport:
         class FakeService:
             def events(self):
                 return self
+
             def list(self, *args, **kwargs):
                 return self
+
             def execute(self):
                 return {"items": items}
 

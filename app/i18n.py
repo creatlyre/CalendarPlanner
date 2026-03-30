@@ -102,7 +102,7 @@ def inject_template_i18n(request: Request, context: dict[str, Any]) -> dict[str,
 def set_locale_cookie_if_param(response: Response, request: Request) -> None:
     """
     Set locale cookie if ?lang=xx query param is present and valid.
-    
+
     Called after locale has been resolved and page rendered.
     Sets httponly cookie with 365-day expiry and lax sameSite policy.
     """

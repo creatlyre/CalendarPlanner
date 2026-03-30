@@ -32,7 +32,9 @@ async def unread_count(user=Depends(get_current_user), db=Depends(get_db)):
 
 
 @router.post("/{notification_id}/read")
-async def mark_read(notification_id: str, user=Depends(get_current_user), db=Depends(get_db)):
+async def mark_read(
+    notification_id: str, user=Depends(get_current_user), db=Depends(get_db)
+):
     svc = _service(db)
     result = svc.mark_read(notification_id, user.id)
     if not result:
@@ -48,7 +50,9 @@ async def mark_all_read(user=Depends(get_current_user), db=Depends(get_db)):
 
 
 @router.post("/{notification_id}/dismiss")
-async def dismiss(notification_id: str, user=Depends(get_current_user), db=Depends(get_db)):
+async def dismiss(
+    notification_id: str, user=Depends(get_current_user), db=Depends(get_db)
+):
     svc = _service(db)
     result = svc.dismiss(notification_id, user.id)
     if not result:

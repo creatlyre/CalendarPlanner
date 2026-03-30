@@ -103,7 +103,9 @@ class AdminRepository:
         return {"calendar": cal, "members": members, "owner": owner}
 
     def transfer_user_to_household(
-        self, user_id: str, target_calendar_id: str,
+        self,
+        user_id: str,
+        target_calendar_id: str,
     ) -> None:
         self.db.update(
             "users",
@@ -115,10 +117,13 @@ class AdminRepository:
         )
 
     def merge_households(
-        self, source_calendar_id: str, target_calendar_id: str,
+        self,
+        source_calendar_id: str,
+        target_calendar_id: str,
     ) -> int:
         rows = self.db.select(
-            "users", {"calendar_id": f"eq.{source_calendar_id}"},
+            "users",
+            {"calendar_id": f"eq.{source_calendar_id}"},
         )
         for r in rows:
             self.db.update(

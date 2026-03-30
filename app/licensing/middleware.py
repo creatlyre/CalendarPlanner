@@ -23,7 +23,13 @@ _WARNING_BANNER = (
 
 
 class LicenseCheckMiddleware(BaseHTTPMiddleware):
-    def __init__(self, app, environment: str = "", license_key: str = "", license_secret: str = ""):
+    def __init__(
+        self,
+        app,
+        environment: str = "",
+        license_key: str = "",
+        license_secret: str = "",
+    ):
         super().__init__(app)
         self.is_self_hosted = environment == "self-hosted"
         self.license_valid = False

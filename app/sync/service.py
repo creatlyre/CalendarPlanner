@@ -47,8 +47,16 @@ class GoogleSyncService:
         if not user.google_refresh_token and not user.google_access_token:
             return None
 
-        token = decrypt_token(user.google_access_token) if user.google_access_token else None
-        refresh_token = decrypt_token(user.google_refresh_token) if user.google_refresh_token else None
+        token = (
+            decrypt_token(user.google_access_token)
+            if user.google_access_token
+            else None
+        )
+        refresh_token = (
+            decrypt_token(user.google_refresh_token)
+            if user.google_refresh_token
+            else None
+        )
 
         creds = Credentials(
             token=token,
@@ -59,7 +67,11 @@ class GoogleSyncService:
             scopes=self.settings.GOOGLE_SCOPES,
         )
 
-        if user.google_token_expiry and user.google_token_expiry <= datetime.utcnow() and refresh_token:
+        if (
+            user.google_token_expiry
+            and user.google_token_expiry <= datetime.utcnow()
+            and refresh_token
+        ):
             refreshed = refresh_access_token(refresh_token)
             if not refreshed:
                 return None
@@ -72,13 +84,21 @@ class GoogleSyncService:
                 {
                     "google_access_token": user.google_access_token,
                     "google_refresh_token": user.google_refresh_token,
-                    "google_token_expiry": user.google_token_expiry.isoformat() if user.google_token_expiry else None,
+                    "google_token_expiry": (
+                        user.google_token_expiry.isoformat()
+                        if user.google_token_expiry
+                        else None
+                    ),
                 },
             )
 
             creds = Credentials(
                 token=refreshed["access_token"],
-                refresh_token=decrypt_token(user.google_refresh_token) if user.google_refresh_token else None,
+                refresh_token=(
+                    decrypt_token(user.google_refresh_token)
+                    if user.google_refresh_token
+                    else None
+                ),
                 token_uri="https://oauth2.googleapis.com/token",
                 client_id=self.settings.GOOGLE_CLIENT_ID,
                 client_secret=self.settings.GOOGLE_CLIENT_SECRET,
@@ -103,7 +123,11 @@ class GoogleSyncService:
             if cal.get("summary") == target_name:
                 return cal["id"]
 
-        created = service.calendars().insert(body={"summary": target_name, "timeZone": "UTC"}).execute()
+        created = (
+            service.calendars()
+            .insert(body={"summary": target_name, "timeZone": "UTC"})
+            .execute()
+        )
         return created["id"]
 
     def _import_calendar_ids(self, service, user: User) -> list[str]:
@@ -129,8 +153,7 @@ class GoogleSyncService:
             reminders = {
                 "useDefault": False,
                 "overrides": [
-                    {"method": "popup", "minutes": minutes}
-                    for minutes in reminder_list
+                    {"method": "popup", "minutes": minutes} for minutes in reminder_list
                 ],
             }
         else:
@@ -139,8 +162,14 @@ class GoogleSyncService:
         return {
             "summary": event.title,
             "description": event.description or "",
-            "start": {"dateTime": event.start_at.isoformat(), "timeZone": event.timezone or "UTC"},
-            "end": {"dateTime": event.end_at.isoformat(), "timeZone": event.timezone or "UTC"},
+            "start": {
+                "dateTime": event.start_at.isoformat(),
+                "timeZone": event.timezone or "UTC",
+            },
+            "end": {
+                "dateTime": event.end_at.isoformat(),
+                "timeZone": event.timezone or "UTC",
+            },
             "recurrence": [f"RRULE:{event.rrule}"] if event.rrule else [],
             "reminders": reminders,
             "extendedProperties": {
@@ -177,6 +206,7 @@ class GoogleSyncService:
                     if tz_name:
                         try:
                             from zoneinfo import ZoneInfo
+
                             target_tz = ZoneInfo(tz_name)
                             return parsed.astimezone(target_tz).replace(tzinfo=None)
                         except (KeyError, Exception):
@@ -213,7 +243,9 @@ class GoogleSyncService:
             return vis
         return "shared"
 
-    def _find_local_event_by_google_id(self, calendar_id: str, google_event_id: str) -> Event | None:
+    def _find_local_event_by_google_id(
+        self, calendar_id: str, google_event_id: str
+    ) -> Event | None:
         rows = self.db.select(
             "events",
             {
@@ -227,16 +259,24 @@ class GoogleSyncService:
             return None
         return EventRepository(self.db).get_by_id(rows[0].get("id"), calendar_id)
 
-    def _upsert_google_event(self, calendar_id: str, user_id: str, google_event: dict) -> tuple[int, int]:
+    def _upsert_google_event(
+        self, calendar_id: str, user_id: str, google_event: dict
+    ) -> tuple[int, int]:
         google_event_id = google_event.get("id")
         if not google_event_id:
             return 0, 0
 
         if google_event.get("status") == "cancelled":
             cp_event_id = self._extract_cp_event_id(google_event)
-            target = EventRepository(self.db).get_by_id(cp_event_id, calendar_id) if cp_event_id else None
+            target = (
+                EventRepository(self.db).get_by_id(cp_event_id, calendar_id)
+                if cp_event_id
+                else None
+            )
             if not target:
-                target = self._find_local_event_by_google_id(calendar_id, google_event_id)
+                target = self._find_local_event_by_google_id(
+                    calendar_id, google_event_id
+                )
             if target:
                 EventRepository(self.db).soft_delete(target, user_id)
                 return 0, 1
@@ -266,7 +306,11 @@ class GoogleSyncService:
         event_description = google_event.get("description")
 
         cp_event_id = self._extract_cp_event_id(google_event)
-        existing = EventRepository(self.db).get_by_id(cp_event_id, calendar_id) if cp_event_id else None
+        existing = (
+            EventRepository(self.db).get_by_id(cp_event_id, calendar_id)
+            if cp_event_id
+            else None
+        )
         if not existing:
             existing = self._find_local_event_by_google_id(calendar_id, google_event_id)
 
@@ -324,26 +368,45 @@ class GoogleSyncService:
     def _find_google_event(self, service, calendar_id: str, app_event_id: str):
         items = (
             service.events()
-            .list(calendarId=calendar_id, privateExtendedProperty=f"cp_event_id={app_event_id}", showDeleted=True)
+            .list(
+                calendarId=calendar_id,
+                privateExtendedProperty=f"cp_event_id={app_event_id}",
+                showDeleted=True,
+            )
             .execute()
             .get("items", [])
         )
         return items[0] if items else None
 
-    def _sync_recipients(self, event: Event, household_users: list[User] | None = None) -> list[User]:
+    def _sync_recipients(
+        self, event: Event, household_users: list[User] | None = None
+    ) -> list[User]:
         """Return the list of users who should receive this event via Google sync.
 
         Shared events go to all household users. Private events go only to the owner.
         """
-        users = household_users if household_users is not None else self._household_users(event.calendar_id)
+        users = (
+            household_users
+            if household_users is not None
+            else self._household_users(event.calendar_id)
+        )
         visibility = getattr(event, "visibility", "shared") or "shared"
         if visibility == "private":
             return [u for u in users if u.id == event.created_by_user_id]
         return users
 
-    def sync_event_for_household(self, event: Event, deleted: bool = False, household_users: list[User] | None = None) -> SyncResult:
+    def sync_event_for_household(
+        self,
+        event: Event,
+        deleted: bool = False,
+        household_users: list[User] | None = None,
+    ) -> SyncResult:
         users = self._sync_recipients(event, household_users=household_users)
-        all_household = household_users if household_users is not None else self._household_users(event.calendar_id)
+        all_household = (
+            household_users
+            if household_users is not None
+            else self._household_users(event.calendar_id)
+        )
         recipient_ids = {u.id for u in users}
         non_recipients = [u for u in all_household if u.id not in recipient_ids]
         synced_users = 0
@@ -362,14 +425,20 @@ class GoogleSyncService:
 
                 if deleted:
                     if existing:
-                        service.events().delete(calendarId=calendar_id, eventId=existing["id"]).execute()
+                        service.events().delete(
+                            calendarId=calendar_id, eventId=existing["id"]
+                        ).execute()
                         synced_events += 1
                 else:
                     payload = self._event_body(event)
                     if existing:
-                        service.events().update(calendarId=calendar_id, eventId=existing["id"], body=payload).execute()
+                        service.events().update(
+                            calendarId=calendar_id, eventId=existing["id"], body=payload
+                        ).execute()
                     else:
-                        service.events().insert(calendarId=calendar_id, body=payload).execute()
+                        service.events().insert(
+                            calendarId=calendar_id, body=payload
+                        ).execute()
                     synced_events += 1
 
                 synced_users += 1
@@ -387,7 +456,9 @@ class GoogleSyncService:
                     cal_id = self._ensure_user_calendar(service, user)
                     existing = self._find_google_event(service, cal_id, event.id)
                     if existing:
-                        service.events().delete(calendarId=cal_id, eventId=existing["id"]).execute()
+                        service.events().delete(
+                            calendarId=cal_id, eventId=existing["id"]
+                        ).execute()
                         synced_events += 1
                 except Exception as exc:
                     errors.append(f"{user.email}: {exc}")
@@ -399,11 +470,15 @@ class GoogleSyncService:
                 {"id": f"eq.{event.id}"},
                 {"google_sync_at": event.google_sync_at.isoformat()},
             )
-        return SyncResult(users_synced=synced_users, events_synced=synced_events, errors=errors)
+        return SyncResult(
+            users_synced=synced_users, events_synced=synced_events, errors=errors
+        )
 
     def export_month(self, user: User, year: int, month: int) -> SyncResult:
         service = EventService(EventRepository(self.db))
-        events = service.list_month_expanded(user.calendar_id, year, month, requesting_user_id=user.id)
+        events = service.list_month_expanded(
+            user.calendar_id, year, month, requesting_user_id=user.id
+        )
 
         total_users = 0
         total_events = 0
@@ -418,7 +493,9 @@ class GoogleSyncService:
             if cal_id not in household_users_cache:
                 household_users_cache[cal_id] = self._household_users(cal_id)
 
-            result = self.sync_event_for_household(item, deleted=False, household_users=household_users_cache[cal_id])
+            result = self.sync_event_for_household(
+                item, deleted=False, household_users=household_users_cache[cal_id]
+            )
             total_users += result.users_synced
             total_events += result.events_synced
             errors.extend(result.errors)
@@ -430,7 +507,9 @@ class GoogleSyncService:
                 {"last_sync_at": datetime.utcnow().isoformat()},
             )
 
-        return SyncResult(users_synced=total_users, events_synced=total_events, errors=errors)
+        return SyncResult(
+            users_synced=total_users, events_synced=total_events, errors=errors
+        )
 
     def import_month(self, user: User, year: int, month: int) -> ImportResult:
         errors: list[str] = []
@@ -438,11 +517,21 @@ class GoogleSyncService:
         updated = 0
 
         if not user.calendar_id:
-            return ImportResult(events_imported=0, events_updated=0, calendars_scanned=0, errors=["User has no calendar_id"])
+            return ImportResult(
+                events_imported=0,
+                events_updated=0,
+                calendars_scanned=0,
+                errors=["User has no calendar_id"],
+            )
 
         creds = self._credentials_for_user(user)
         if not creds:
-            return ImportResult(events_imported=0, events_updated=0, calendars_scanned=0, errors=["Google account is not connected"])
+            return ImportResult(
+                events_imported=0,
+                events_updated=0,
+                calendars_scanned=0,
+                errors=["Google account is not connected"],
+            )
 
         try:
             service = self._google_service(creds)
@@ -466,9 +555,16 @@ class GoogleSyncService:
                         .execute()
                     )
                     items = response.get("items", [])
-                    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+                    with concurrent.futures.ThreadPoolExecutor(
+                        max_workers=10
+                    ) as executor:
                         future_to_item = {
-                            executor.submit(self._upsert_google_event, user.calendar_id, user.id, item): item
+                            executor.submit(
+                                self._upsert_google_event,
+                                user.calendar_id,
+                                user.id,
+                                item,
+                            ): item
                             for item in items
                         }
                         for future in concurrent.futures.as_completed(future_to_item):
@@ -496,6 +592,8 @@ class GoogleSyncService:
         return ImportResult(
             events_imported=imported,
             events_updated=updated,
-            calendars_scanned=len(google_calendar_ids) if 'google_calendar_ids' in locals() else 0,
+            calendars_scanned=(
+                len(google_calendar_ids) if "google_calendar_ids" in locals() else 0
+            ),
             errors=errors,
         )

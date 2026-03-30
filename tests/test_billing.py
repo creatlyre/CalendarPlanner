@@ -4,6 +4,7 @@ Tests for billing module (Phase 29).
 Tests billing repository, service, entitlement dependencies, routes, and views.
 Validates against real Stripe product/price IDs and Supabase table schema.
 """
+
 import os
 import uuid
 from datetime import datetime, timedelta, timezone
@@ -14,7 +15,11 @@ from fastapi.testclient import TestClient
 
 from app.billing.repository import BillingRepository
 from app.billing.schemas import CheckoutRequest, SubscriptionInfo, BillingEventCreate
-from app.billing.dependencies import get_current_plan, require_plan, get_user_plan_for_template
+from app.billing.dependencies import (
+    get_current_plan,
+    require_plan,
+    get_user_plan_for_template,
+)
 from app.billing.service import BillingService, PLAN_PRICE_MAP
 from app.database.models import Subscription, BillingEvent
 
@@ -271,40 +276,51 @@ class TestEntitlementDependencies:
 
     def test_pro_plan_with_subscription(self, test_db, test_user_a):
         """User with pro subscription returns 'pro'."""
-        test_db.insert("subscriptions", {
-            "id": str(uuid.uuid4()),
-            "user_id": test_user_a.id,
-            "stripe_customer_id": "cus_pro_123",
-            "plan": "pro",
-            "status": "active",
-            "cancel_at_period_end": False,
-        })
+        test_db.insert(
+            "subscriptions",
+            {
+                "id": str(uuid.uuid4()),
+                "user_id": test_user_a.id,
+                "stripe_customer_id": "cus_pro_123",
+                "plan": "pro",
+                "status": "active",
+                "cancel_at_period_end": False,
+            },
+        )
         plan = get_user_plan_for_template(test_user_a, test_db)
         assert plan == "pro"
 
     def test_family_plus_plan_with_subscription(self, test_db, test_user_a):
         """User with family_plus subscription returns 'family_plus'."""
-        test_db.insert("subscriptions", {
-            "id": str(uuid.uuid4()),
-            "user_id": test_user_a.id,
-            "stripe_customer_id": "cus_fam_123",
-            "plan": "family_plus",
-            "status": "active",
-            "cancel_at_period_end": False,
-        })
+        test_db.insert(
+            "subscriptions",
+            {
+                "id": str(uuid.uuid4()),
+                "user_id": test_user_a.id,
+                "stripe_customer_id": "cus_fam_123",
+                "plan": "family_plus",
+                "status": "active",
+                "cancel_at_period_end": False,
+            },
+        )
         plan = get_user_plan_for_template(test_user_a, test_db)
         assert plan == "family_plus"
 
-    def test_require_plan_allows_matching_plan(self, authenticated_client, test_db, test_user_a):
+    def test_require_plan_allows_matching_plan(
+        self, authenticated_client, test_db, test_user_a
+    ):
         """require_plan dependency passes when user has allowed plan."""
-        test_db.insert("subscriptions", {
-            "id": str(uuid.uuid4()),
-            "user_id": test_user_a.id,
-            "stripe_customer_id": "cus_allow_test",
-            "plan": "pro",
-            "status": "active",
-            "cancel_at_period_end": False,
-        })
+        test_db.insert(
+            "subscriptions",
+            {
+                "id": str(uuid.uuid4()),
+                "user_id": test_user_a.id,
+                "stripe_customer_id": "cus_allow_test",
+                "plan": "pro",
+                "status": "active",
+                "cancel_at_period_end": False,
+            },
+        )
         # Billing settings page should load (available to all plans)
         resp = authenticated_client.get("/billing/settings")
         assert resp.status_code == 200
@@ -344,16 +360,22 @@ class TestBillingRoutes:
         )
         assert resp.status_code == 422  # Pydantic validation error
 
-    def test_checkout_pro_plan_hits_service(self, authenticated_client, test_db, test_user_a):
+    def test_checkout_pro_plan_hits_service(
+        self, authenticated_client, test_db, test_user_a
+    ):
         """POST /api/billing/checkout for pro plan calls Stripe service.
 
         We patch the Stripe API call since we don't want to create real
         Stripe sessions in automated tests, but we verify the flow reaches Stripe.
         """
-        with patch("app.billing.service.stripe.Customer.create") as mock_cust, \
-             patch("app.billing.service.stripe.checkout.Session.create") as mock_session:
+        with (
+            patch("app.billing.service.stripe.Customer.create") as mock_cust,
+            patch("app.billing.service.stripe.checkout.Session.create") as mock_session,
+        ):
             mock_cust.return_value = MagicMock(id="cus_new_test")
-            mock_session.return_value = MagicMock(url="https://checkout.stripe.com/test")
+            mock_session.return_value = MagicMock(
+                url="https://checkout.stripe.com/test"
+            )
 
             resp = authenticated_client.post(
                 "/api/billing/checkout",
@@ -407,18 +429,27 @@ class TestBillingViews:
         resp = authenticated_client.get("/billing/settings")
         html = resp.text
         # Should show free plan info or upgrade CTA
-        assert "free" in html.lower() or "upgrade" in html.lower() or "plan" in html.lower()
+        assert (
+            "free" in html.lower()
+            or "upgrade" in html.lower()
+            or "plan" in html.lower()
+        )
 
-    def test_billing_settings_pro_user(self, authenticated_client, test_db, test_user_a):
+    def test_billing_settings_pro_user(
+        self, authenticated_client, test_db, test_user_a
+    ):
         """Pro user sees their plan on billing settings."""
-        test_db.insert("subscriptions", {
-            "id": str(uuid.uuid4()),
-            "user_id": test_user_a.id,
-            "stripe_customer_id": "cus_pro_view",
-            "plan": "pro",
-            "status": "active",
-            "cancel_at_period_end": False,
-        })
+        test_db.insert(
+            "subscriptions",
+            {
+                "id": str(uuid.uuid4()),
+                "user_id": test_user_a.id,
+                "stripe_customer_id": "cus_pro_view",
+                "plan": "pro",
+                "status": "active",
+                "cancel_at_period_end": False,
+            },
+        )
         resp = authenticated_client.get("/billing/settings")
         assert resp.status_code == 200
         html = resp.text.lower()
@@ -435,9 +466,16 @@ class TestSupabaseSchemaCompliance:
         """Subscription dataclass has all fields matching Supabase columns."""
         sub = Subscription()
         required_fields = [
-            "id", "user_id", "stripe_customer_id", "stripe_subscription_id",
-            "plan", "status", "current_period_end", "cancel_at_period_end",
-            "created_at", "updated_at",
+            "id",
+            "user_id",
+            "stripe_customer_id",
+            "stripe_subscription_id",
+            "plan",
+            "status",
+            "current_period_end",
+            "cancel_at_period_end",
+            "created_at",
+            "updated_at",
         ]
         for field_name in required_fields:
             assert hasattr(sub, field_name), f"Missing field: {field_name}"
@@ -453,8 +491,13 @@ class TestSupabaseSchemaCompliance:
         """BillingEvent dataclass has all fields matching Supabase columns."""
         event = BillingEvent()
         required_fields = [
-            "id", "user_id", "event_type", "plan",
-            "stripe_event_id", "metadata", "created_at",
+            "id",
+            "user_id",
+            "event_type",
+            "plan",
+            "stripe_event_id",
+            "metadata",
+            "created_at",
         ]
         for field_name in required_fields:
             assert hasattr(event, field_name), f"Missing field: {field_name}"
@@ -481,7 +524,14 @@ class TestSupabaseSchemaCompliance:
 
     def test_valid_event_types(self):
         """Event types match Supabase CHECK constraint."""
-        valid_types = {"signup", "subscribe", "plan_change", "cancel", "churn", "payment_failed"}
+        valid_types = {
+            "signup",
+            "subscribe",
+            "plan_change",
+            "cancel",
+            "churn",
+            "payment_failed",
+        }
         for event_type in valid_types:
             event = BillingEvent(event_type=event_type)
             assert event.event_type == event_type
@@ -540,17 +590,22 @@ class TestBillingServiceLogic:
             status="active",
         )
         service = BillingService(repo)
-        user_id = service._resolve_user_id({
-            "metadata": {},
-            "customer": "cus_lookup_123",
-        })
+        user_id = service._resolve_user_id(
+            {
+                "metadata": {},
+                "customer": "cus_lookup_123",
+            }
+        )
         assert user_id == test_user_a.id
 
     def test_resolve_user_id_none_when_not_found(self, test_db):
         """_resolve_user_id returns None when no user found."""
         repo = BillingRepository(test_db)
         service = BillingService(repo)
-        assert service._resolve_user_id({"metadata": {}, "customer": "cus_unknown"}) is None
+        assert (
+            service._resolve_user_id({"metadata": {}, "customer": "cus_unknown"})
+            is None
+        )
 
 
 # ── Stripe Live API Tests (require STRIPE_SECRET_KEY) ──────────────────────
@@ -558,7 +613,7 @@ class TestBillingServiceLogic:
 
 @pytest.mark.skipif(
     not os.getenv("STRIPE_SECRET_KEY"),
-    reason="STRIPE_SECRET_KEY not set — skipping live Stripe tests"
+    reason="STRIPE_SECRET_KEY not set — skipping live Stripe tests",
 )
 class TestStripeLiveAPI:
     """Tests that call the real Stripe API.
@@ -569,6 +624,7 @@ class TestStripeLiveAPI:
 
     def test_retrieve_pro_product(self):
         import stripe
+
         stripe.api_key = os.environ["STRIPE_SECRET_KEY"]
         product = stripe.Product.retrieve(REAL_STRIPE_PRO_PRODUCT_ID)
         assert product.name == "Dobry Plan Pro"
@@ -576,6 +632,7 @@ class TestStripeLiveAPI:
 
     def test_retrieve_family_plus_product(self):
         import stripe
+
         stripe.api_key = os.environ["STRIPE_SECRET_KEY"]
         product = stripe.Product.retrieve(REAL_STRIPE_FAMILY_PLUS_PRODUCT_ID)
         assert product.name == "Dobry Plan Family Plus"
@@ -583,6 +640,7 @@ class TestStripeLiveAPI:
 
     def test_retrieve_pro_price(self):
         import stripe
+
         stripe.api_key = os.environ["STRIPE_SECRET_KEY"]
         price = stripe.Price.retrieve(REAL_STRIPE_PRO_PRICE_ID)
         assert price.unit_amount == 1999
@@ -591,6 +649,7 @@ class TestStripeLiveAPI:
 
     def test_retrieve_family_plus_price(self):
         import stripe
+
         stripe.api_key = os.environ["STRIPE_SECRET_KEY"]
         price = stripe.Price.retrieve(REAL_STRIPE_FAMILY_PLUS_PRICE_ID)
         assert price.unit_amount == 3499
@@ -599,6 +658,7 @@ class TestStripeLiveAPI:
 
     def test_retrieve_test_customer(self):
         import stripe
+
         stripe.api_key = os.environ["STRIPE_SECRET_KEY"]
         customer = stripe.Customer.retrieve(REAL_STRIPE_TEST_CUSTOMER_ID)
         assert customer.email == "test-validation@dobryplan.app"
@@ -609,7 +669,7 @@ class TestStripeLiveAPI:
 
 @pytest.mark.skipif(
     not os.getenv("STRIPE_SECRET_KEY"),
-    reason="STRIPE_SECRET_KEY not set — skipping live Stripe purchase flow tests"
+    reason="STRIPE_SECRET_KEY not set — skipping live Stripe purchase flow tests",
 )
 class TestStripeLivePurchaseFlow:
     """Live Stripe purchase flow integration tests.
@@ -628,6 +688,7 @@ class TestStripeLivePurchaseFlow:
     def _setup_stripe(self):
         """Set up Stripe API key, create a fresh customer and test prices."""
         import stripe
+
         stripe.api_key = os.environ["STRIPE_SECRET_KEY"]
 
         # Create a test customer
@@ -789,9 +850,7 @@ class TestStripeLivePurchaseFlow:
         sig_header = f"t={timestamp},v1={signature}"
 
         # The construct_event call should succeed with our computed signature
-        event = stripe.Webhook.construct_event(
-            payload_bytes, sig_header, test_secret
-        )
+        event = stripe.Webhook.construct_event(payload_bytes, sig_header, test_secret)
         assert event["type"] == "checkout.session.completed"
         assert event["data"]["object"]["metadata"]["plan"] == "pro"
 

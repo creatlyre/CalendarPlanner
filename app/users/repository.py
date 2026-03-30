@@ -68,31 +68,61 @@ class UserRepository:
     def __init__(self, db: SupabaseStore):
         self.db = db
 
-    def get_user_by_id(self, user_id: str, auth_token: str | None = None) -> User | None:
-        rows = self.db.select("users", {"id": f"eq.{user_id}", "limit": "1"}, auth_token=auth_token)
+    def get_user_by_id(
+        self, user_id: str, auth_token: str | None = None
+    ) -> User | None:
+        rows = self.db.select(
+            "users", {"id": f"eq.{user_id}", "limit": "1"}, auth_token=auth_token
+        )
         return _to_user(rows[0]) if rows else None
 
-    def get_user_by_email(self, email: str, auth_token: str | None = None) -> User | None:
-        rows = self.db.select("users", {"email": f"eq.{email.lower()}", "limit": "1"}, auth_token=auth_token)
+    def get_user_by_email(
+        self, email: str, auth_token: str | None = None
+    ) -> User | None:
+        rows = self.db.select(
+            "users",
+            {"email": f"eq.{email.lower()}", "limit": "1"},
+            auth_token=auth_token,
+        )
         return _to_user(rows[0]) if rows else None
 
-    def get_user_by_external_id(self, external_id: str, auth_token: str | None = None) -> User | None:
-        rows = self.db.select("users", {"google_id": f"eq.{external_id}", "limit": "1"}, auth_token=auth_token)
+    def get_user_by_external_id(
+        self, external_id: str, auth_token: str | None = None
+    ) -> User | None:
+        rows = self.db.select(
+            "users",
+            {"google_id": f"eq.{external_id}", "limit": "1"},
+            auth_token=auth_token,
+        )
         return _to_user(rows[0]) if rows else None
 
-    def create_user(self, payload: dict[str, Any], auth_token: str | None = None) -> User:
+    def create_user(
+        self, payload: dict[str, Any], auth_token: str | None = None
+    ) -> User:
         row = self.db.insert("users", payload, auth_token=auth_token)
         return _to_user(row)
 
-    def update_user(self, user_id: str, payload: dict[str, Any], auth_token: str | None = None) -> User | None:
-        row = self.db.update("users", {"id": f"eq.{user_id}"}, payload, auth_token=auth_token)
+    def update_user(
+        self, user_id: str, payload: dict[str, Any], auth_token: str | None = None
+    ) -> User | None:
+        row = self.db.update(
+            "users", {"id": f"eq.{user_id}"}, payload, auth_token=auth_token
+        )
         return _to_user(row) if row else None
 
-    def get_calendar_by_id(self, calendar_id: str, auth_token: str | None = None) -> Calendar | None:
-        rows = self.db.select("calendars", {"id": f"eq.{calendar_id}", "limit": "1"}, auth_token=auth_token)
+    def get_calendar_by_id(
+        self, calendar_id: str, auth_token: str | None = None
+    ) -> Calendar | None:
+        rows = self.db.select(
+            "calendars",
+            {"id": f"eq.{calendar_id}", "limit": "1"},
+            auth_token=auth_token,
+        )
         return _to_calendar(rows[0]) if rows else None
 
-    def create_calendar(self, payload: dict[str, Any], auth_token: str | None = None) -> Calendar:
+    def create_calendar(
+        self, payload: dict[str, Any], auth_token: str | None = None
+    ) -> Calendar:
         row = self.db.insert("calendars", payload, auth_token=auth_token)
         return _to_calendar(row)
 
@@ -128,7 +158,9 @@ class UserRepository:
         return [_to_invitation(item) for item in rows]
 
     def accept_invitation(self, invitation_id: str, user_id: str) -> User | None:
-        invitation_rows = self.db.select("calendar_invitations", {"id": f"eq.{invitation_id}", "limit": "1"})
+        invitation_rows = self.db.select(
+            "calendar_invitations", {"id": f"eq.{invitation_id}", "limit": "1"}
+        )
         user_rows = self.db.select("users", {"id": f"eq.{user_id}", "limit": "1"})
         if not invitation_rows or not user_rows:
             return None
@@ -136,8 +168,16 @@ class UserRepository:
         invitation = invitation_rows[0]
         user = user_rows[0]
 
-        self.db.update("users", {"id": f"eq.{user_id}"}, {"calendar_id": invitation.get("calendar_id")})
-        self.db.update("calendar_invitations", {"id": f"eq.{invitation_id}"}, {"status": "accepted"})
+        self.db.update(
+            "users",
+            {"id": f"eq.{user_id}"},
+            {"calendar_id": invitation.get("calendar_id")},
+        )
+        self.db.update(
+            "calendar_invitations",
+            {"id": f"eq.{invitation_id}"},
+            {"status": "accepted"},
+        )
 
         updated_rows = self.db.select("users", {"id": f"eq.{user_id}", "limit": "1"})
         return _to_user(updated_rows[0]) if updated_rows else _to_user(user)

@@ -1,4 +1,5 @@
 """Tests for shopping list (Phase 25)."""
+
 import pytest
 
 
@@ -24,7 +25,9 @@ class TestShoppingItemCRUD:
         assert "sections" in data
 
     def test_update_item(self, authenticated_client):
-        create = authenticated_client.post("/api/shopping/items", json={"name": "Masło"})
+        create = authenticated_client.post(
+            "/api/shopping/items", json={"name": "Masło"}
+        )
         item_id = create.json()["data"]["id"]
         res = authenticated_client.put(
             f"/api/shopping/items/{item_id}",
@@ -34,7 +37,9 @@ class TestShoppingItemCRUD:
         assert res.json()["data"]["name"] == "Masło ekstra"
 
     def test_delete_item(self, authenticated_client):
-        create = authenticated_client.post("/api/shopping/items", json={"name": "Masło"})
+        create = authenticated_client.post(
+            "/api/shopping/items", json={"name": "Masło"}
+        )
         item_id = create.json()["data"]["id"]
         res = authenticated_client.delete(f"/api/shopping/items/{item_id}")
         assert res.status_code == 200
@@ -88,7 +93,9 @@ class TestShoppingAutoCategorize:
         assert data["section_id"] is not None
 
     def test_unknown_item_uncategorized(self, authenticated_client):
-        res = authenticated_client.post("/api/shopping/items", json={"name": "Fizblorp"})
+        res = authenticated_client.post(
+            "/api/shopping/items", json={"name": "Fizblorp"}
+        )
         assert res.status_code == 201
         data = res.json()["data"]
         assert data["section_id"] is None
@@ -99,7 +106,9 @@ class TestShoppingKeywordLearning:
 
     def test_learn_keyword(self, authenticated_client):
         # Add unknown item
-        create = authenticated_client.post("/api/shopping/items", json={"name": "Fizblorp"})
+        create = authenticated_client.post(
+            "/api/shopping/items", json={"name": "Fizblorp"}
+        )
         item_id = create.json()["data"]["id"]
         # Get sections to find a section_id
         sections_res = authenticated_client.get("/api/shopping/sections")
@@ -150,7 +159,9 @@ class TestShoppingSharedAccess:
         res = authenticated_client.get("/api/shopping/items")
         data = res.json()["data"]
         # Total items across all sections + uncategorized = 1
-        total = sum(len(s.get("items", [])) for s in data["sections"]) + len(data.get("uncategorized", []))
+        total = sum(len(s.get("items", [])) for s in data["sections"]) + len(
+            data.get("uncategorized", [])
+        )
         assert total == 1
 
 
@@ -159,18 +170,21 @@ class TestShoppingServiceUnit:
 
     def test_categorize_keywords_loaded(self):
         from app.shopping.service import SECTION_KEYWORDS
+
         assert len(SECTION_KEYWORDS) == 10
         assert "Warzywa i Owoce" in SECTION_KEYWORDS
         assert "Alkohol" in SECTION_KEYWORDS
 
     def test_normalize_diacritics(self):
         from app.shopping.service import _normalize
+
         assert _normalize("Masło") == "maslo"
         assert _normalize("Żeberka") == "zeberka"
         assert _normalize("Łosoś") == "losos"
 
     def test_multi_item_parsing(self):
         import re
+
         text = "Masło, Mleko, Jogurt"
         items = re.split(r"[,\n]+", text)
         names = [t.strip() for t in items if t.strip()]
@@ -178,6 +192,7 @@ class TestShoppingServiceUnit:
 
     def test_multi_item_newline_parsing(self):
         import re
+
         text = "Banan\nJabłko\nPomidor"
         items = re.split(r"[,\n]+", text)
         names = [t.strip() for t in items if t.strip()]
@@ -189,14 +204,18 @@ class TestShoppingViewPage:
 
     def test_shopping_page_loads(self, authenticated_client, test_db, test_user_a):
         import uuid
-        test_db.insert("subscriptions", {
-            "id": str(uuid.uuid4()),
-            "user_id": test_user_a.id,
-            "stripe_customer_id": "cus_test_shop",
-            "plan": "pro",
-            "status": "active",
-            "cancel_at_period_end": False,
-        })
+
+        test_db.insert(
+            "subscriptions",
+            {
+                "id": str(uuid.uuid4()),
+                "user_id": test_user_a.id,
+                "stripe_customer_id": "cus_test_shop",
+                "plan": "pro",
+                "status": "active",
+                "cancel_at_period_end": False,
+            },
+        )
         res = authenticated_client.get("/shopping")
         assert res.status_code == 200
         assert "shopping" in res.text.lower()

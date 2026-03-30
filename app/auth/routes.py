@@ -123,7 +123,9 @@ def _upsert_local_user_from_profile(
         if provider_token:
             update_payload["google_access_token"] = encrypt_token(provider_token)
         if provider_refresh_token:
-            update_payload["google_refresh_token"] = encrypt_token(provider_refresh_token)
+            update_payload["google_refresh_token"] = encrypt_token(
+                provider_refresh_token
+            )
         user = repo.update_user(user.id, update_payload) or user
 
     service = UserService(db)
@@ -162,15 +164,17 @@ async def oauth_callback(
     settings = Settings()
 
     if error:
-        raise HTTPException(status_code=400, detail=_msg(request, "auth.oauth_callback_failed", error=error))
+        raise HTTPException(
+            status_code=400,
+            detail=_msg(request, "auth.oauth_callback_failed", error=error),
+        )
 
     if not code:
         # Supabase OAuth implicit flow delivers tokens in URL fragment; JS forwards them to /auth/session.
         locale = resolve_locale(request)
         unknown_error = json.dumps(_msg(request, "sync.unknown"))
         app_name = _msg(request, "app.name")
-        return HTMLResponse(
-            f"""
+        return HTMLResponse(f"""
 <!doctype html>
 <html lang="{locale}">
 <head>
@@ -301,18 +305,22 @@ async def oauth_callback(
   </script>
 </body>
 </html>
-            """.strip()
-        )
+            """.strip())
 
     # Keep direct Google callback flow for backward compatibility and tests.
     try:
         tokens = exchange_code_for_token(code, state or "")
     except Exception as exc:
-        raise HTTPException(status_code=500, detail=_msg(request, "auth.oauth_callback_failed", error=str(exc))) from exc
+        raise HTTPException(
+            status_code=500,
+            detail=_msg(request, "auth.oauth_callback_failed", error=str(exc)),
+        ) from exc
 
     user_info = tokens["user_info"]
     if not user_info.get("email") or not user_info.get("google_id"):
-        raise HTTPException(status_code=400, detail=_msg(request, "auth.missing_google_profile"))
+        raise HTTPException(
+            status_code=400, detail=_msg(request, "auth.missing_google_profile")
+        )
 
     user = _upsert_local_user_from_profile(
         db=db,
@@ -323,7 +331,9 @@ async def oauth_callback(
         provider_refresh_token=tokens.get("refresh_token"),
     )
 
-    UserRepository(db).update_user(user.id, {"google_token_expiry": tokens["token_expiry"].isoformat()})
+    UserRepository(db).update_user(
+        user.id, {"google_token_expiry": tokens["token_expiry"].isoformat()}
+    )
 
     payload = {
         "user_id": str(user.id),
@@ -338,14 +348,20 @@ async def oauth_callback(
 
 
 @router.post("/session")
-async def create_supabase_session(request: Request, payload: AuthSessionPayload, db=Depends(get_db)):
+async def create_supabase_session(
+    request: Request, payload: AuthSessionPayload, db=Depends(get_db)
+):
     profile = await fetch_supabase_user(payload.access_token)
     if not profile:
-        raise HTTPException(status_code=401, detail=_msg(request, "auth.invalid_supabase_session"))
+        raise HTTPException(
+            status_code=401, detail=_msg(request, "auth.invalid_supabase_session")
+        )
 
     email = (profile.get("email") or "").lower()
     if not email:
-        raise HTTPException(status_code=400, detail=_msg(request, "auth.supabase_profile_missing_email"))
+        raise HTTPException(
+            status_code=400, detail=_msg(request, "auth.supabase_profile_missing_email")
+        )
 
     metadata = profile.get("user_metadata") or {}
     name = metadata.get("full_name") or metadata.get("name") or email
@@ -362,7 +378,9 @@ async def create_supabase_session(request: Request, payload: AuthSessionPayload,
             provider_refresh_token=payload.provider_refresh_token,
         )
     except Exception:
-        db_warning = "Authenticated via Supabase, but local database is unavailable right now."
+        db_warning = (
+            "Authenticated via Supabase, but local database is unavailable right now."
+        )
 
     body = {"message": _msg(request, "auth.session_created")}
     if db_warning:
@@ -375,10 +393,14 @@ async def create_supabase_session(request: Request, payload: AuthSessionPayload,
 
 
 @router.post("/register")
-async def register_with_password(request: Request, payload: PasswordAuthPayload, db=Depends(get_db)):
+async def register_with_password(
+    request: Request, payload: PasswordAuthPayload, db=Depends(get_db)
+):
     settings = Settings()
     if not is_supabase_auth_enabled(settings):
-        raise HTTPException(status_code=400, detail=_msg(request, "auth.supabase_not_configured"))
+        raise HTTPException(
+            status_code=400, detail=_msg(request, "auth.supabase_not_configured")
+        )
 
     try:
         data = await supabase_sign_up(payload.email, payload.password)
@@ -415,10 +437,14 @@ async def register_with_password(request: Request, payload: PasswordAuthPayload,
 
 
 @router.post("/password-login")
-async def login_with_password(request: Request, payload: PasswordAuthPayload, db=Depends(get_db)):
+async def login_with_password(
+    request: Request, payload: PasswordAuthPayload, db=Depends(get_db)
+):
     settings = Settings()
     if not is_supabase_auth_enabled(settings):
-        raise HTTPException(status_code=400, detail=_msg(request, "auth.supabase_not_configured"))
+        raise HTTPException(
+            status_code=400, detail=_msg(request, "auth.supabase_not_configured")
+        )
 
     try:
         data = await supabase_password_sign_in(payload.email, payload.password)
@@ -427,11 +453,15 @@ async def login_with_password(request: Request, payload: PasswordAuthPayload, db
 
     access_token = data.get("access_token")
     if not access_token:
-        raise HTTPException(status_code=401, detail=_msg(request, "auth.no_access_token"))
+        raise HTTPException(
+            status_code=401, detail=_msg(request, "auth.no_access_token")
+        )
 
     supabase_profile = await fetch_supabase_user(access_token)
     if not supabase_profile:
-        raise HTTPException(status_code=401, detail=_msg(request, "auth.profile_fetch_failed"))
+        raise HTTPException(
+            status_code=401, detail=_msg(request, "auth.profile_fetch_failed")
+        )
 
     email = (supabase_profile.get("email") or payload.email).lower()
     metadata = supabase_profile.get("user_metadata") or {}
@@ -487,7 +517,9 @@ async def forgot_password_page(request: Request):
 async def forgot_password_submit(request: Request, payload: ForgotPasswordPayload):
     settings = Settings()
     if not is_supabase_auth_enabled(settings):
-        raise HTTPException(status_code=400, detail=_msg(request, "auth.supabase_not_configured"))
+        raise HTTPException(
+            status_code=400, detail=_msg(request, "auth.supabase_not_configured")
+        )
     base_url = str(request.base_url).rstrip("/")
     redirect_to = f"{base_url}/auth/confirm"
     try:
@@ -555,9 +587,13 @@ async def update_password_page(request: Request):
 async def update_password_submit(request: Request, payload: UpdatePasswordPayload):
     session = request.cookies.get("session")
     if not session:
-        raise HTTPException(status_code=401, detail=_msg(request, "auth.not_authenticated"))
+        raise HTTPException(
+            status_code=401, detail=_msg(request, "auth.not_authenticated")
+        )
     if len(payload.password) < 6:
-        raise HTTPException(status_code=400, detail=_msg(request, "auth.password_min_length"))
+        raise HTTPException(
+            status_code=400, detail=_msg(request, "auth.password_min_length")
+        )
     try:
         await supabase_update_user_password(session, payload.password)
     except ValueError as exc:

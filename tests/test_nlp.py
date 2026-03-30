@@ -40,7 +40,9 @@ class TestExplicitDateParsing:
         )
         assert result.title in ["dentist", "dentist 10"]
         assert result.start_at.date() == datetime(2026, 4, 10).date()
-        assert result.confidence_date == 0.95  # Fixed interpretation, slightly uncertain
+        assert (
+            result.confidence_date == 0.95
+        )  # Fixed interpretation, slightly uncertain
         assert result.errors == []
 
     def test_parse_past_date_fails(self, nlp_service, context_date):

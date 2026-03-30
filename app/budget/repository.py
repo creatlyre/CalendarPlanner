@@ -41,7 +41,9 @@ class BudgetSettingsRepository:
     def __init__(self, db: SupabaseStore):
         self.db = db
 
-    def get_by_calendar(self, calendar_id: str, year: int | None = None) -> BudgetSettings | None:
+    def get_by_calendar(
+        self, calendar_id: str, year: int | None = None
+    ) -> BudgetSettings | None:
         params: dict = {"calendar_id": f"eq.{calendar_id}", "limit": "1"}
         if year is not None:
             params["year"] = f"eq.{year}"
@@ -64,7 +66,9 @@ class BudgetSettingsRepository:
         )
         return _to_budget_settings(row)
 
-    def update(self, settings: BudgetSettings, payload: BudgetSettingsUpdate) -> BudgetSettings:
+    def update(
+        self, settings: BudgetSettings, payload: BudgetSettingsUpdate
+    ) -> BudgetSettings:
         row = self.db.update(
             "budget_settings",
             {"id": f"eq.{settings.id}"},

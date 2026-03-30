@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-from app.budget.income_repository import MonthlyHoursRepository, AdditionalEarningsRepository
+from app.budget.income_repository import (
+    MonthlyHoursRepository,
+    AdditionalEarningsRepository,
+)
 from app.budget.repository import BudgetSettingsRepository
 from app.budget.income_schemas import MonthlyHoursUpdate, AdditionalEarningCreate
 from app.database.models import MonthlyHours, AdditionalEarning
@@ -58,27 +61,30 @@ class IncomeService:
                 for e in recurring_earnings
             ]
 
-            months.append({
-                "month": m,
-                "rate_1_hours": h.rate_1_hours if h else None,
-                "rate_2_hours": h.rate_2_hours if h else None,
-                "rate_3_hours": h.rate_3_hours if h else None,
-                "gross": round(gross, 2),
-                "net": round(net, 2),
-                "additional_earnings": month_earnings,
-                "recurring_earnings": recurring_entries,
-            })
+            months.append(
+                {
+                    "month": m,
+                    "rate_1_hours": h.rate_1_hours if h else None,
+                    "rate_2_hours": h.rate_2_hours if h else None,
+                    "rate_3_hours": h.rate_3_hours if h else None,
+                    "gross": round(gross, 2),
+                    "net": round(net, 2),
+                    "additional_earnings": month_earnings,
+                    "recurring_earnings": recurring_entries,
+                }
+            )
 
         recurring_list = [
-            {"id": e.id, "name": e.name, "amount": e.amount}
-            for e in recurring_earnings
+            {"id": e.id, "name": e.name, "amount": e.amount} for e in recurring_earnings
         ]
         return {"year": year, "months": months, "recurring_earnings": recurring_list}
 
     def save_hours(self, calendar_id: str, payload: MonthlyHoursUpdate) -> MonthlyHours:
         return self.hours_repo.upsert(calendar_id, payload)
 
-    def bulk_save_hours(self, calendar_id: str, year: int, entries: list[MonthlyHoursUpdate]) -> list[MonthlyHours]:
+    def bulk_save_hours(
+        self, calendar_id: str, year: int, entries: list[MonthlyHoursUpdate]
+    ) -> list[MonthlyHours]:
         results = []
         for entry in entries:
             entry.year = year
@@ -86,7 +92,9 @@ class IncomeService:
             results.append(result)
         return results
 
-    def add_earning(self, calendar_id: str, payload: AdditionalEarningCreate) -> AdditionalEarning:
+    def add_earning(
+        self, calendar_id: str, payload: AdditionalEarningCreate
+    ) -> AdditionalEarning:
         return self.earnings_repo.create(calendar_id, payload)
 
     def delete_earning(self, earning_id: str) -> bool:

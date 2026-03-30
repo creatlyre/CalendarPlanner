@@ -18,7 +18,9 @@ def _service(db) -> NotificationService:
 
 
 @router.get("/badge", response_class=HTMLResponse)
-async def notification_badge(request: Request, user=Depends(get_current_user), db=Depends(get_db)):
+async def notification_badge(
+    request: Request, user=Depends(get_current_user), db=Depends(get_db)
+):
     svc = _service(db)
     count = svc.unread_count(user.id)
     if count > 0:
@@ -30,25 +32,37 @@ async def notification_badge(request: Request, user=Depends(get_current_user), d
 
 
 @router.get("/dropdown", response_class=HTMLResponse)
-async def notification_dropdown(request: Request, user=Depends(get_current_user), db=Depends(get_db)):
+async def notification_dropdown(
+    request: Request, user=Depends(get_current_user), db=Depends(get_db)
+):
     svc = _service(db)
     notifications = svc.list_for_user(user.id)
     pref = svc.get_preference(user.id)
-    context = inject_template_i18n(request, {
-        "request": request,
-        "notifications": notifications,
-        "email_enabled": pref.email_enabled,
-    })
+    context = inject_template_i18n(
+        request,
+        {
+            "request": request,
+            "notifications": notifications,
+            "email_enabled": pref.email_enabled,
+        },
+    )
     return templates.TemplateResponse("partials/notification_dropdown.html", context)
 
 
 @router.post("/{notification_id}/read-html", response_class=HTMLResponse)
-async def mark_read_html(notification_id: str, request: Request, user=Depends(get_current_user), db=Depends(get_db)):
+async def mark_read_html(
+    notification_id: str,
+    request: Request,
+    user=Depends(get_current_user),
+    db=Depends(get_db),
+):
     svc = _service(db)
     result = svc.mark_read(notification_id, user.id)
     if result:
         # Re-fetch to get actor_name
-        actor = UserRepository(_service(db).user_repo.db).get_user_by_id(result.actor_user_id)
+        actor = UserRepository(_service(db).user_repo.db).get_user_by_id(
+            result.actor_user_id
+        )
         actor_name = actor.name if actor else ""
         n = {
             "id": result.id,
@@ -65,25 +79,36 @@ async def mark_read_html(notification_id: str, request: Request, user=Depends(ge
 
 
 @router.post("/read-all-html", response_class=HTMLResponse)
-async def mark_all_read_html(request: Request, user=Depends(get_current_user), db=Depends(get_db)):
+async def mark_all_read_html(
+    request: Request, user=Depends(get_current_user), db=Depends(get_db)
+):
     svc = _service(db)
     svc.mark_all_read(user.id)
     return await notification_dropdown(request=request, user=user, db=db)
 
 
 @router.post("/{notification_id}/dismiss-html", response_class=HTMLResponse)
-async def dismiss_html(notification_id: str, request: Request, user=Depends(get_current_user), db=Depends(get_db)):
+async def dismiss_html(
+    notification_id: str,
+    request: Request,
+    user=Depends(get_current_user),
+    db=Depends(get_db),
+):
     svc = _service(db)
     svc.dismiss(notification_id, user.id)
     return HTMLResponse("")
 
 
 @router.put("/preferences-html", response_class=HTMLResponse)
-async def toggle_email_pref(request: Request, user=Depends(get_current_user), db=Depends(get_db)):
+async def toggle_email_pref(
+    request: Request, user=Depends(get_current_user), db=Depends(get_db)
+):
     svc = _service(db)
     current = svc.get_preference(user.id)
     new_pref = svc.update_preference(user.id, not current.email_enabled)
-    context = inject_template_i18n(request, {"request": request, "email_enabled": new_pref.email_enabled})
+    context = inject_template_i18n(
+        request, {"request": request, "email_enabled": new_pref.email_enabled}
+    )
     checked = "checked" if new_pref.email_enabled else ""
     t = context["t"]
     return HTMLResponse(

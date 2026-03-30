@@ -4,9 +4,9 @@ Tests for PWA & Mobile Distribution (Phase 32).
 Validates manifest, service worker, icons, offline page, base.html integration,
 auth bypass for PWA routes, TWA config, and native deferral documentation.
 """
+
 import json
 import os
-
 
 # ── MOB-01: Manifest Endpoint ──────────────────────────────────────────────
 
@@ -114,7 +114,9 @@ class TestAppIcons:
     def test_icons_served_via_static(self, test_client):
         for icon in self.ICONS:
             resp = test_client.get(f"/static/icons/{icon}")
-            assert resp.status_code == 200, f"/static/icons/{icon} returned {resp.status_code}"
+            assert (
+                resp.status_code == 200
+            ), f"/static/icons/{icon} returned {resp.status_code}"
 
 
 # ── MOB-01: Offline Page ───────────────────────────────────────────────────

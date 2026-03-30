@@ -5,7 +5,6 @@ from typing import Literal, Optional
 
 from pydantic import BaseModel, field_validator
 
-
 VALID_PLANS = ("pro", "family_plus", "self_hosted")
 
 

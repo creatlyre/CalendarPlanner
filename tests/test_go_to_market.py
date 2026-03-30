@@ -4,12 +4,12 @@ Tests for Phase 33: Go-to-Market (GTM-01 through GTM-05).
 Covers: pricing page, landing page, legal pages, self-hosted checkout mode,
 footer legal links, and LAUNCH.md documentation artifacts.
 """
+
 import os
 from pathlib import Path
 from unittest.mock import patch, MagicMock
 
 import pytest
-
 
 # ── GTM-01: Pricing Page ──────────────────────────────────────────────────
 
@@ -47,9 +47,11 @@ class TestPricingPage:
         # Extract the checkout function area (between 'function checkout' and end of script)
         checkout_start = html.find("function checkout")
         assert checkout_start != -1, "checkout function not found in pricing page"
-        checkout_section = html[checkout_start:checkout_start + 1000]
+        checkout_section = html[checkout_start : checkout_start + 1000]
         assert "alert(" not in checkout_section, "checkout() still uses native alert()"
-        assert "showToast" in checkout_section, "checkout() should use showToast for errors"
+        assert (
+            "showToast" in checkout_section
+        ), "checkout() should use showToast for errors"
 
 
 # ── GTM-02: Landing Page ─────────────────────────────────────────────────
@@ -67,7 +69,12 @@ class TestLandingPage:
         resp = test_client.get("/")
         html = resp.text.lower()
         # Should have sign-up or get-started CTA
-        assert "auth/login" in html or "zaloguj" in html or "sign" in html or "start" in html
+        assert (
+            "auth/login" in html
+            or "zaloguj" in html
+            or "sign" in html
+            or "start" in html
+        )
 
     def test_landing_page_has_features(self, test_client):
         resp = test_client.get("/")
@@ -94,7 +101,9 @@ class TestLandingPage:
         """Landing page must include a trust indicators / social proof section."""
         resp = test_client.get("/")
         html = resp.text.lower()
-        assert "trust" in html or "open source" in html or "gdpr" in html or "rodo" in html
+        assert (
+            "trust" in html or "open source" in html or "gdpr" in html or "rodo" in html
+        )
 
     def test_landing_page_has_register_cta(self, test_client):
         """Primary hero CTA must point to /auth/register, not /auth/login."""
@@ -109,11 +118,17 @@ class TestLandingPage:
 class TestSelfHostedCheckout:
     """Self-hosted checkout uses Stripe payment mode (one-time), not subscription."""
 
-    def test_self_hosted_checkout_uses_payment_mode(self, authenticated_client, test_db, test_user_a):
-        with patch("app.billing.service.stripe.Customer.create") as mock_cust, \
-             patch("app.billing.service.stripe.checkout.Session.create") as mock_session:
+    def test_self_hosted_checkout_uses_payment_mode(
+        self, authenticated_client, test_db, test_user_a
+    ):
+        with (
+            patch("app.billing.service.stripe.Customer.create") as mock_cust,
+            patch("app.billing.service.stripe.checkout.Session.create") as mock_session,
+        ):
             mock_cust.return_value = MagicMock(id="cus_sh_test")
-            mock_session.return_value = MagicMock(url="https://checkout.stripe.com/sh_test")
+            mock_session.return_value = MagicMock(
+                url="https://checkout.stripe.com/sh_test"
+            )
 
             resp = authenticated_client.post(
                 "/api/billing/checkout",
@@ -123,17 +138,22 @@ class TestSelfHostedCheckout:
                 # Verify Stripe was called with mode=payment
                 mock_session.assert_called_once()
                 call_kwargs = mock_session.call_args
-                assert call_kwargs[1]["mode"] == "payment" or call_kwargs.kwargs.get("mode") == "payment"
+                assert (
+                    call_kwargs[1]["mode"] == "payment"
+                    or call_kwargs.kwargs.get("mode") == "payment"
+                )
             else:
                 # 400 because STRIPE_SELF_HOSTED_PRICE_ID is empty in test env
                 assert resp.status_code == 400
 
     def test_plan_price_map_has_self_hosted_key(self):
         from app.billing.service import PLAN_PRICE_MAP
+
         assert "self_hosted" in PLAN_PRICE_MAP
 
     def test_plan_price_map_has_annual_keys(self):
         from app.billing.service import PLAN_PRICE_MAP
+
         assert ("pro", "annual") in PLAN_PRICE_MAP
         assert ("family_plus", "annual") in PLAN_PRICE_MAP
 
@@ -183,7 +203,9 @@ class TestLegalPages:
         """Public pages should not have POST forms that cause resubmission dialogs."""
         for path in ["/pricing", "/terms", "/privacy", "/refund"]:
             resp = test_client.get(path)
-            assert 'method="post"' not in resp.text.lower(), f"{path} contains a POST form"
+            assert (
+                'method="post"' not in resp.text.lower()
+            ), f"{path} contains a POST form"
 
     def test_footer_has_legal_links(self, authenticated_client):
         """Authenticated pages include footer with legal links."""
@@ -233,11 +255,21 @@ class TestDockerArtifacts:
     """GitHub Actions workflow and Dockerfile OCI labels exist."""
 
     def test_docker_publish_workflow_exists(self):
-        wf = Path(__file__).parent.parent / ".github" / "workflows" / "docker-publish.yml"
+        wf = (
+            Path(__file__).parent.parent
+            / ".github"
+            / "workflows"
+            / "docker-publish.yml"
+        )
         assert wf.exists(), "docker-publish.yml workflow must exist"
 
     def test_docker_publish_triggers_on_tags(self):
-        wf = Path(__file__).parent.parent / ".github" / "workflows" / "docker-publish.yml"
+        wf = (
+            Path(__file__).parent.parent
+            / ".github"
+            / "workflows"
+            / "docker-publish.yml"
+        )
         content = wf.read_text(encoding="utf-8")
         assert "v*" in content or "tags" in content
 

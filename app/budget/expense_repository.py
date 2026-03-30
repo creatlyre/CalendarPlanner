@@ -108,7 +108,11 @@ class ExpenseRepository:
     def delete_by_year_onetime(self, calendar_id: str, year: int) -> int:
         return self.db.delete(
             "expenses",
-            {"calendar_id": f"eq.{calendar_id}", "year": f"eq.{year}", "month": "neq.0"},
+            {
+                "calendar_id": f"eq.{calendar_id}",
+                "year": f"eq.{year}",
+                "month": "neq.0",
+            },
         )
 
     # ── Category methods ─────────────────────────────────────────────────
@@ -143,7 +147,9 @@ class ExpenseRepository:
         )
         return [_to_category(row) for row in rows]
 
-    def create_category(self, calendar_id: str, name: str, color: str) -> ExpenseCategory:
+    def create_category(
+        self, calendar_id: str, name: str, color: str
+    ) -> ExpenseCategory:
         row = self.db.insert(
             "expense_categories",
             {

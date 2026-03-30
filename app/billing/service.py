@@ -49,14 +49,18 @@ class BillingService:
         else:
             price_id = PLAN_PRICE_MAP.get((plan, billing_period))
         if not price_id:
-            raise ValueError(f"No Stripe price configured for plan: {plan} ({billing_period})")
+            raise ValueError(
+                f"No Stripe price configured for plan: {plan} ({billing_period})"
+            )
 
         # Get or create Stripe customer
         sub = self.repo.get_subscription(user_id)
         stripe_customer_id = sub.stripe_customer_id if sub else None
 
         if not stripe_customer_id:
-            customer = stripe.Customer.create(email=email, metadata={"user_id": user_id})
+            customer = stripe.Customer.create(
+                email=email, metadata={"user_id": user_id}
+            )
             stripe_customer_id = customer.id
             self.repo.upsert_subscription(
                 user_id=user_id,
@@ -168,7 +172,10 @@ class BillingService:
         customer_id = subscription.get("customer")
         user_id = self._resolve_user_id(subscription)
         if not user_id:
-            logger.warning("subscription.updated: cannot resolve user_id for customer %s", customer_id)
+            logger.warning(
+                "subscription.updated: cannot resolve user_id for customer %s",
+                customer_id,
+            )
             return
 
         # Determine plan from price
@@ -182,7 +189,11 @@ class BillingService:
         old_plan = existing.plan if existing else "free"
 
         period_end_ts = subscription.get("current_period_end")
-        period_end = datetime.fromtimestamp(period_end_ts, tz=timezone.utc) if period_end_ts else None
+        period_end = (
+            datetime.fromtimestamp(period_end_ts, tz=timezone.utc)
+            if period_end_ts
+            else None
+        )
 
         status_map = {
             "active": "active",
@@ -232,9 +243,16 @@ class BillingService:
 
     def _handle_payment_failed(self, event: dict, invoice: dict) -> None:
         customer_id = invoice.get("customer")
-        sub = self.repo.get_subscription_by_stripe_customer(customer_id) if customer_id else None
+        sub = (
+            self.repo.get_subscription_by_stripe_customer(customer_id)
+            if customer_id
+            else None
+        )
         if not sub:
-            logger.warning("invoice.payment_failed: cannot find subscription for customer %s", customer_id)
+            logger.warning(
+                "invoice.payment_failed: cannot find subscription for customer %s",
+                customer_id,
+            )
             return
 
         self.repo.upsert_subscription(

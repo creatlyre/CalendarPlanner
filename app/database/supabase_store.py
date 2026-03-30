@@ -74,7 +74,9 @@ class SupabaseStore:
     def __init__(self):
         self.settings = Settings()
         self.base_url = self.settings.SUPABASE_URL.rstrip("/")
-        self.api_key = self.settings.SUPABASE_SERVICE_ROLE_KEY or self.settings.SUPABASE_ANON_KEY
+        self.api_key = (
+            self.settings.SUPABASE_SERVICE_ROLE_KEY or self.settings.SUPABASE_ANON_KEY
+        )
         self._client = _get_shared_client()
 
     def _auth_context(self, auth_token: str | None) -> dict[str, Any]:
@@ -132,10 +134,16 @@ class SupabaseStore:
             headers["Prefer"] = prefer
         return headers
 
-    def select(self, table: str, params: Dict[str, str], auth_token: str | None = None) -> List[Dict[str, Any]]:
+    def select(
+        self, table: str, params: Dict[str, str], auth_token: str | None = None
+    ) -> List[Dict[str, Any]]:
         url = f"{self.base_url}/rest/v1/{table}"
         query = {"select": "*", **params}
-        response = self._client.get(url, params=query, headers=self._headers(auth_token=auth_token, content_type_json=False))
+        response = self._client.get(
+            url,
+            params=query,
+            headers=self._headers(auth_token=auth_token, content_type_json=False),
+        )
         if response.status_code >= 400:
             raise SupabaseStoreError(
                 "select",
@@ -158,7 +166,9 @@ class SupabaseStore:
         response = self._client.post(
             url,
             json=payload,
-            headers=self._headers(auth_token=auth_token, prefer="return=representation"),
+            headers=self._headers(
+                auth_token=auth_token, prefer="return=representation"
+            ),
         )
         if response.status_code >= 400:
             raise SupabaseStoreError(
@@ -174,6 +184,34 @@ class SupabaseStore:
         data = response.json()
         return data[0] if data else {}
 
+    def bulk_insert(
+        self,
+        table: str,
+        payloads: List[Dict[str, Any]],
+        auth_token: str | None = None,
+    ) -> List[Dict[str, Any]]:
+        if not payloads:
+            return []
+        url = f"{self.base_url}/rest/v1/{table}"
+        response = self._client.post(
+            url,
+            json=payloads,
+            headers=self._headers(
+                auth_token=auth_token, prefer="return=representation"
+            ),
+        )
+        if response.status_code >= 400:
+            raise SupabaseStoreError(
+                "bulk_insert",
+                table,
+                response.status_code,
+                response.text,
+                request_id=response.headers.get("x-request-id"),
+                auth_context=self._auth_context(auth_token),
+                payload_keys=sorted(payloads[0].keys()) if payloads else [],
+            )
+        return response.json()
+
     def update(
         self,
         table: str,
@@ -186,7 +224,9 @@ class SupabaseStore:
             url,
             params=filters,
             json=payload,
-            headers=self._headers(auth_token=auth_token, prefer="return=representation"),
+            headers=self._headers(
+                auth_token=auth_token, prefer="return=representation"
+            ),
         )
         if response.status_code >= 400:
             raise SupabaseStoreError(
@@ -203,9 +243,13 @@ class SupabaseStore:
         data = response.json()
         return data[0] if data else None
 
-    def count(self, table: str, filters: Dict[str, str], auth_token: str | None = None) -> int:
+    def count(
+        self, table: str, filters: Dict[str, str], auth_token: str | None = None
+    ) -> int:
         url = f"{self.base_url}/rest/v1/{table}"
-        headers = self._headers(auth_token=auth_token, content_type_json=False, prefer="count=exact")
+        headers = self._headers(
+            auth_token=auth_token, content_type_json=False, prefer="count=exact"
+        )
         query = {"select": "id", **filters}
         response = self._client.get(url, params=query, headers=headers)
         if response.status_code >= 400:
@@ -226,12 +270,18 @@ class SupabaseStore:
                 return len(response.json())
         return len(response.json())
 
-    def delete(self, table: str, filters: Dict[str, str], auth_token: str | None = None) -> int:
+    def delete(
+        self, table: str, filters: Dict[str, str], auth_token: str | None = None
+    ) -> int:
         url = f"{self.base_url}/rest/v1/{table}"
         response = self._client.delete(
             url,
             params=filters,
-            headers=self._headers(auth_token=auth_token, content_type_json=False, prefer="return=representation"),
+            headers=self._headers(
+                auth_token=auth_token,
+                content_type_json=False,
+                prefer="return=representation",
+            ),
         )
         if response.status_code >= 400:
             raise SupabaseStoreError(

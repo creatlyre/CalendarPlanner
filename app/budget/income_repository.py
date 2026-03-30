@@ -59,10 +59,17 @@ class MonthlyHoursRepository:
         )
         return [_to_monthly_hours(r) for r in rows]
 
-    def get_by_calendar_year_month(self, calendar_id: str, year: int, month: int) -> MonthlyHours | None:
+    def get_by_calendar_year_month(
+        self, calendar_id: str, year: int, month: int
+    ) -> MonthlyHours | None:
         rows = self.db.select(
             "monthly_hours",
-            {"calendar_id": f"eq.{calendar_id}", "year": f"eq.{year}", "month": f"eq.{month}", "limit": "1"},
+            {
+                "calendar_id": f"eq.{calendar_id}",
+                "year": f"eq.{year}",
+                "month": f"eq.{month}",
+                "limit": "1",
+            },
         )
         return _to_monthly_hours(rows[0]) if rows else None
 
@@ -74,7 +81,9 @@ class MonthlyHoursRepository:
         return sorted(set(int(r.get("year", 0)) for r in rows) - {0})
 
     def upsert(self, calendar_id: str, payload: MonthlyHoursUpdate) -> MonthlyHours:
-        existing = self.get_by_calendar_year_month(calendar_id, payload.year, payload.month)
+        existing = self.get_by_calendar_year_month(
+            calendar_id, payload.year, payload.month
+        )
         if existing:
             row = self.db.update(
                 "monthly_hours",
@@ -105,7 +114,9 @@ class AdditionalEarningsRepository:
     def __init__(self, db: SupabaseStore):
         self.db = db
 
-    def get_by_calendar_year(self, calendar_id: str, year: int) -> list[AdditionalEarning]:
+    def get_by_calendar_year(
+        self, calendar_id: str, year: int
+    ) -> list[AdditionalEarning]:
         rows = self.db.select(
             "additional_earnings",
             {"calendar_id": f"eq.{calendar_id}", "year": f"eq.{year}"},
@@ -119,14 +130,22 @@ class AdditionalEarningsRepository:
         )
         return sorted(set(int(r.get("year", 0)) for r in rows) - {0})
 
-    def get_by_calendar_year_month(self, calendar_id: str, year: int, month: int) -> list[AdditionalEarning]:
+    def get_by_calendar_year_month(
+        self, calendar_id: str, year: int, month: int
+    ) -> list[AdditionalEarning]:
         rows = self.db.select(
             "additional_earnings",
-            {"calendar_id": f"eq.{calendar_id}", "year": f"eq.{year}", "month": f"eq.{month}"},
+            {
+                "calendar_id": f"eq.{calendar_id}",
+                "year": f"eq.{year}",
+                "month": f"eq.{month}",
+            },
         )
         return [_to_additional_earning(r) for r in rows]
 
-    def create(self, calendar_id: str, payload: AdditionalEarningCreate) -> AdditionalEarning:
+    def create(
+        self, calendar_id: str, payload: AdditionalEarningCreate
+    ) -> AdditionalEarning:
         row = self.db.insert(
             "additional_earnings",
             {

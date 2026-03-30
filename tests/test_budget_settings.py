@@ -1,4 +1,5 @@
 """Integration tests for budget settings API and views."""
+
 import uuid
 from datetime import datetime, timedelta
 
@@ -10,7 +11,6 @@ from app.auth.dependencies import get_current_user
 from app.database.models import Calendar, User
 from config import Settings
 from main import app
-
 
 # ── API Tests ──────────────────────────────────────────────
 
@@ -24,17 +24,20 @@ def test_get_budget_settings_empty(authenticated_client):
 
 def test_get_budget_settings_existing(authenticated_client, test_db, test_user_a):
     """GET /api/budget/settings?year=2026 when settings exist returns saved values."""
-    test_db.insert("budget_settings", {
-        "id": str(uuid.uuid4()),
-        "calendar_id": test_user_a.calendar_id,
-        "year": 2026,
-        "rate_1": 150.0,
-        "rate_2": 200.0,
-        "rate_3": 250.0,
-        "zus_costs": 1500.0,
-        "accounting_costs": 300.0,
-        "initial_balance": 50000.0,
-    })
+    test_db.insert(
+        "budget_settings",
+        {
+            "id": str(uuid.uuid4()),
+            "calendar_id": test_user_a.calendar_id,
+            "year": 2026,
+            "rate_1": 150.0,
+            "rate_2": 200.0,
+            "rate_3": 250.0,
+            "zus_costs": 1500.0,
+            "accounting_costs": 300.0,
+            "initial_balance": 50000.0,
+        },
+    )
 
     response = authenticated_client.get("/api/budget/settings?year=2026")
     assert response.status_code == 200
@@ -74,17 +77,20 @@ def test_save_budget_settings_create(authenticated_client):
 
 def test_save_budget_settings_update(authenticated_client, test_db, test_user_a):
     """PUT /api/budget/settings updates existing settings."""
-    test_db.insert("budget_settings", {
-        "id": str(uuid.uuid4()),
-        "calendar_id": test_user_a.calendar_id,
-        "year": 2026,
-        "rate_1": 100.0,
-        "rate_2": 100.0,
-        "rate_3": 100.0,
-        "zus_costs": 800.0,
-        "accounting_costs": 200.0,
-        "initial_balance": 10000.0,
-    })
+    test_db.insert(
+        "budget_settings",
+        {
+            "id": str(uuid.uuid4()),
+            "calendar_id": test_user_a.calendar_id,
+            "year": 2026,
+            "rate_1": 100.0,
+            "rate_2": 100.0,
+            "rate_3": 100.0,
+            "zus_costs": 800.0,
+            "accounting_costs": 200.0,
+            "initial_balance": 10000.0,
+        },
+    )
 
     payload = {
         "year": 2026,
@@ -191,7 +197,9 @@ def test_budget_settings_page_renders(authenticated_client):
     response = authenticated_client.get("/budget/settings")
     assert response.status_code == 200
     assert "text/html" in response.headers.get("content-type", "")
-    assert "budget.section_rates" in response.text or "Stawki godzinowe" in response.text
+    assert (
+        "budget.section_rates" in response.text or "Stawki godzinowe" in response.text
+    )
 
 
 def test_budget_settings_page_has_form_fields(authenticated_client):

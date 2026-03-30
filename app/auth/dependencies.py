@@ -44,8 +44,16 @@ async def get_current_user(
         session = refreshed.get("access_token")
         new_refresh = refreshed.get("refresh_token") or supabase_refresh
         if response and session:
-            response.set_cookie("session", session, httponly=True, secure=False, samesite="lax")
-            response.set_cookie("supabase_refresh", new_refresh, httponly=True, secure=False, samesite="lax")
+            response.set_cookie(
+                "session", session, httponly=True, secure=False, samesite="lax"
+            )
+            response.set_cookie(
+                "supabase_refresh",
+                new_refresh,
+                httponly=True,
+                secure=False,
+                samesite="lax",
+            )
 
     legacy_payload = decode_legacy_session_token(session)
     if legacy_payload:
@@ -65,8 +73,16 @@ async def get_current_user(
             session = refreshed.get("access_token")
             new_refresh = refreshed.get("refresh_token") or supabase_refresh
             if response and session:
-                response.set_cookie("session", session, httponly=True, secure=False, samesite="lax")
-                response.set_cookie("supabase_refresh", new_refresh, httponly=True, secure=False, samesite="lax")
+                response.set_cookie(
+                    "session", session, httponly=True, secure=False, samesite="lax"
+                )
+                response.set_cookie(
+                    "supabase_refresh",
+                    new_refresh,
+                    httponly=True,
+                    secure=False,
+                    samesite="lax",
+                )
             supabase_user = await fetch_supabase_user(session)
 
     if not supabase_user:
@@ -102,7 +118,12 @@ async def get_current_user(
                 },
                 auth_token=session,
             )
-            user = repo.update_user(user.id, {"calendar_id": calendar.id}, auth_token=session) or user
+            user = (
+                repo.update_user(
+                    user.id, {"calendar_id": calendar.id}, auth_token=session
+                )
+                or user
+            )
             # Accept pending invitations for brand-new users.
             try:
                 service = UserService(db)
@@ -132,7 +153,10 @@ async def get_current_user(
                 update_payload["google_id"] = user.google_id or external_id
                 needs_update = True
             if needs_update:
-                user = repo.update_user(user.id, update_payload, auth_token=session) or user
+                user = (
+                    repo.update_user(user.id, update_payload, auth_token=session)
+                    or user
+                )
         return user
     except Exception:
         # Allow auth to continue when SQL connectivity is temporarily unavailable.

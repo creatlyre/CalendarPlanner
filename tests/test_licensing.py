@@ -7,7 +7,6 @@ from fastapi.testclient import TestClient
 
 from app.licensing.keys import generate_license_key, validate_license_key
 
-
 # --- Key generation tests ---
 
 
@@ -294,12 +293,15 @@ def telemetry_client(telemetry_db):
 
 class TestHeartbeatEndpoint:
     def test_first_heartbeat_creates_record(self, telemetry_client):
-        resp = telemetry_client.post("/api/telemetry/heartbeat", json={
-            "installation_id": "aaaa-bbbb-cccc",
-            "version": "1.0.0",
-            "license_valid": True,
-            "integrity_ok": True,
-        })
+        resp = telemetry_client.post(
+            "/api/telemetry/heartbeat",
+            json={
+                "installation_id": "aaaa-bbbb-cccc",
+                "version": "1.0.0",
+                "license_valid": True,
+                "integrity_ok": True,
+            },
+        )
         assert resp.status_code == 200
         assert resp.json()["status"] == "ok"
 
@@ -316,34 +318,45 @@ class TestHeartbeatEndpoint:
 
         resp = telemetry_client.get("/api/admin/installations")
         data = resp.json()
-        matching = [i for i in data["installations"] if i["installation_id"] == "aaaa-bbbb-cccc"]
+        matching = [
+            i for i in data["installations"] if i["installation_id"] == "aaaa-bbbb-cccc"
+        ]
         assert len(matching) == 1
         assert matching[0]["license_valid"] is True
 
     def test_heartbeat_rejects_empty_install_id(self, telemetry_client):
-        resp = telemetry_client.post("/api/telemetry/heartbeat", json={
-            "installation_id": "",
-        })
+        resp = telemetry_client.post(
+            "/api/telemetry/heartbeat",
+            json={
+                "installation_id": "",
+            },
+        )
         assert resp.status_code == 422
 
 
 class TestAdminInstallations:
     def test_list_installations(self, telemetry_client, telemetry_db):
         store, _ = telemetry_db
-        store.insert("installations", {
-            "installation_id": "inst-1",
-            "version": "1.0.0",
-            "license_valid": True,
-            "integrity_ok": True,
-            "environment": "production",
-        })
-        store.insert("installations", {
-            "installation_id": "inst-2",
-            "version": "1.0.0",
-            "license_valid": False,
-            "integrity_ok": False,
-            "environment": "self-hosted",
-        })
+        store.insert(
+            "installations",
+            {
+                "installation_id": "inst-1",
+                "version": "1.0.0",
+                "license_valid": True,
+                "integrity_ok": True,
+                "environment": "production",
+            },
+        )
+        store.insert(
+            "installations",
+            {
+                "installation_id": "inst-2",
+                "version": "1.0.0",
+                "license_valid": False,
+                "integrity_ok": False,
+                "environment": "self-hosted",
+            },
+        )
         resp = telemetry_client.get("/api/admin/installations")
         data = resp.json()
         assert data["total"] == 2
@@ -353,25 +366,52 @@ class TestAdminInstallations:
 
     def test_filter_unlicensed(self, telemetry_client, telemetry_db):
         store, _ = telemetry_db
-        store.insert("installations", {"installation_id": "lic-1", "license_valid": True, "integrity_ok": True})
-        store.insert("installations", {"installation_id": "unlic-1", "license_valid": False, "integrity_ok": True})
-        resp = telemetry_client.get("/api/admin/installations?license_filter=unlicensed")
+        store.insert(
+            "installations",
+            {"installation_id": "lic-1", "license_valid": True, "integrity_ok": True},
+        )
+        store.insert(
+            "installations",
+            {
+                "installation_id": "unlic-1",
+                "license_valid": False,
+                "integrity_ok": True,
+            },
+        )
+        resp = telemetry_client.get(
+            "/api/admin/installations?license_filter=unlicensed"
+        )
         ids = [i["installation_id"] for i in resp.json()["installations"]]
         assert "unlic-1" in ids
         assert "lic-1" not in ids
 
     def test_filter_tampered(self, telemetry_client, telemetry_db):
         store, _ = telemetry_db
-        store.insert("installations", {"installation_id": "clean-1", "license_valid": True, "integrity_ok": True})
-        store.insert("installations", {"installation_id": "tampered-1", "license_valid": False, "integrity_ok": False})
-        resp = telemetry_client.get("/api/admin/installations?integrity_filter=tampered")
+        store.insert(
+            "installations",
+            {"installation_id": "clean-1", "license_valid": True, "integrity_ok": True},
+        )
+        store.insert(
+            "installations",
+            {
+                "installation_id": "tampered-1",
+                "license_valid": False,
+                "integrity_ok": False,
+            },
+        )
+        resp = telemetry_client.get(
+            "/api/admin/installations?integrity_filter=tampered"
+        )
         ids = [i["installation_id"] for i in resp.json()["installations"]]
         assert "tampered-1" in ids
         assert "clean-1" not in ids
 
     def test_stats_endpoint(self, telemetry_client, telemetry_db):
         store, _ = telemetry_db
-        store.insert("installations", {"installation_id": "s1", "license_valid": True, "integrity_ok": True})
+        store.insert(
+            "installations",
+            {"installation_id": "s1", "license_valid": True, "integrity_ok": True},
+        )
         resp = telemetry_client.get("/api/admin/installations/stats")
         data = resp.json()
         assert data["total"] == 1

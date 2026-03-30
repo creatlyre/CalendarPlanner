@@ -20,9 +20,13 @@ def test_oauth_callback_creates_user(test_db, test_client, monkeypatch):
 
     import app.auth.routes
 
-    monkeypatch.setattr(app.auth.routes, "exchange_code_for_token", mock_exchange_code_for_token)
+    monkeypatch.setattr(
+        app.auth.routes, "exchange_code_for_token", mock_exchange_code_for_token
+    )
 
-    response = test_client.get("/auth/callback?code=fake&state=fake", follow_redirects=False)
+    response = test_client.get(
+        "/auth/callback?code=fake&state=fake", follow_redirects=False
+    )
 
     assert response.status_code == 302
     assert response.headers.get("location") == "/dashboard"
@@ -54,7 +58,9 @@ def test_parse_invalid_session_returns_401_not_500(test_client, monkeypatch):
         return None
 
     monkeypatch.setattr(auth_dependencies, "fetch_supabase_user", _fetch_none)
-    monkeypatch.setattr(auth_dependencies, "refresh_supabase_access_token", _refresh_none)
+    monkeypatch.setattr(
+        auth_dependencies, "refresh_supabase_access_token", _refresh_none
+    )
 
     response = test_client.post(
         "/api/events/parse",
@@ -114,7 +120,11 @@ def test_login_google_redirect(test_client):
     response = test_client.get("/auth/login?provider=google", follow_redirects=False)
     assert response.status_code in (302, 307)
     location = response.headers.get("location", "")
-    assert "google" in location.lower() or "supabase" in location.lower() or "accounts.google" in location.lower()
+    assert (
+        "google" in location.lower()
+        or "supabase" in location.lower()
+        or "accounts.google" in location.lower()
+    )
 
 
 def test_register_page_renders(test_client):
@@ -182,7 +192,9 @@ def test_forgot_password_nonexistent_email_still_succeeds(test_client, monkeypat
     assert response.status_code == 200
 
 
-def test_confirm_callback_recovery_redirects_to_update_password(test_client, monkeypatch):
+def test_confirm_callback_recovery_redirects_to_update_password(
+    test_client, monkeypatch
+):
     """GET /auth/confirm?type=recovery creates session and redirects to update-password."""
     import app.auth.routes as auth_routes
 
@@ -190,7 +202,11 @@ def test_confirm_callback_recovery_redirects_to_update_password(test_client, mon
         return {"access_token": "recovered_token", "refresh_token": "refresh_123"}
 
     async def _mock_fetch_user(token):
-        return {"id": "uid-1", "email": "user@example.com", "user_metadata": {"full_name": "Test User"}}
+        return {
+            "id": "uid-1",
+            "email": "user@example.com",
+            "user_metadata": {"full_name": "Test User"},
+        }
 
     monkeypatch.setattr(auth_routes, "supabase_verify_otp", _mock_verify)
     monkeypatch.setattr(auth_routes, "fetch_supabase_user", _mock_fetch_user)
@@ -212,7 +228,11 @@ def test_confirm_callback_signup_redirects_to_home(test_client, monkeypatch):
         return {"access_token": "signup_token", "refresh_token": "refresh_456"}
 
     async def _mock_fetch_user(token):
-        return {"id": "uid-2", "email": "new@example.com", "user_metadata": {"full_name": "New User"}}
+        return {
+            "id": "uid-2",
+            "email": "new@example.com",
+            "user_metadata": {"full_name": "New User"},
+        }
 
     monkeypatch.setattr(auth_routes, "supabase_verify_otp", _mock_verify)
     monkeypatch.setattr(auth_routes, "fetch_supabase_user", _mock_fetch_user)

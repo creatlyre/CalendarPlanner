@@ -24,7 +24,7 @@ class ParseResult:
     recurrence: Optional[dict] = None  # e.g., {"freq": "WEEKLY", "count": 10}
     errors: list[str] = field(default_factory=list)
     raw_text: str = ""
-    ambiguous: bool = False          # True when year is uncertain (month/day without year)
+    ambiguous: bool = False  # True when year is uncertain (month/day without year)
     year_candidates: list[int] = field(default_factory=list)
     suggested_category: Optional[str] = None  # Preset category name suggestion
 
@@ -94,40 +94,82 @@ class NLPService:
     # Weekday names: name -> weekday number (0=Monday)
     WEEKDAY_NAMES = {
         "en": {
-            "monday": 0, "tuesday": 1, "wednesday": 2, "thursday": 3,
-            "friday": 4, "saturday": 5, "sunday": 6,
+            "monday": 0,
+            "tuesday": 1,
+            "wednesday": 2,
+            "thursday": 3,
+            "friday": 4,
+            "saturday": 5,
+            "sunday": 6,
         },
         "pl": {
-            "poniedzia\u0142ek": 0, "poniedzialek": 0,
+            "poniedzia\u0142ek": 0,
+            "poniedzialek": 0,
             "wtorek": 1,
-            "\u015broda": 2, "sroda": 2, "\u015brod\u0119": 2, "srode": 2,
+            "\u015broda": 2,
+            "sroda": 2,
+            "\u015brod\u0119": 2,
+            "srode": 2,
             "czwartek": 3,
-            "pi\u0105tek": 4, "piatek": 4,
-            "sobota": 5, "sobot\u0119": 5, "sobote": 5,
-            "niedziela": 6, "niedziel\u0119": 6, "niedziele": 6,
+            "pi\u0105tek": 4,
+            "piatek": 4,
+            "sobota": 5,
+            "sobot\u0119": 5,
+            "sobote": 5,
+            "niedziela": 6,
+            "niedziel\u0119": 6,
+            "niedziele": 6,
         },
     }
 
     # Month names: name -> month number
     MONTH_NAMES = {
         "en": {
-            "january": 1, "february": 2, "march": 3, "april": 4,
-            "may": 5, "june": 6, "july": 7, "august": 8,
-            "september": 9, "october": 10, "november": 11, "december": 12,
+            "january": 1,
+            "february": 2,
+            "march": 3,
+            "april": 4,
+            "may": 5,
+            "june": 6,
+            "july": 7,
+            "august": 8,
+            "september": 9,
+            "october": 10,
+            "november": 11,
+            "december": 12,
         },
         "pl": {
-            "stycze\u0144": 1, "styczen": 1, "stycznia": 1,
-            "luty": 2, "lutego": 2,
-            "marzec": 3, "marca": 3,
-            "kwiecie\u0144": 4, "kwiecien": 4, "kwietnia": 4,
-            "maj": 5, "maja": 5,
-            "czerwiec": 6, "czerwca": 6,
-            "lipiec": 7, "lipca": 7,
-            "sierpie\u0144": 8, "sierpien": 8, "sierpnia": 8,
-            "wrzesie\u0144": 9, "wrzesien": 9, "wrze\u015bnia": 9,
-            "pa\u017adziernik": 10, "pazdziernik": 10, "pa\u017adziernika": 10, "pazdziernika": 10,
-            "listopad": 11, "listopada": 11,
-            "grudzie\u0144": 12, "grudzien": 12, "grudnia": 12,
+            "stycze\u0144": 1,
+            "styczen": 1,
+            "stycznia": 1,
+            "luty": 2,
+            "lutego": 2,
+            "marzec": 3,
+            "marca": 3,
+            "kwiecie\u0144": 4,
+            "kwiecien": 4,
+            "kwietnia": 4,
+            "maj": 5,
+            "maja": 5,
+            "czerwiec": 6,
+            "czerwca": 6,
+            "lipiec": 7,
+            "lipca": 7,
+            "sierpie\u0144": 8,
+            "sierpien": 8,
+            "sierpnia": 8,
+            "wrzesie\u0144": 9,
+            "wrzesien": 9,
+            "wrze\u015bnia": 9,
+            "pa\u017adziernik": 10,
+            "pazdziernik": 10,
+            "pa\u017adziernika": 10,
+            "pazdziernika": 10,
+            "listopad": 11,
+            "listopada": 11,
+            "grudzie\u0144": 12,
+            "grudzien": 12,
+            "grudnia": 12,
         },
     }
 
@@ -135,13 +177,26 @@ class NLPService:
     MODIFIER_WORDS = {
         "en": {"next": "next", "this": "this", "last": "last"},
         "pl": {
-            "nast\u0119pny": "next", "nast\u0119pna": "next", "nast\u0119pne": "next",
-            "nastepny": "next", "nastepna": "next", "nastepne": "next",
-            "przysz\u0142y": "next", "przysz\u0142a": "next", "przysz\u0142e": "next",
-            "przyszly": "next", "przyszla": "next", "przyszle": "next",
-            "ten": "this", "ta": "this", "to": "this",
-            "ostatni": "last", "ostatnia": "last", "ostatnie": "last",
-            "poprzedni": "last", "poprzednia": "last",
+            "nast\u0119pny": "next",
+            "nast\u0119pna": "next",
+            "nast\u0119pne": "next",
+            "nastepny": "next",
+            "nastepna": "next",
+            "nastepne": "next",
+            "przysz\u0142y": "next",
+            "przysz\u0142a": "next",
+            "przysz\u0142e": "next",
+            "przyszly": "next",
+            "przyszla": "next",
+            "przyszle": "next",
+            "ten": "this",
+            "ta": "this",
+            "to": "this",
+            "ostatni": "last",
+            "ostatnia": "last",
+            "ostatnie": "last",
+            "poprzedni": "last",
+            "poprzednia": "last",
         },
     }
 
@@ -202,7 +257,9 @@ class NLPService:
             # Allow recurrence-only input by anchoring to context date.
             if recurrence:
                 hour, minute = self._extract_time_from_text(text, locale)
-                start_at = context_date.replace(hour=hour, minute=minute, second=0, microsecond=0)
+                start_at = context_date.replace(
+                    hour=hour, minute=minute, second=0, microsecond=0
+                )
                 if start_at < context_date:
                     start_at = start_at + timedelta(days=1)
                 parsed_dates = {
@@ -231,9 +288,7 @@ class NLPService:
             # Validate RRULE if we have a start_at
             if result.start_at:
                 try:
-                    rrule_str = self._build_rrule_string(
-                        recurrence, result.start_at
-                    )
+                    rrule_str = self._build_rrule_string(recurrence, result.start_at)
                     validate_rrule(rrule_str, result.start_at)
                 except ValueError as e:
                     result.errors.append(f"Invalid recurrence: {str(e)}")
@@ -282,8 +337,15 @@ class NLPService:
                 flags=re.IGNORECASE,
             )
         # Remove English month/weekday abbreviations
-        cleaned = re.sub(r"\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\b", "", cleaned, flags=re.IGNORECASE)
-        cleaned = re.sub(r"\b(mon|tue|wed|thu|fri|sat|sun)[a-z]*\b", "", cleaned, flags=re.IGNORECASE)
+        cleaned = re.sub(
+            r"\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\b",
+            "",
+            cleaned,
+            flags=re.IGNORECASE,
+        )
+        cleaned = re.sub(
+            r"\b(mon|tue|wed|thu|fri|sat|sun)[a-z]*\b", "", cleaned, flags=re.IGNORECASE
+        )
         # Remove Polish month/weekday names
         if locale == "pl":
             pl_months = "|".join(re.escape(m) for m in self.MONTH_NAMES["pl"])
@@ -350,7 +412,9 @@ class NLPService:
         # If user said "dentysta 14:00" (title + time, no day), anchor to context_date.
         if self._has_explicit_time(text, locale):
             hour, minute = self._extract_time_from_text(text, locale)
-            start_at = context_date.replace(hour=hour, minute=minute, second=0, microsecond=0)
+            start_at = context_date.replace(
+                hour=hour, minute=minute, second=0, microsecond=0
+            )
             if start_at < context_date:
                 start_at = start_at + timedelta(days=1)
             end_at = start_at + timedelta(hours=1)
@@ -371,10 +435,16 @@ class NLPService:
         iso_match = re.search(r"(\d{4})-(\d{2})-(\d{2})", text)
         if iso_match:
             try:
-                year, month, day = int(iso_match.group(1)), int(iso_match.group(2)), int(iso_match.group(3))
+                year, month, day = (
+                    int(iso_match.group(1)),
+                    int(iso_match.group(2)),
+                    int(iso_match.group(3)),
+                )
                 hour, minute = self._extract_time_from_text(text)
                 start_at = datetime(year, month, day, hour, minute)
-                if start_at < context_date.replace(hour=0, minute=0, second=0, microsecond=0):
+                if start_at < context_date.replace(
+                    hour=0, minute=0, second=0, microsecond=0
+                ):
                     return {
                         "error": f"Date is in the past: {start_at.date()}",
                         "start_at": None,
@@ -392,11 +462,17 @@ class NLPService:
         ddmmyyyy_match = re.search(r"(\d{1,2})/(\d{1,2})/(\d{4})", text)
         if ddmmyyyy_match:
             try:
-                day, month, year = int(ddmmyyyy_match.group(1)), int(ddmmyyyy_match.group(2)), int(ddmmyyyy_match.group(3))
+                day, month, year = (
+                    int(ddmmyyyy_match.group(1)),
+                    int(ddmmyyyy_match.group(2)),
+                    int(ddmmyyyy_match.group(3)),
+                )
                 hour, minute = self._extract_time_from_text(text)
                 start_at = datetime(year, month, day, hour, minute)
                 # Check if past
-                if start_at < context_date.replace(hour=0, minute=0, second=0, microsecond=0):
+                if start_at < context_date.replace(
+                    hour=0, minute=0, second=0, microsecond=0
+                ):
                     return {
                         "error": f"Date is in the past: {start_at.date()}",
                         "start_at": None,
@@ -445,20 +521,31 @@ class NLPService:
         text_lower = text.lower()
 
         # Check relative keywords (tomorrow/today/yesterday and locale equivalents)
-        merged_rel = {**self.RELATIVE_KEYWORDS.get("en", {}), **self.RELATIVE_KEYWORDS.get(locale, {})}
+        merged_rel = {
+            **self.RELATIVE_KEYWORDS.get("en", {}),
+            **self.RELATIVE_KEYWORDS.get(locale, {}),
+        }
         for keyword, offset in merged_rel.items():
             if keyword in text_lower:
                 if offset < 0:
                     target = context_date + timedelta(days=offset)
-                    if target < context_date.replace(hour=0, minute=0, second=0, microsecond=0):
+                    if target < context_date.replace(
+                        hour=0, minute=0, second=0, microsecond=0
+                    ):
                         return {"error": "Date is in the past", "start_at": None}
                     return self._build_date_result(target, text, context_date, locale)
                 target = context_date + timedelta(days=offset)
                 return self._build_date_result(target, text, context_date, locale)
 
         # Modifier + weekday (next Monday / następny poniedziałek)
-        weekdays = {**self.WEEKDAY_NAMES.get("en", {}), **self.WEEKDAY_NAMES.get(locale, {})}
-        modifiers = {**self.MODIFIER_WORDS.get("en", {}), **self.MODIFIER_WORDS.get(locale, {})}
+        weekdays = {
+            **self.WEEKDAY_NAMES.get("en", {}),
+            **self.WEEKDAY_NAMES.get(locale, {}),
+        }
+        modifiers = {
+            **self.MODIFIER_WORDS.get("en", {}),
+            **self.MODIFIER_WORDS.get(locale, {}),
+        }
         modifier_pattern = "|".join(re.escape(m) for m in modifiers)
         weekday_pattern = "|".join(re.escape(w) for w in weekdays)
 
@@ -470,7 +557,9 @@ class NLPService:
             mod_word = day_match.group(1)
             day_name = day_match.group(2)
             modifier = modifiers[mod_word]
-            target_date = self._find_day_of_week(context_date, day_name, modifier, locale)
+            target_date = self._find_day_of_week(
+                context_date, day_name, modifier, locale
+            )
             return self._build_date_result(target_date, text, context_date, locale)
 
         # Plain weekday name
@@ -484,7 +573,9 @@ class NLPService:
             return self._build_date_result(target_date, text, context_date, locale)
 
         # "in N days" / "za N dni"
-        in_days_match = re.search(r"\bza\s+(\d+)\s+dn", text_lower) or re.search(r"\bin\s+(\d+)\s+day", text_lower)
+        in_days_match = re.search(r"\bza\s+(\d+)\s+dn", text_lower) or re.search(
+            r"\bin\s+(\d+)\s+day", text_lower
+        )
         if in_days_match:
             days = int(in_days_match.group(1))
             target_date = context_date + timedelta(days=days)
@@ -513,24 +604,34 @@ class NLPService:
             if match:
                 day = int(match.group(1))
                 try:
-                    current_year_date = datetime(context_date.year, month_num, day, 9, 0)
+                    current_year_date = datetime(
+                        context_date.year, month_num, day, 9, 0
+                    )
                     if current_year_date >= context_date:
                         return {
                             "start_at": current_year_date,
                             "end_at": current_year_date + timedelta(hours=1),
                             "confidence": 0.85,
                             "ambiguous": True,
-                            "year_candidates": [context_date.year, context_date.year + 1],
+                            "year_candidates": [
+                                context_date.year,
+                                context_date.year + 1,
+                            ],
                         }
                     else:
-                        next_year_date = datetime(context_date.year + 1, month_num, day, 9, 0)
+                        next_year_date = datetime(
+                            context_date.year + 1, month_num, day, 9, 0
+                        )
                         return {
                             "start_at": next_year_date,
                             "end_at": next_year_date + timedelta(hours=1),
                             "confidence": 0.85,
                         }
                 except ValueError:
-                    return {"error": f"Invalid day for {month_name}: {day}", "start_at": None}
+                    return {
+                        "error": f"Invalid day for {month_name}: {day}",
+                        "start_at": None,
+                    }
         return {}
 
     def _find_day_of_week(
@@ -541,7 +642,10 @@ class NLPService:
         locale: str = "en",
     ) -> datetime:
         """Find the next/this/last occurrence of a day of week."""
-        days_of_week = {**self.WEEKDAY_NAMES.get("en", {}), **self.WEEKDAY_NAMES.get(locale, {})}
+        days_of_week = {
+            **self.WEEKDAY_NAMES.get("en", {}),
+            **self.WEEKDAY_NAMES.get(locale, {}),
+        }
 
         target_dow = days_of_week.get(day_name, -1)
         if target_dow == -1:
@@ -572,11 +676,16 @@ class NLPService:
         """Build a date result with extracted time."""
         hour, minute = self._extract_time_from_text(text, locale)
 
-        start_at = target_date.replace(hour=hour, minute=minute, second=0, microsecond=0)
+        start_at = target_date.replace(
+            hour=hour, minute=minute, second=0, microsecond=0
+        )
 
         # Check if past
         if start_at < context_date:
-            return {"error": f"Date is in the past: {start_at.date()}", "start_at": None}
+            return {
+                "error": f"Date is in the past: {start_at.date()}",
+                "start_at": None,
+            }
 
         end_at = start_at + timedelta(hours=1)
         return {"start_at": start_at, "end_at": end_at, "confidence": 0.95}
@@ -603,7 +712,9 @@ class NLPService:
         hour, minute = 9, 0
 
         # Prefer explicit HH:MM time first.
-        colon_match = re.search(r"\b(\d{1,2}):(\d{2})\s*(am|pm)?\b", text, re.IGNORECASE)
+        colon_match = re.search(
+            r"\b(\d{1,2}):(\d{2})\s*(am|pm)?\b", text, re.IGNORECASE
+        )
         if colon_match:
             hour = int(colon_match.group(1))
             minute = int(colon_match.group(2))
@@ -650,103 +761,356 @@ class NLPService:
     CATEGORY_KEYWORDS: dict[str, dict[str, list[str]]] = {
         "Work": {
             "en": [
-                "meeting", "standup", "stand-up", "scrum", "sprint", "retro",
-                "retrospective", "review", "1:1", "one-on-one", "sync",
-                "workshop", "presentation", "demo", "conference", "call",
-                "interview", "deadline", "report", "project", "client",
-                "office", "shift", "on-call", "oncall", "training",
-                "seminar", "webinar", "brainstorm", "kickoff", "kick-off",
-                "planning", "release", "deploy", "deployment", "code review",
+                "meeting",
+                "standup",
+                "stand-up",
+                "scrum",
+                "sprint",
+                "retro",
+                "retrospective",
+                "review",
+                "1:1",
+                "one-on-one",
+                "sync",
+                "workshop",
+                "presentation",
+                "demo",
+                "conference",
+                "call",
+                "interview",
+                "deadline",
+                "report",
+                "project",
+                "client",
+                "office",
+                "shift",
+                "on-call",
+                "oncall",
+                "training",
+                "seminar",
+                "webinar",
+                "brainstorm",
+                "kickoff",
+                "kick-off",
+                "planning",
+                "release",
+                "deploy",
+                "deployment",
+                "code review",
             ],
             "pl": [
-                "spotkanie", "zebranie", "narada", "standup", "scrum",
-                "sprint", "retro", "retrospektywa", "prezentacja", "demo",
-                "konferencja", "rozmowa", "termin", "raport", "projekt",
-                "klient", "biuro", "zmiana", "szkolenie", "seminarium",
-                "webinar", "burza mózgów", "planowanie", "wdrożenie",
-                "wdrozenie", "przegląd kodu", "przeglad kodu",
-                "deadline", "call", "review",
+                "spotkanie",
+                "zebranie",
+                "narada",
+                "standup",
+                "scrum",
+                "sprint",
+                "retro",
+                "retrospektywa",
+                "prezentacja",
+                "demo",
+                "konferencja",
+                "rozmowa",
+                "termin",
+                "raport",
+                "projekt",
+                "klient",
+                "biuro",
+                "zmiana",
+                "szkolenie",
+                "seminarium",
+                "webinar",
+                "burza mózgów",
+                "planowanie",
+                "wdrożenie",
+                "wdrozenie",
+                "przegląd kodu",
+                "przeglad kodu",
+                "deadline",
+                "call",
+                "review",
             ],
         },
         "Health": {
             "en": [
-                "doctor", "dentist", "therapy", "therapist", "gym",
-                "workout", "exercise", "run", "running", "yoga", "pilates",
-                "checkup", "check-up", "appointment", "physio",
-                "physiotherapy", "vaccination", "vaccine", "blood test",
-                "surgery", "hospital", "clinic", "medication", "med",
-                "meditation", "swim", "swimming", "cycling", "hike",
-                "hiking", "walk", "fitness",
+                "doctor",
+                "dentist",
+                "therapy",
+                "therapist",
+                "gym",
+                "workout",
+                "exercise",
+                "run",
+                "running",
+                "yoga",
+                "pilates",
+                "checkup",
+                "check-up",
+                "appointment",
+                "physio",
+                "physiotherapy",
+                "vaccination",
+                "vaccine",
+                "blood test",
+                "surgery",
+                "hospital",
+                "clinic",
+                "medication",
+                "med",
+                "meditation",
+                "swim",
+                "swimming",
+                "cycling",
+                "hike",
+                "hiking",
+                "walk",
+                "fitness",
             ],
             "pl": [
-                "lekarz", "dentysta", "stomatolog", "terapia", "terapeuta",
-                "siłownia", "silownia", "trening", "ćwiczenia", "cwiczenia",
-                "bieganie", "joga", "pilates", "badanie", "wizyta",
-                "fizjoterapia", "szczepienie", "szczepionka", "krew",
-                "operacja", "szpital", "klinika", "lek", "medytacja",
-                "pływanie", "plywanie", "rower", "spacer", "fitness",
-                "basen", "rehabilitacja",
+                "lekarz",
+                "dentysta",
+                "stomatolog",
+                "terapia",
+                "terapeuta",
+                "siłownia",
+                "silownia",
+                "trening",
+                "ćwiczenia",
+                "cwiczenia",
+                "bieganie",
+                "joga",
+                "pilates",
+                "badanie",
+                "wizyta",
+                "fizjoterapia",
+                "szczepienie",
+                "szczepionka",
+                "krew",
+                "operacja",
+                "szpital",
+                "klinika",
+                "lek",
+                "medytacja",
+                "pływanie",
+                "plywanie",
+                "rower",
+                "spacer",
+                "fitness",
+                "basen",
+                "rehabilitacja",
             ],
         },
         "Social": {
             "en": [
-                "dinner", "lunch", "brunch", "breakfast", "coffee",
-                "party", "birthday", "wedding", "anniversary", "date",
-                "drinks", "beer", "wine", "bar", "pub", "club",
-                "gathering", "reunion", "hangout", "hang out", "bbq",
-                "barbecue", "picnic", "game night", "movie night",
-                "concert", "show", "festival", "visit", "guests",
-                "friends", "family dinner", "celebration",
+                "dinner",
+                "lunch",
+                "brunch",
+                "breakfast",
+                "coffee",
+                "party",
+                "birthday",
+                "wedding",
+                "anniversary",
+                "date",
+                "drinks",
+                "beer",
+                "wine",
+                "bar",
+                "pub",
+                "club",
+                "gathering",
+                "reunion",
+                "hangout",
+                "hang out",
+                "bbq",
+                "barbecue",
+                "picnic",
+                "game night",
+                "movie night",
+                "concert",
+                "show",
+                "festival",
+                "visit",
+                "guests",
+                "friends",
+                "family dinner",
+                "celebration",
             ],
             "pl": [
-                "obiad", "kolacja", "śniadanie", "sniadanie", "brunch",
-                "kawa", "impreza", "urodziny", "ślub", "slub",
-                "rocznica", "randka", "piwo", "wino", "bar", "pub",
-                "spotkanie towarzyskie", "zjazd", "grill", "piknik",
-                "wieczór filmowy", "wieczor filmowy", "koncert",
-                "występ", "wystep", "festiwal", "odwiedziny", "goście",
-                "goscie", "znajomi", "przyjaciele", "imieniny",
-                "wigilia", "celebracja",
+                "obiad",
+                "kolacja",
+                "śniadanie",
+                "sniadanie",
+                "brunch",
+                "kawa",
+                "impreza",
+                "urodziny",
+                "ślub",
+                "slub",
+                "rocznica",
+                "randka",
+                "piwo",
+                "wino",
+                "bar",
+                "pub",
+                "spotkanie towarzyskie",
+                "zjazd",
+                "grill",
+                "piknik",
+                "wieczór filmowy",
+                "wieczor filmowy",
+                "koncert",
+                "występ",
+                "wystep",
+                "festiwal",
+                "odwiedziny",
+                "goście",
+                "goscie",
+                "znajomi",
+                "przyjaciele",
+                "imieniny",
+                "wigilia",
+                "celebracja",
             ],
         },
         "Errands": {
             "en": [
-                "shopping", "groceries", "store", "market", "pharmacy",
-                "bank", "post office", "laundry", "cleaning", "repair",
-                "mechanic", "car wash", "oil change", "appointment",
-                "pickup", "pick up", "drop off", "dropoff", "deliver",
-                "delivery", "return", "exchange", "pay", "payment",
-                "bill", "insurance", "dmv", "passport", "visa",
-                "plumber", "electrician", "move", "moving",
+                "shopping",
+                "groceries",
+                "store",
+                "market",
+                "pharmacy",
+                "bank",
+                "post office",
+                "laundry",
+                "cleaning",
+                "repair",
+                "mechanic",
+                "car wash",
+                "oil change",
+                "appointment",
+                "pickup",
+                "pick up",
+                "drop off",
+                "dropoff",
+                "deliver",
+                "delivery",
+                "return",
+                "exchange",
+                "pay",
+                "payment",
+                "bill",
+                "insurance",
+                "dmv",
+                "passport",
+                "visa",
+                "plumber",
+                "electrician",
+                "move",
+                "moving",
             ],
             "pl": [
-                "zakupy", "sklep", "market", "apteka", "bank",
-                "poczta", "pranie", "sprzątanie", "sprzatanie",
-                "naprawa", "mechanik", "myjnia", "wymiana oleju",
-                "odbiór", "odbior", "dostarczenie", "dostawa",
-                "zwrot", "wymiana", "płatność", "platnosc", "rachunek",
-                "ubezpieczenie", "paszport", "wiza",
-                "hydraulik", "elektryk", "przeprowadzka",
+                "zakupy",
+                "sklep",
+                "market",
+                "apteka",
+                "bank",
+                "poczta",
+                "pranie",
+                "sprzątanie",
+                "sprzatanie",
+                "naprawa",
+                "mechanik",
+                "myjnia",
+                "wymiana oleju",
+                "odbiór",
+                "odbior",
+                "dostarczenie",
+                "dostawa",
+                "zwrot",
+                "wymiana",
+                "płatność",
+                "platnosc",
+                "rachunek",
+                "ubezpieczenie",
+                "paszport",
+                "wiza",
+                "hydraulik",
+                "elektryk",
+                "przeprowadzka",
             ],
         },
         "Personal": {
             "en": [
-                "hobby", "read", "reading", "study", "studying",
-                "course", "class", "lesson", "practice", "rehearsal",
-                "music", "guitar", "piano", "painting", "drawing",
-                "writing", "journal", "diary", "self-care", "haircut",
-                "spa", "massage", "nails", "beauty", "relax",
-                "vacation", "holiday", "travel", "trip", "flight",
-                "plan", "rest", "sleep", "nap",
+                "hobby",
+                "read",
+                "reading",
+                "study",
+                "studying",
+                "course",
+                "class",
+                "lesson",
+                "practice",
+                "rehearsal",
+                "music",
+                "guitar",
+                "piano",
+                "painting",
+                "drawing",
+                "writing",
+                "journal",
+                "diary",
+                "self-care",
+                "haircut",
+                "spa",
+                "massage",
+                "nails",
+                "beauty",
+                "relax",
+                "vacation",
+                "holiday",
+                "travel",
+                "trip",
+                "flight",
+                "plan",
+                "rest",
+                "sleep",
+                "nap",
             ],
             "pl": [
-                "hobby", "czytanie", "nauka", "kurs", "lekcja",
-                "zajęcia", "zajecia", "ćwiczenie", "próba", "proba",
-                "muzyka", "gitara", "pianino", "malowanie", "rysowanie",
-                "pisanie", "dziennik", "pamiętnik", "pamietnik",
-                "fryzjer", "spa", "masaż", "masaz", "paznokcie",
-                "urlop", "wakacje", "podróż", "podroz", "wycieczka",
-                "lot", "odpoczynek", "sen", "drzemka",
+                "hobby",
+                "czytanie",
+                "nauka",
+                "kurs",
+                "lekcja",
+                "zajęcia",
+                "zajecia",
+                "ćwiczenie",
+                "próba",
+                "proba",
+                "muzyka",
+                "gitara",
+                "pianino",
+                "malowanie",
+                "rysowanie",
+                "pisanie",
+                "dziennik",
+                "pamiętnik",
+                "pamietnik",
+                "fryzjer",
+                "spa",
+                "masaż",
+                "masaz",
+                "paznokcie",
+                "urlop",
+                "wakacje",
+                "podróż",
+                "podroz",
+                "wycieczka",
+                "lot",
+                "odpoczynek",
+                "sen",
+                "drzemka",
             ],
         },
     }
@@ -774,14 +1138,24 @@ class NLPService:
         text_lower = text.lower()
 
         # Interval pattern: "every N weeks" / "co N tygodni"
-        interval_match = re.search(r"\bco\s+(\d+)\s+(dn|tydz|miesi[\u0105a]c|rok|lat)", text_lower) or \
-                         re.search(r"every\s+(\d+)\s+(week|day|month|year)[s]?", text_lower)
+        interval_match = re.search(
+            r"\bco\s+(\d+)\s+(dn|tydz|miesi[\u0105a]c|rok|lat)", text_lower
+        ) or re.search(r"every\s+(\d+)\s+(week|day|month|year)[s]?", text_lower)
         if interval_match:
             interval = int(interval_match.group(1))
             freq_word = interval_match.group(2)
-            freq_map = {"dn": "DAILY", "tydz": "WEEKLY", "miesi": "MONTHLY",
-                        "miesi\u0105": "MONTHLY", "rok": "YEARLY", "lat": "YEARLY",
-                        "day": "DAILY", "week": "WEEKLY", "month": "MONTHLY", "year": "YEARLY"}
+            freq_map = {
+                "dn": "DAILY",
+                "tydz": "WEEKLY",
+                "miesi": "MONTHLY",
+                "miesi\u0105": "MONTHLY",
+                "rok": "YEARLY",
+                "lat": "YEARLY",
+                "day": "DAILY",
+                "week": "WEEKLY",
+                "month": "MONTHLY",
+                "year": "YEARLY",
+            }
             matched_freq = None
             for key, val in freq_map.items():
                 if freq_word.startswith(key):
@@ -794,7 +1168,10 @@ class NLPService:
                 return recurrence
 
         # "every weekday" / "co poniedzia\u0142ek"
-        weekdays = {**self.WEEKDAY_NAMES.get("en", {}), **self.WEEKDAY_NAMES.get(locale, {})}
+        weekdays = {
+            **self.WEEKDAY_NAMES.get("en", {}),
+            **self.WEEKDAY_NAMES.get(locale, {}),
+        }
         weekday_pattern = "|".join(re.escape(w) for w in weekdays)
         weekday_every_match = re.search(
             rf"\bco\s+({weekday_pattern})\b|\bka\u017cd[y\u0105a]\s+({weekday_pattern})\b|\bkazd[yaa]\s+({weekday_pattern})\b|\bevery\s+({weekday_pattern})\b",
@@ -805,7 +1182,10 @@ class NLPService:
 
         # Check for frequency keywords (both locale and English)
         freq = None
-        merged_freq = {**self.FREQ_KEYWORDS.get("en", {}), **self.FREQ_KEYWORDS.get(locale, {})}
+        merged_freq = {
+            **self.FREQ_KEYWORDS.get("en", {}),
+            **self.FREQ_KEYWORDS.get(locale, {}),
+        }
         for pattern, freq_value in merged_freq.items():
             if re.search(pattern, text_lower):
                 freq = freq_value
@@ -816,8 +1196,9 @@ class NLPService:
 
         # Extract COUNT if present
         count = None
-        count_match = re.search(r"\b(\d+)\s+(raz[y\u00f3w]*|powt\u00f3rze[\u0144n])", text_lower) or \
-                      re.search(r"\b(\d+)\s+(times|occasions)\b", text_lower)
+        count_match = re.search(
+            r"\b(\d+)\s+(raz[y\u00f3w]*|powt\u00f3rze[\u0144n])", text_lower
+        ) or re.search(r"\b(\d+)\s+(times|occasions)\b", text_lower)
         if count_match:
             count = int(count_match.group(1))
 

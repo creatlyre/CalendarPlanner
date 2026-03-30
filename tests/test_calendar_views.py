@@ -5,9 +5,9 @@ from app.database.models import Event
 
 
 def assert_contains_any(text: str, *candidates: str) -> None:
-    assert any(candidate in text for candidate in candidates), (
-        f"Expected one of {candidates} to be present"
-    )
+    assert any(
+        candidate in text for candidate in candidates
+    ), f"Expected one of {candidates} to be present"
 
 
 def assert_locale_rendered(html_text, expected_locale):
@@ -31,7 +31,9 @@ def test_month_view_renders_event_title_and_time(authenticated_client):
         },
     )
 
-    response = authenticated_client.get(f"/calendar/month?year={now.year}&month={now.month}")
+    response = authenticated_client.get(
+        f"/calendar/month?year={now.year}&month={now.month}"
+    )
     assert response.status_code == 200
     assert "Gym" in response.text
 
@@ -49,7 +51,9 @@ def test_day_view_renders_event(authenticated_client):
         },
     )
 
-    response = authenticated_client.get(f"/calendar/day?year={now.year}&month={now.month}&day={now.day}")
+    response = authenticated_client.get(
+        f"/calendar/day?year={now.year}&month={now.month}&day={now.day}"
+    )
     assert response.status_code == 200
     assert "Lunch" in response.text
 
@@ -57,18 +61,24 @@ def test_day_view_renders_event(authenticated_client):
 def test_month_navigation_changes_label(authenticated_client):
     now = datetime.utcnow().replace(microsecond=0)
 
-    current_response = authenticated_client.get(f"/calendar/month?year={now.year}&month={now.month}")
+    current_response = authenticated_client.get(
+        f"/calendar/month?year={now.year}&month={now.month}"
+    )
     assert current_response.status_code == 200
 
     next_month = 1 if now.month == 12 else now.month + 1
     next_year = now.year + 1 if now.month == 12 else now.year
 
-    next_response = authenticated_client.get(f"/calendar/month?year={next_year}&month={next_month}")
+    next_response = authenticated_client.get(
+        f"/calendar/month?year={next_year}&month={next_month}"
+    )
     assert next_response.status_code == 200
     assert current_response.text != next_response.text
 
 
-def test_month_view_ignores_malformed_recurrence_rule(authenticated_client, test_user_a, test_db):
+def test_month_view_ignores_malformed_recurrence_rule(
+    authenticated_client, test_user_a, test_db
+):
     now = datetime.utcnow().replace(microsecond=0)
     bad_rrule_event = Event(
         id=str(uuid.uuid4()),
@@ -85,11 +95,15 @@ def test_month_view_ignores_malformed_recurrence_rule(authenticated_client, test
     test_db.add(bad_rrule_event)
     test_db.commit()
 
-    response = authenticated_client.get(f"/calendar/month?year={now.year}&month={now.month}")
+    response = authenticated_client.get(
+        f"/calendar/month?year={now.year}&month={now.month}"
+    )
     assert response.status_code == 200
 
 
-def test_day_view_ignores_malformed_recurrence_rule(authenticated_client, test_user_a, test_db):
+def test_day_view_ignores_malformed_recurrence_rule(
+    authenticated_client, test_user_a, test_db
+):
     now = datetime.utcnow().replace(hour=12, minute=0, second=0, microsecond=0)
     bad_rrule_event = Event(
         id=str(uuid.uuid4()),
@@ -106,11 +120,14 @@ def test_day_view_ignores_malformed_recurrence_rule(authenticated_client, test_u
     test_db.add(bad_rrule_event)
     test_db.commit()
 
-    response = authenticated_client.get(f"/calendar/day?year={now.year}&month={now.month}&day={now.day}")
+    response = authenticated_client.get(
+        f"/calendar/day?year={now.year}&month={now.month}&day={now.day}"
+    )
     assert response.status_code == 200
 
 
 # ── Quick Add modal (server-rendered HTML presence) ───────────────────────────
+
 
 def _calendar_html(authenticated_client):
     response = authenticated_client.get("/calendar")
@@ -211,8 +228,12 @@ def test_day_click_opens_quick_entry_modal(authenticated_client):
     html = _calendar_html(authenticated_client)
     assert "addEventForDay" in html, "Calendar must have addEventForDay function"
     assert "calculateEndTime" in html, "Calendar must have calculateEndTime function"
-    assert "getDefaultStartTime" in html, "Calendar must have getDefaultStartTime function"
-    assert "setEventEntryDateLocked(true)" in html, "addEventForDay must lock the date field"
+    assert (
+        "getDefaultStartTime" in html
+    ), "Calendar must have getDefaultStartTime function"
+    assert (
+        "setEventEntryDateLocked(true)" in html
+    ), "addEventForDay must lock the date field"
 
     # Month grid endpoint has day cells with data attributes
     response = authenticated_client.get(
@@ -221,8 +242,12 @@ def test_day_click_opens_quick_entry_modal(authenticated_client):
     assert response.status_code == 200
     grid_html = response.text
     assert "data-day" in grid_html, "Month grid day cells must have data-day attributes"
-    assert "data-year" in grid_html, "Month grid day cells must have data-year attributes"
-    assert "data-month" in grid_html, "Month grid day cells must have data-month attributes"
+    assert (
+        "data-year" in grid_html
+    ), "Month grid day cells must have data-year attributes"
+    assert (
+        "data-month" in grid_html
+    ), "Month grid day cells must have data-month attributes"
     assert "loadDay(" in grid_html, "Day cells must call loadDay on click"
 
 
@@ -249,9 +274,9 @@ def test_quick_entry_saves_with_auto_end_time(authenticated_client):
     start_time = datetime.fromisoformat(event["start_at"])
     end_time = datetime.fromisoformat(event["end_at"])
     delta = end_time - start_time
-    assert delta.total_seconds() == 3600, (
-        f"End time must be 1 hour after start, got {delta.total_seconds()}s"
-    )
+    assert (
+        delta.total_seconds() == 3600
+    ), f"End time must be 1 hour after start, got {delta.total_seconds()}s"
 
     # Verify auto-calculation JS exists on the client
     html = _calendar_html(authenticated_client)
@@ -264,15 +289,19 @@ def test_quick_entry_mode_locks_date_field(authenticated_client):
     html = _calendar_html(authenticated_client)
 
     # Quick-entry styling class exists in CSS/JS
-    assert "quick-entry-mode" in html, "Event form must have quick-entry-mode class for styling"
+    assert (
+        "quick-entry-mode" in html
+    ), "Event form must have quick-entry-mode class for styling"
 
     # Quick-entry hint exists in modal
-    assert "quick-entry-hint" in html, "Modal should have quick-entry hint for user awareness"
+    assert (
+        "quick-entry-hint" in html
+    ), "Modal should have quick-entry hint for user awareness"
 
     # Date-lock indicator is in modal
-    assert "date-lock-note" in html.lower() or "date_locked" in html.lower(), (
-        "Modal should indicate date is locked"
-    )
+    assert (
+        "date-lock-note" in html.lower() or "date_locked" in html.lower()
+    ), "Modal should indicate date is locked"
     assert "qaTextInput.focus();" in html
 
 
@@ -315,6 +344,7 @@ def test_quick_add_edit_review_fields(authenticated_client):
 
 
 # ── Year disambiguation (05-05) ────────────────────────────────────────────
+
 
 def test_quick_add_parse_returns_ambiguity_metadata(authenticated_client):
     """Parser returns ambiguous flag and year candidates for month/day without explicit year."""
@@ -363,6 +393,7 @@ def test_quick_add_save_gated_on_unresolved_ambiguity(authenticated_client):
 
 # ── OCR quick-add flow (06-01) ────────────────────────────────────────────
 
+
 def test_quick_add_ocr_controls_present(authenticated_client):
     html = _calendar_html(authenticated_client)
     assert 'id="qa-ocr-btn"' in html
@@ -385,6 +416,7 @@ def test_quick_add_ocr_fallback_on_errors(authenticated_client):
 
 # ── Google sync panel (07-xx revisit) ─────────────────────────────────────
 
+
 def test_google_sync_panel_present(authenticated_client):
     html = _calendar_html(authenticated_client)
     assert_contains_any(html, "Google Sync", "Synchronizacja Google")
@@ -399,19 +431,28 @@ def test_google_sync_panel_present(authenticated_client):
 def test_google_sync_panel_wiring(authenticated_client):
     html = _calendar_html(authenticated_client)
     assert "fetch('/api/sync/status')" in html
-    assert "fetch(`/api/sync/export-month?year=${currentYear}&month=${currentMonth}`" in html
-    assert "fetch(`/api/sync/import-month?year=${currentYear}&month=${currentMonth}`" in html
+    assert (
+        "fetch(`/api/sync/export-month?year=${currentYear}&month=${currentMonth}`"
+        in html
+    )
+    assert (
+        "fetch(`/api/sync/import-month?year=${currentYear}&month=${currentMonth}`"
+        in html
+    )
     assert "formatSyncTimestamp" in html
     assert "syncLastPrefix" in html
     assert "loadSyncStatus();" in html
     assert "syncRefreshBtn.addEventListener('click', loadSyncStatus)" in html
     assert "syncExportBtn.addEventListener('click', exportCurrentMonthToGoogle)" in html
-    assert "syncImportBtn.addEventListener('click', importCurrentMonthFromGoogle)" in html
+    assert (
+        "syncImportBtn.addEventListener('click', importCurrentMonthFromGoogle)" in html
+    )
     assert "syncPullEmpty" in html
     assert "calendars_scanned" in html
 
 
 # ── Phase 7 UI/UX modal flow ──────────────────────────────────────────────
+
 
 def test_event_entry_modal_markup_present(authenticated_client):
     html = _calendar_html(authenticated_client)
@@ -464,7 +505,11 @@ def test_day_click_opens_event_entry_for_selected_day(authenticated_client):
 
     html = _calendar_html(authenticated_client)
     assert "function addEventForDay(year, month, day)" in html
-    assert_contains_any(html, "Date locked to selected calendar day.", "Data zablokowana na wybranym dniu kalendarza.")
+    assert_contains_any(
+        html,
+        "Date locked to selected calendar day.",
+        "Data zablokowana na wybranym dniu kalendarza.",
+    )
     assert "setEventEntryDateLocked(true)" in html
 
 
@@ -473,7 +518,9 @@ def test_invite_back_link_present(authenticated_client):
     assert response.status_code == 200
     html = response.text
     assert 'href="/calendar"' in html
-    assert_contains_any(html, "Back to Calendar", "Powrot do kalendarza", "Powr\u00f3t do kalendarza")
+    assert_contains_any(
+        html, "Back to Calendar", "Powrot do kalendarza", "Powr\u00f3t do kalendarza"
+    )
     assert "focus-visible:ring-cyan-300" in html
 
 
@@ -483,7 +530,9 @@ def test_invite_back_link_present(authenticated_client):
 def test_event_entry_visibility_control_present(authenticated_client):
     html = _calendar_html(authenticated_client)
     assert 'id="event-entry-visibility"' in html
-    assert_contains_any(html, "Shared (household)", "Wspolne (domownicy)", "Wsp\u00f3lne (domownicy)")
+    assert_contains_any(
+        html, "Shared (household)", "Wspolne (domownicy)", "Wsp\u00f3lne (domownicy)"
+    )
     assert_contains_any(html, "Private (only me)", "Prywatne (tylko ja)")
     assert 'value="shared"' in html
     assert 'value="private"' in html
@@ -492,7 +541,9 @@ def test_event_entry_visibility_control_present(authenticated_client):
 def test_quick_add_visibility_control_present(authenticated_client):
     html = _calendar_html(authenticated_client)
     assert 'id="qa-parsed-visibility"' in html
-    assert_contains_any(html, "Shared (household)", "Wspolne (domownicy)", "Wsp\u00f3lne (domownicy)")
+    assert_contains_any(
+        html, "Shared (household)", "Wspolne (domownicy)", "Wsp\u00f3lne (domownicy)"
+    )
     assert_contains_any(html, "Private (only me)", "Prywatne (tylko ja)")
 
 
@@ -518,6 +569,7 @@ def test_prefill_event_accepts_visibility(authenticated_client):
 
 
 # ── Phase 9 locale and language switching ─────────────────────────────────────
+
 
 def test_default_locale_is_polish(authenticated_client):
     """First-time user sees Polish UI by default."""
@@ -650,7 +702,9 @@ def test_event_deletion_unchanged(authenticated_client, test_db, test_user_a):
 
 
 def test_sync_export_includes_reminders_backward_compat(
-    authenticated_client, test_db, test_user_a,
+    authenticated_client,
+    test_db,
+    test_user_a,
 ):
     """Regression: old single-reminder field still handled correctly in sync payload."""
     from app.sync.service import GoogleSyncService
@@ -672,7 +726,8 @@ def test_sync_export_includes_reminders_backward_compat(
 
     service = GoogleSyncService(test_db)
     event = EventRepository(test_db).get_by_id(
-        response.json()["id"], test_user_a.calendar_id,
+        response.json()["id"],
+        test_user_a.calendar_id,
     )
     body = service._event_body(event)
 
@@ -723,8 +778,10 @@ def test_month_grid_no_lock_icon_for_shared_event(authenticated_client):
     assert "SharedMonthEvt" in html
     # Find the event cell text — lock should not appear near the shared event title
     idx = html.index("SharedMonthEvt")
-    snippet = html[max(0, idx - 80):idx]
-    assert "🔒" not in snippet, "Lock icon must NOT appear for shared events in month grid"
+    snippet = html[max(0, idx - 80) : idx]
+    assert (
+        "🔒" not in snippet
+    ), "Lock icon must NOT appear for shared events in month grid"
 
 
 def test_day_view_lock_icon_for_private_event(authenticated_client):
@@ -750,8 +807,13 @@ def test_day_view_lock_icon_for_private_event(authenticated_client):
 def test_event_form_visibility_dropdown_present():
     """VIS-01: Simple event form (event_form.html) has visibility dropdown."""
     import pathlib
-    html = pathlib.Path("app/templates/partials/event_form.html").read_text(encoding="utf-8")
-    assert 'id="event-visibility"' in html, "event_form.html must have visibility select"
+
+    html = pathlib.Path("app/templates/partials/event_form.html").read_text(
+        encoding="utf-8"
+    )
+    assert (
+        'id="event-visibility"' in html
+    ), "event_form.html must have visibility select"
     assert 'value="shared"' in html
     assert 'value="private"' in html
     assert "qa.visibility" in html, "Visibility label must use i18n key"
@@ -822,7 +884,9 @@ def test_month_grid_renders_category_dot_for_categorized_event(authenticated_cli
         },
     )
 
-    html = authenticated_client.get(f"/calendar/month?year={now.year}&month={now.month}").text
+    html = authenticated_client.get(
+        f"/calendar/month?year={now.year}&month={now.month}"
+    ).text
     assert "category-dot" in html
     assert work_cat["color"] in html
     assert f'data-category-id="{work_cat["id"]}"' in html
@@ -845,7 +909,9 @@ def test_day_view_renders_category_color_indicator(authenticated_client):
         },
     )
 
-    html = authenticated_client.get(f"/calendar/day?year={now.year}&month={now.month}&day={now.day}").text
+    html = authenticated_client.get(
+        f"/calendar/day?year={now.year}&month={now.month}&day={now.day}"
+    ).text
     assert "category-color" in html
     assert health_cat["color"] in html
     # Category name may be translated (e.g. "Zdrowie" in Polish)
@@ -880,6 +946,7 @@ def test_category_dropdown_in_event_entry_modal(authenticated_client):
 def test_category_dropdown_in_event_form(authenticated_client):
     """ECAT-05: Simple event form partial includes category select dropdown."""
     import os
+
     form_path = os.path.join("app", "templates", "partials", "event_form.html")
     with open(form_path, "r", encoding="utf-8") as f:
         html = f.read()
@@ -910,6 +977,8 @@ def test_edit_prefill_passes_category_id(authenticated_client):
         },
     )
 
-    html = authenticated_client.get(f"/calendar/day?year={now.year}&month={now.month}&day={now.day}").text
+    html = authenticated_client.get(
+        f"/calendar/day?year={now.year}&month={now.month}&day={now.day}"
+    ).text
     # Verify the edit button onclick passes category_id
     assert personal_cat["id"] in html

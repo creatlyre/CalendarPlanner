@@ -22,6 +22,7 @@ def _service(db) -> ShoppingService:
 
 # ── Items ────────────────────────────────────────────────────────────────
 
+
 @router.get("/items")
 async def get_items(user=Depends(get_current_user), db=Depends(get_db)):
     if not user.calendar_id:
@@ -109,6 +110,7 @@ async def learn_keyword(
 
 
 # ── Sections ─────────────────────────────────────────────────────────────
+
 
 @router.get("/sections")
 async def get_sections(user=Depends(get_current_user), db=Depends(get_db)):

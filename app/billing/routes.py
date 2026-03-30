@@ -23,7 +23,11 @@ def _get_billing_service(db=Depends(get_db)) -> BillingService:
 def _get_base_url(request: Request) -> str:
     """Derive public base URL, respecting X-Forwarded-Proto/Host behind proxies."""
     scheme = request.headers.get("x-forwarded-proto", request.url.scheme)
-    host = request.headers.get("x-forwarded-host") or request.headers.get("host") or request.url.netloc
+    host = (
+        request.headers.get("x-forwarded-host")
+        or request.headers.get("host")
+        or request.url.netloc
+    )
     return f"{scheme}://{host}"
 
 

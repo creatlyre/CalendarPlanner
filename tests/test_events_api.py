@@ -14,7 +14,9 @@ from config import Settings
 from main import app
 
 
-def _payload(title: str, start: datetime, end: datetime, visibility: str = "shared") -> dict:
+def _payload(
+    title: str, start: datetime, end: datetime, visibility: str = "shared"
+) -> dict:
     return {
         "title": title,
         "description": "desc",
@@ -66,7 +68,9 @@ def test_delete_event_hides_from_month(authenticated_client):
     delete_response = authenticated_client.delete(f"/api/events/{event_id}")
     assert delete_response.status_code == 200
 
-    month_response = authenticated_client.get(f"/api/events/month?year={now.year}&month={now.month}")
+    month_response = authenticated_client.get(
+        f"/api/events/month?year={now.year}&month={now.month}"
+    )
     assert month_response.status_code == 200
     ids = [item["id"] for item in month_response.json()]
     assert event_id not in ids
@@ -287,7 +291,12 @@ def test_create_event_explicit_private(authenticated_client):
     now = datetime.utcnow().replace(microsecond=0)
     response = authenticated_client.post(
         "/api/events",
-        json=_payload("Solo task", now + timedelta(hours=1), now + timedelta(hours=2), visibility="private"),
+        json=_payload(
+            "Solo task",
+            now + timedelta(hours=1),
+            now + timedelta(hours=2),
+            visibility="private",
+        ),
     )
     assert response.status_code == 201
     assert response.json()["visibility"] == "private"
@@ -343,6 +352,7 @@ def _household_user_b(test_db, test_user_a):
 
 def _make_client_for_user(test_db, user):
     """Create an authenticated TestClient bound to a specific user."""
+
     def override_get_db():
         try:
             yield test_db
@@ -370,7 +380,9 @@ def _make_client_for_user(test_db, user):
     return client
 
 
-def test_private_event_hidden_from_other_user_month(test_db, test_user_a, _household_user_b):
+def test_private_event_hidden_from_other_user_month(
+    test_db, test_user_a, _household_user_b
+):
     """Private events by user A should not appear in user B month listing."""
     now = datetime.utcnow().replace(microsecond=0)
 
@@ -378,7 +390,12 @@ def test_private_event_hidden_from_other_user_month(test_db, test_user_a, _house
     client_a = _make_client_for_user(test_db, test_user_a)
     create = client_a.post(
         "/api/events",
-        json=_payload("A secret", now + timedelta(hours=1), now + timedelta(hours=2), visibility="private"),
+        json=_payload(
+            "A secret",
+            now + timedelta(hours=1),
+            now + timedelta(hours=2),
+            visibility="private",
+        ),
     )
     assert create.status_code == 201
     event_id = create.json()["id"]
@@ -397,20 +414,29 @@ def test_private_event_hidden_from_other_user_month(test_db, test_user_a, _house
     app.dependency_overrides.clear()
 
 
-def test_private_event_hidden_from_other_user_day(test_db, test_user_a, _household_user_b):
+def test_private_event_hidden_from_other_user_day(
+    test_db, test_user_a, _household_user_b
+):
     """Private events by user A should not appear in user B day listing."""
     now = datetime.utcnow().replace(microsecond=0)
 
     client_a = _make_client_for_user(test_db, test_user_a)
     create = client_a.post(
         "/api/events",
-        json=_payload("A day secret", now + timedelta(hours=1), now + timedelta(hours=2), visibility="private"),
+        json=_payload(
+            "A day secret",
+            now + timedelta(hours=1),
+            now + timedelta(hours=2),
+            visibility="private",
+        ),
     )
     assert create.status_code == 201
     event_id = create.json()["id"]
 
     client_b = _make_client_for_user(test_db, _household_user_b)
-    day_b = client_b.get(f"/api/events/day?year={now.year}&month={now.month}&day={now.day}")
+    day_b = client_b.get(
+        f"/api/events/day?year={now.year}&month={now.month}&day={now.day}"
+    )
     ids_b = [e["id"] for e in day_b.json()]
     assert event_id not in ids_b
 
@@ -424,7 +450,12 @@ def test_shared_event_visible_to_both_users(test_db, test_user_a, _household_use
     client_a = _make_client_for_user(test_db, test_user_a)
     create = client_a.post(
         "/api/events",
-        json=_payload("Family dinner", now + timedelta(hours=1), now + timedelta(hours=2), visibility="shared"),
+        json=_payload(
+            "Family dinner",
+            now + timedelta(hours=1),
+            now + timedelta(hours=2),
+            visibility="shared",
+        ),
     )
     event_id = create.json()["id"]
 
@@ -436,14 +467,21 @@ def test_shared_event_visible_to_both_users(test_db, test_user_a, _household_use
     app.dependency_overrides.clear()
 
 
-def test_other_user_cannot_update_private_event(test_db, test_user_a, _household_user_b):
+def test_other_user_cannot_update_private_event(
+    test_db, test_user_a, _household_user_b
+):
     """User B should get 404 trying to update user A's private event."""
     now = datetime.utcnow().replace(microsecond=0)
 
     client_a = _make_client_for_user(test_db, test_user_a)
     create = client_a.post(
         "/api/events",
-        json=_payload("A private", now + timedelta(hours=1), now + timedelta(hours=2), visibility="private"),
+        json=_payload(
+            "A private",
+            now + timedelta(hours=1),
+            now + timedelta(hours=2),
+            visibility="private",
+        ),
     )
     event_id = create.json()["id"]
 
@@ -454,14 +492,21 @@ def test_other_user_cannot_update_private_event(test_db, test_user_a, _household
     app.dependency_overrides.clear()
 
 
-def test_other_user_cannot_delete_private_event(test_db, test_user_a, _household_user_b):
+def test_other_user_cannot_delete_private_event(
+    test_db, test_user_a, _household_user_b
+):
     """User B should get 404 trying to delete user A's private event."""
     now = datetime.utcnow().replace(microsecond=0)
 
     client_a = _make_client_for_user(test_db, test_user_a)
     create = client_a.post(
         "/api/events",
-        json=_payload("A private del", now + timedelta(hours=1), now + timedelta(hours=2), visibility="private"),
+        json=_payload(
+            "A private del",
+            now + timedelta(hours=1),
+            now + timedelta(hours=2),
+            visibility="private",
+        ),
     )
     event_id = create.json()["id"]
 
@@ -478,7 +523,9 @@ def test_other_user_cannot_delete_private_event(test_db, test_user_a, _household
 def test_create_event_with_reminder_list(authenticated_client):
     """Creating an event with reminder_minutes_list returns the list in response."""
     now = datetime.utcnow().replace(microsecond=0)
-    payload = _payload("Reminder event", now + timedelta(hours=1), now + timedelta(hours=2))
+    payload = _payload(
+        "Reminder event", now + timedelta(hours=1), now + timedelta(hours=2)
+    )
     payload["reminder_minutes_list"] = [30, 1440]
 
     response = authenticated_client.post("/api/events", json=payload)
@@ -507,7 +554,9 @@ def test_update_event_reminder_list(authenticated_client):
 def test_reminder_list_rejects_negative_value(authenticated_client):
     """Negative reminder minutes should be rejected with 422."""
     now = datetime.utcnow().replace(microsecond=0)
-    payload = _payload("Bad reminder", now + timedelta(hours=1), now + timedelta(hours=2))
+    payload = _payload(
+        "Bad reminder", now + timedelta(hours=1), now + timedelta(hours=2)
+    )
     payload["reminder_minutes_list"] = [-5, 30]
 
     response = authenticated_client.post("/api/events", json=payload)
@@ -517,7 +566,9 @@ def test_reminder_list_rejects_negative_value(authenticated_client):
 def test_reminder_list_rejects_over_max_value(authenticated_client):
     """Reminder minutes exceeding 40320 (4 weeks) should be rejected with 422."""
     now = datetime.utcnow().replace(microsecond=0)
-    payload = _payload("Overflow reminder", now + timedelta(hours=1), now + timedelta(hours=2))
+    payload = _payload(
+        "Overflow reminder", now + timedelta(hours=1), now + timedelta(hours=2)
+    )
     payload["reminder_minutes_list"] = [50000]
 
     response = authenticated_client.post("/api/events", json=payload)
@@ -575,7 +626,9 @@ def test_create_event_with_category(authenticated_client):
     category_id = cat_resp.json()[0]["id"]
 
     now = datetime.utcnow().replace(microsecond=0)
-    payload = _payload("Categorized", now + timedelta(hours=1), now + timedelta(hours=2))
+    payload = _payload(
+        "Categorized", now + timedelta(hours=1), now + timedelta(hours=2)
+    )
     payload["category_id"] = category_id
 
     response = authenticated_client.post("/api/events", json=payload)

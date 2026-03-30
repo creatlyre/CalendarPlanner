@@ -10,6 +10,7 @@ from app.database.database import get_db
 
 class UpgradeRedirect(Exception):
     """Raised when an HTML page requires a plan upgrade."""
+
     def __init__(self, feature: str = "generic"):
         self.feature = feature
         super().__init__(feature)

@@ -26,6 +26,8 @@ async def shopping_page(
             "user_plan": get_user_plan_for_template(user, db),
         },
     )
-    response = templates.TemplateResponse(request=request, name="shopping.html", context=context)
+    response = templates.TemplateResponse(
+        request=request, name="shopping.html", context=context
+    )
     set_locale_cookie_if_param(response, request)
     return response

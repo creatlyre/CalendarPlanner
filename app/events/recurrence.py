@@ -30,7 +30,9 @@ def validate_rrule(rrule_value: str, dtstart: datetime) -> None:
         raise ValueError(f"Invalid rrule: {exc}") from exc
 
 
-def expand_event(event: Event, range_start: datetime, range_end: datetime) -> Iterable[EventOccurrence]:
+def expand_event(
+    event: Event, range_start: datetime, range_end: datetime
+) -> Iterable[EventOccurrence]:
     if not event.rrule:
         if range_start <= event.start_at <= range_end:
             yield EventOccurrence(
@@ -52,7 +54,9 @@ def expand_event(event: Event, range_start: datetime, range_end: datetime) -> It
     except Exception:
         # Gracefully handle legacy/corrupt RRULE values already stored in DB.
         return
-    for index, occurrence_start in enumerate(rule.between(range_start, range_end, inc=True)):
+    for index, occurrence_start in enumerate(
+        rule.between(range_start, range_end, inc=True)
+    ):
         occurrence_id = f"{event.id}:{index}:{occurrence_start.isoformat()}"
         yield EventOccurrence(
             id=occurrence_id,

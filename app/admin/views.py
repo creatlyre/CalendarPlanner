@@ -32,7 +32,9 @@ async def admin_dashboard(
         },
     )
     response = templates.TemplateResponse(
-        request=request, name="admin_dashboard.html", context=context,
+        request=request,
+        name="admin_dashboard.html",
+        context=context,
     )
     set_locale_cookie_if_param(response, request)
     return response
@@ -72,7 +74,9 @@ async def admin_users_page(
         },
     )
     response = templates.TemplateResponse(
-        request=request, name="admin_users.html", context=context,
+        request=request,
+        name="admin_users.html",
+        context=context,
     )
     set_locale_cookie_if_param(response, request)
     return response
@@ -110,7 +114,9 @@ async def admin_user_detail_page(
         },
     )
     response = templates.TemplateResponse(
-        request=request, name="admin_user_detail.html", context=context,
+        request=request,
+        name="admin_user_detail.html",
+        context=context,
     )
     set_locale_cookie_if_param(response, request)
     return response
@@ -123,7 +129,9 @@ async def admin_installations_page(
 ):
     context = inject_template_i18n(request, {"request": request, "user": user})
     response = templates.TemplateResponse(
-        request=request, name="admin_installations.html", context=context,
+        request=request,
+        name="admin_installations.html",
+        context=context,
     )
     set_locale_cookie_if_param(response, request)
     return response
@@ -147,7 +155,9 @@ async def admin_households_page(
         },
     )
     response = templates.TemplateResponse(
-        request=request, name="admin_households.html", context=context,
+        request=request,
+        name="admin_households.html",
+        context=context,
     )
     set_locale_cookie_if_param(response, request)
     return response

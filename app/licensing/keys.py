@@ -12,9 +12,7 @@ def generate_license_key(secret: str) -> str:
     """
     payload = secrets.token_hex(16)  # 32 hex chars
     check = hmac.new(secret.encode(), bytes.fromhex(payload), "sha256").hexdigest()[:8]
-    return (
-        f"DOBRYPLAN-{payload[:8]}-{payload[8:16]}-{payload[16:24]}-{payload[24:32]}-{check}"
-    )
+    return f"DOBRYPLAN-{payload[:8]}-{payload[8:16]}-{payload[16:24]}-{payload[24:32]}-{check}"
 
 
 def validate_license_key(key: str, secret: str) -> bool:

@@ -84,7 +84,8 @@ class EventRepository:
                 "visibility": payload.visibility,
                 "category_id": getattr(payload, "category_id", None),
                 "reminder_minutes": getattr(payload, "reminder_minutes", None),
-                "reminder_minutes_list": getattr(payload, "reminder_minutes_list", None) or [],
+                "reminder_minutes_list": getattr(payload, "reminder_minutes_list", None)
+                or [],
             },
         )
         return _to_event(row)
@@ -145,7 +146,9 @@ class EventRepository:
         cache = getattr(self, "_active_cache", None)
         if cache is not None and cache[0] == calendar_id:
             return cache[1]
-        rows = self.db.select("events", {"calendar_id": f"eq.{calendar_id}", "is_deleted": "eq.false"})
+        rows = self.db.select(
+            "events", {"calendar_id": f"eq.{calendar_id}", "is_deleted": "eq.false"}
+        )
         events = [_to_event(item) for item in rows]
         result = [item for item in events if item.start_at is not None]
         self._active_cache = (calendar_id, result)
@@ -157,31 +160,58 @@ class EventRepository:
         if not user_id:
             return events
         return [
-            e for e in events
+            e
+            for e in events
             if e.visibility != "private" or e.created_by_user_id == user_id
         ]
 
-    def list_for_day(self, calendar_id: str, year: int, month: int, day: int, *, requesting_user_id: str | None = None) -> list[Event]:
+    def list_for_day(
+        self,
+        calendar_id: str,
+        year: int,
+        month: int,
+        day: int,
+        *,
+        requesting_user_id: str | None = None,
+    ) -> list[Event]:
         day_start = datetime(year, month, day, 0, 0, 0)
         day_end = datetime(year, month, day, 23, 59, 59)
         events = [
             item
             for item in self._all_active_for_calendar(calendar_id)
-            if item.rrule is None and item.start_at and day_start <= item.start_at <= day_end
+            if item.rrule is None
+            and item.start_at
+            and day_start <= item.start_at <= day_end
         ]
         events = self._visible_to(events, requesting_user_id)
         return sorted(events, key=lambda item: item.start_at or datetime.min)
 
-    def list_for_month(self, calendar_id: str, year: int, month: int, *, requesting_user_id: str | None = None) -> list[Event]:
+    def list_for_month(
+        self,
+        calendar_id: str,
+        year: int,
+        month: int,
+        *,
+        requesting_user_id: str | None = None,
+    ) -> list[Event]:
         events = [
             item
             for item in self._all_active_for_calendar(calendar_id)
-            if item.rrule is None and item.start_at and item.start_at.year == year and item.start_at.month == month
+            if item.rrule is None
+            and item.start_at
+            and item.start_at.year == year
+            and item.start_at.month == month
         ]
         events = self._visible_to(events, requesting_user_id)
         return sorted(events, key=lambda item: item.start_at or datetime.min)
 
-    def list_recurrence_roots_until(self, calendar_id: str, range_end: datetime, *, requesting_user_id: str | None = None) -> list[Event]:
+    def list_recurrence_roots_until(
+        self,
+        calendar_id: str,
+        range_end: datetime,
+        *,
+        requesting_user_id: str | None = None,
+    ) -> list[Event]:
         events = [
             item
             for item in self._all_active_for_calendar(calendar_id)
@@ -207,7 +237,9 @@ class EventRepository:
         )
         return [_to_category(row) for row in rows]
 
-    def create_category(self, calendar_id: str, payload: CategoryCreate) -> EventCategory:
+    def create_category(
+        self, calendar_id: str, payload: CategoryCreate
+    ) -> EventCategory:
         row = self.db.insert(
             "event_categories",
             {

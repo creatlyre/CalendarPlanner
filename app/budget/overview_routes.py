@@ -5,7 +5,10 @@ from pydantic import BaseModel
 
 from app.auth.dependencies import get_current_user
 from app.budget.expense_repository import ExpenseRepository
-from app.budget.income_repository import MonthlyHoursRepository, AdditionalEarningsRepository
+from app.budget.income_repository import (
+    MonthlyHoursRepository,
+    AdditionalEarningsRepository,
+)
 from app.budget.overview_service import CarryForwardRepository, OverviewService
 from app.budget.repository import BudgetSettingsRepository
 from app.database.database import get_db
@@ -29,7 +32,12 @@ class CarryForwardUpdate(BaseModel):
 
 
 @router.get("/comparison")
-async def get_comparison(year: int, user=Depends(get_current_user), db=Depends(get_db), session: Optional[str] = Cookie(None)):
+async def get_comparison(
+    year: int,
+    user=Depends(get_current_user),
+    db=Depends(get_db),
+    session: Optional[str] = Cookie(None),
+):
     if not user.calendar_id:
         raise HTTPException(status_code=400, detail="No calendar linked")
     service = _service(db)
@@ -38,7 +46,12 @@ async def get_comparison(year: int, user=Depends(get_current_user), db=Depends(g
 
 
 @router.get("")
-async def get_overview(year: int, user=Depends(get_current_user), db=Depends(get_db), session: Optional[str] = Cookie(None)):
+async def get_overview(
+    year: int,
+    user=Depends(get_current_user),
+    db=Depends(get_db),
+    session: Optional[str] = Cookie(None),
+):
     if not user.calendar_id:
         raise HTTPException(status_code=400, detail="No calendar linked")
     service = _service(db)
@@ -57,7 +70,9 @@ async def set_carry_forward(
     if not user.calendar_id:
         raise HTTPException(status_code=400, detail="No calendar linked")
     repo = CarryForwardRepository(db)
-    override = repo.upsert(user.calendar_id, payload.year, payload.amount, auth_token=session)
+    override = repo.upsert(
+        user.calendar_id, payload.year, payload.amount, auth_token=session
+    )
     return {"data": {"year": override.year, "amount": override.amount}}
 
 

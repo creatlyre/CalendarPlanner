@@ -32,7 +32,9 @@ def test_export_month_uses_service(authenticated_client, monkeypatch):
 
     import app.sync.service
 
-    monkeypatch.setattr(app.sync.service.GoogleSyncService, "export_month", fake_export_month)
+    monkeypatch.setattr(
+        app.sync.service.GoogleSyncService, "export_month", fake_export_month
+    )
 
     response = authenticated_client.post("/api/sync/export-month?year=2026&month=3")
     assert response.status_code == 200
@@ -59,7 +61,9 @@ def test_import_month_uses_service(authenticated_client, monkeypatch):
 
     import app.sync.service
 
-    monkeypatch.setattr(app.sync.service.GoogleSyncService, "import_month", fake_import_month)
+    monkeypatch.setattr(
+        app.sync.service.GoogleSyncService, "import_month", fake_import_month
+    )
 
     response = authenticated_client.post("/api/sync/import-month?year=2026&month=3")
     assert response.status_code == 200
@@ -71,7 +75,9 @@ def test_import_month_uses_service(authenticated_client, monkeypatch):
     assert called["ok"]
 
 
-def test_import_month_sets_requires_reauth_on_scope_error(authenticated_client, monkeypatch):
+def test_import_month_sets_requires_reauth_on_scope_error(
+    authenticated_client, monkeypatch
+):
     class FakeResult:
         events_imported = 0
         events_updated = 0
@@ -83,16 +89,22 @@ def test_import_month_sets_requires_reauth_on_scope_error(authenticated_client, 
 
     import app.sync.service
 
-    monkeypatch.setattr(app.sync.service.GoogleSyncService, "import_month", fake_import_month)
+    monkeypatch.setattr(
+        app.sync.service.GoogleSyncService, "import_month", fake_import_month
+    )
 
     response = authenticated_client.post("/api/sync/import-month?year=2026&month=3")
     assert response.status_code == 200
     assert response.json()["requires_reauth"] is True
 
 
-def test_sync_status_returns_calendar_last_sync(authenticated_client, test_db, test_user_a):
+def test_sync_status_returns_calendar_last_sync(
+    authenticated_client, test_db, test_user_a
+):
     stamp = datetime(2026, 3, 19, 10, 30, 0).isoformat()
-    test_db.update("calendars", {"id": f"eq.{test_user_a.calendar_id}"}, {"last_sync_at": stamp})
+    test_db.update(
+        "calendars", {"id": f"eq.{test_user_a.calendar_id}"}, {"last_sync_at": stamp}
+    )
 
     response = authenticated_client.get("/api/sync/status")
     assert response.status_code == 200
@@ -230,7 +242,9 @@ def test_extract_cp_visibility_unknown_defaults_shared():
 
 def test_extract_cp_visibility_missing_defaults_shared():
     assert GoogleSyncService._extract_cp_visibility({}) == "shared"
-    assert GoogleSyncService._extract_cp_visibility({"extendedProperties": {}}) == "shared"
+    assert (
+        GoogleSyncService._extract_cp_visibility({"extendedProperties": {}}) == "shared"
+    )
 
 
 # ── Phase 18 Nyquist: import ownership validation ─────────────────────────────

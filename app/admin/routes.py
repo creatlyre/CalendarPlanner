@@ -138,14 +138,17 @@ async def list_households(
             {
                 "calendar_id": h["calendar"].id,
                 "calendar_name": h["calendar"].name,
-                "owner": {
-                    "id": h["owner"].id,
-                    "email": h["owner"].email,
-                    "name": h["owner"].name,
-                } if h["owner"] else None,
+                "owner": (
+                    {
+                        "id": h["owner"].id,
+                        "email": h["owner"].email,
+                        "name": h["owner"].name,
+                    }
+                    if h["owner"]
+                    else None
+                ),
                 "members": [
-                    {"id": m.id, "email": m.email, "name": m.name}
-                    for m in h["members"]
+                    {"id": m.id, "email": m.email, "name": m.name} for m in h["members"]
                 ],
                 "member_count": len(h["members"]),
             }
@@ -177,7 +180,8 @@ async def merge_households(
     service = AdminService(db)
     try:
         moved = service.merge_households(
-            body.source_calendar_id, body.target_calendar_id,
+            body.source_calendar_id,
+            body.target_calendar_id,
         )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc))

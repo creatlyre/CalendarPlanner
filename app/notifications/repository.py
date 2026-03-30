@@ -134,7 +134,9 @@ class NotificationRepository:
             return _to_preference(rows[0])
         return NotificationPreference(user_id=user_id, email_enabled=False)
 
-    def upsert_preference(self, user_id: str, email_enabled: bool) -> NotificationPreference:
+    def upsert_preference(
+        self, user_id: str, email_enabled: bool
+    ) -> NotificationPreference:
         existing = self.db.select(
             "notification_preferences",
             {"user_id": f"eq.{user_id}", "limit": "1"},

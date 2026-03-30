@@ -130,6 +130,19 @@ class InMemoryStore:
         self.tables.setdefault(table, []).append(row)
         return dict(row)
 
+    def bulk_insert(
+        self, table: str, payloads: list[dict[str, Any]], auth_token: str | None = None
+    ) -> list[dict[str, Any]]:
+        rows = []
+        for payload in payloads:
+            row = {key: self._normalize_value(value) for key, value in payload.items()}
+            if not row.get("id"):
+                row["id"] = str(uuid.uuid4())
+            rows.append(row)
+
+        self.tables.setdefault(table, []).extend(rows)
+        return [dict(r) for r in rows]
+
     def update(
         self,
         table: str,

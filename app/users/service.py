@@ -18,9 +18,13 @@ class UserService:
     ):
         inviter = self.repo.get_user_by_id(inviter_id, auth_token=auth_token)
         if not inviter:
-            inviter = self.repo.get_user_by_external_id(inviter_id, auth_token=auth_token)
+            inviter = self.repo.get_user_by_external_id(
+                inviter_id, auth_token=auth_token
+            )
         if not inviter and inviter_email:
-            inviter = self.repo.get_user_by_email(inviter_email.lower(), auth_token=auth_token)
+            inviter = self.repo.get_user_by_email(
+                inviter_email.lower(), auth_token=auth_token
+            )
 
         if not inviter and inviter_email:
             new_id = str(uuid.uuid4())
@@ -51,11 +55,14 @@ class UserService:
             raise ValueError("Inviter not found")
 
         if inviter_external_id and not inviter.google_id:
-            inviter = self.repo.update_user(
-                inviter.id,
-                {"google_id": inviter_external_id},
-                auth_token=auth_token,
-            ) or inviter
+            inviter = (
+                self.repo.update_user(
+                    inviter.id,
+                    {"google_id": inviter_external_id},
+                    auth_token=auth_token,
+                )
+                or inviter
+            )
 
         if not inviter.calendar_id:
             cal = self.repo.create_calendar(
@@ -66,7 +73,12 @@ class UserService:
                 },
                 auth_token=auth_token,
             )
-            inviter = self.repo.update_user(inviter.id, {"calendar_id": cal.id}, auth_token=auth_token) or inviter
+            inviter = (
+                self.repo.update_user(
+                    inviter.id, {"calendar_id": cal.id}, auth_token=auth_token
+                )
+                or inviter
+            )
 
         return inviter
 
@@ -88,7 +100,9 @@ class UserService:
         )
 
         normalized_email = invited_email.lower()
-        invited_user = self.repo.get_user_by_email(normalized_email, auth_token=auth_token)
+        invited_user = self.repo.get_user_by_email(
+            normalized_email, auth_token=auth_token
+        )
 
         if invited_user and invited_user.calendar_id == inviter.calendar_id:
             raise ValueError(f"{invited_email} is already a member")

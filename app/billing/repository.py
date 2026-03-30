@@ -58,8 +58,12 @@ class BillingRepository:
             return None
         return _to_subscription(rows[0])
 
-    def get_subscription_by_stripe_customer(self, stripe_customer_id: str) -> Optional[Subscription]:
-        rows = self.db.select("subscriptions", {"stripe_customer_id": f"eq.{stripe_customer_id}"})
+    def get_subscription_by_stripe_customer(
+        self, stripe_customer_id: str
+    ) -> Optional[Subscription]:
+        rows = self.db.select(
+            "subscriptions", {"stripe_customer_id": f"eq.{stripe_customer_id}"}
+        )
         if not rows:
             return None
         return _to_subscription(rows[0])

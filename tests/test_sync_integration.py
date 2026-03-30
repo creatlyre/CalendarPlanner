@@ -13,7 +13,9 @@ def test_event_create_triggers_sync(authenticated_client, monkeypatch):
 
     import app.sync.service
 
-    monkeypatch.setattr(app.sync.service.GoogleSyncService, "sync_event_for_household", fake_sync)
+    monkeypatch.setattr(
+        app.sync.service.GoogleSyncService, "sync_event_for_household", fake_sync
+    )
 
     response = authenticated_client.post(
         "/api/events",
@@ -46,7 +48,9 @@ def test_event_delete_triggers_delete_sync(authenticated_client, monkeypatch):
 
     import app.sync.service
 
-    monkeypatch.setattr(app.sync.service.GoogleSyncService, "sync_event_for_household", fake_sync)
+    monkeypatch.setattr(
+        app.sync.service.GoogleSyncService, "sync_event_for_household", fake_sync
+    )
 
     create_response = authenticated_client.post(
         "/api/events",
@@ -77,11 +81,16 @@ def test_private_event_sync_only_targets_owner(authenticated_client, monkeypatch
         errors = []
 
     def fake_sync(self, event, deleted=False):
-        called["events"].append({"visibility": getattr(event, "visibility", "shared"), "deleted": deleted})
+        called["events"].append(
+            {"visibility": getattr(event, "visibility", "shared"), "deleted": deleted}
+        )
         return FakeResult()
 
     import app.sync.service
-    monkeypatch.setattr(app.sync.service.GoogleSyncService, "sync_event_for_household", fake_sync)
+
+    monkeypatch.setattr(
+        app.sync.service.GoogleSyncService, "sync_event_for_household", fake_sync
+    )
 
     response = authenticated_client.post(
         "/api/events",
@@ -111,7 +120,10 @@ def test_shared_event_sync_targets_all_household(authenticated_client, monkeypat
         return FakeResult()
 
     import app.sync.service
-    monkeypatch.setattr(app.sync.service.GoogleSyncService, "sync_event_for_household", fake_sync)
+
+    monkeypatch.setattr(
+        app.sync.service.GoogleSyncService, "sync_event_for_household", fake_sync
+    )
 
     response = authenticated_client.post(
         "/api/events",
@@ -132,7 +144,10 @@ def test_shared_event_sync_targets_all_household(authenticated_client, monkeypat
 
 
 def test_day_click_entry_syncs_to_google_with_reminders(
-    authenticated_client, test_db, test_user_a, monkeypatch,
+    authenticated_client,
+    test_db,
+    test_user_a,
+    monkeypatch,
 ):
     """E2E: day-click creates event with reminder list → sync payload has overrides."""
     from datetime import datetime, timedelta
@@ -159,7 +174,9 @@ def test_day_click_entry_syncs_to_google_with_reminders(
 
     # Build Google payload via sync service
     service = GoogleSyncService(test_db)
-    event = EventRepository(test_db).get_by_id(event_data["id"], test_user_a.calendar_id)
+    event = EventRepository(test_db).get_by_id(
+        event_data["id"], test_user_a.calendar_id
+    )
     assert event is not None
 
     body = service._event_body(event)
@@ -175,7 +192,9 @@ def test_day_click_entry_syncs_to_google_with_reminders(
 
 
 def test_day_click_entry_with_default_reminders(
-    authenticated_client, test_db, test_user_a,
+    authenticated_client,
+    test_db,
+    test_user_a,
 ):
     """E2E: day-click event without reminders → Google payload uses useDefault=True."""
     from datetime import datetime, timedelta
@@ -197,12 +216,16 @@ def test_day_click_entry_with_default_reminders(
 
     service = GoogleSyncService(test_db)
     event = EventRepository(test_db).get_by_id(
-        response.json()["id"], test_user_a.calendar_id,
+        response.json()["id"],
+        test_user_a.calendar_id,
     )
     body = service._event_body(event)
 
     assert body["reminders"]["useDefault"] is True
-    assert "overrides" not in body["reminders"] or len(body["reminders"].get("overrides", [])) == 0
+    assert (
+        "overrides" not in body["reminders"]
+        or len(body["reminders"].get("overrides", [])) == 0
+    )
 
 
 def test_sync_retraction_deletes_from_partner(authenticated_client, monkeypatch):
@@ -215,11 +238,16 @@ def test_sync_retraction_deletes_from_partner(authenticated_client, monkeypatch)
         errors = []
 
     def fake_sync(self, event, deleted=False):
-        calls["sync_to"].append({"visibility": getattr(event, "visibility", "shared"), "deleted": deleted})
+        calls["sync_to"].append(
+            {"visibility": getattr(event, "visibility", "shared"), "deleted": deleted}
+        )
         return FakeResult()
 
     import app.sync.service
-    monkeypatch.setattr(app.sync.service.GoogleSyncService, "sync_event_for_household", fake_sync)
+
+    monkeypatch.setattr(
+        app.sync.service.GoogleSyncService, "sync_event_for_household", fake_sync
+    )
 
     # Create shared event, then update to private
     create_resp = authenticated_client.post(
@@ -247,7 +275,9 @@ def test_sync_retraction_deletes_from_partner(authenticated_client, monkeypatch)
     assert calls["sync_to"][-1]["visibility"] == "private"
 
 
-def test_export_month_respects_visibility(authenticated_client, test_db, test_user_a, monkeypatch):
+def test_export_month_respects_visibility(
+    authenticated_client, test_db, test_user_a, monkeypatch
+):
     """export_month should pass requesting_user_id to filter private events."""
     import app.sync.service
     import app.events.service
@@ -258,9 +288,13 @@ def test_export_month_respects_visibility(authenticated_client, test_db, test_us
 
     def tracking_list(self, calendar_id, year, month, *, requesting_user_id=None):
         captured["requesting_user_id"] = requesting_user_id
-        return original_list(self, calendar_id, year, month, requesting_user_id=requesting_user_id)
+        return original_list(
+            self, calendar_id, year, month, requesting_user_id=requesting_user_id
+        )
 
-    monkeypatch.setattr(app.events.service.EventService, "list_month_expanded", tracking_list)
+    monkeypatch.setattr(
+        app.events.service.EventService, "list_month_expanded", tracking_list
+    )
 
     # Mock sync to avoid real GCal API calls
     class FakeResult:

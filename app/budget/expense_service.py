@@ -78,7 +78,9 @@ class ExpenseService:
     def delete_expense(self, expense_id: str) -> bool:
         return self.repo.delete(expense_id)
 
-    def bulk_create(self, calendar_id: str, items: list[ExpenseCreate]) -> list[Expense]:
+    def bulk_create(
+        self, calendar_id: str, items: list[ExpenseCreate]
+    ) -> list[Expense]:
         categories = None
         for item in items:
             if not item.category_id:
@@ -134,6 +136,7 @@ class ExpenseService:
             cat_id = self._detect_category(e.name, categories)
             if cat_id:
                 from app.budget.expense_schemas import ExpenseUpdate
+
                 self.repo.update(e.id, ExpenseUpdate(category_id=cat_id))
                 updated += 1
 

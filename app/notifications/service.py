@@ -62,7 +62,9 @@ class NotificationService:
     def get_preference(self, user_id: str) -> NotificationPreference:
         return self.repo.get_preference(user_id)
 
-    def update_preference(self, user_id: str, email_enabled: bool) -> NotificationPreference:
+    def update_preference(
+        self, user_id: str, email_enabled: bool
+    ) -> NotificationPreference:
         return self.repo.upsert_preference(user_id, email_enabled)
 
     def create_for_partner(
@@ -117,7 +119,9 @@ class NotificationService:
             msg["To"] = recipient_email
             body = f"{actor_name} {action_type.replace('_', ' ')}: {entity_title}\n"
             msg.set_content(body)
-            with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT, timeout=10) as server:
+            with smtplib.SMTP(
+                settings.SMTP_HOST, settings.SMTP_PORT, timeout=10
+            ) as server:
                 if settings.SMTP_USE_TLS:
                     server.starttls()
                 if settings.SMTP_USER and settings.SMTP_PASSWORD:
@@ -144,7 +148,9 @@ class NotificationService:
                 reminder_time = event.start_at - timedelta(minutes=minutes)
                 # Reminder is due if within last hour window
                 if reminder_time <= now and reminder_time > now - timedelta(hours=1):
-                    if not self.repo.exists_reminder(user_id, event.id, "event_reminder"):
+                    if not self.repo.exists_reminder(
+                        user_id, event.id, "event_reminder"
+                    ):
                         self.repo.create(
                             user_id=user_id,
                             calendar_id=calendar_id,

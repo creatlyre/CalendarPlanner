@@ -32,7 +32,9 @@ class OCRService:
 
         try:
             import easyocr  # type: ignore
-        except Exception as exc:  # pragma: no cover - exercised in environments without easyocr
+        except (
+            Exception
+        ) as exc:  # pragma: no cover - exercised in environments without easyocr
             raise RuntimeError("EasyOCR is not installed") from exc
 
         langs = ["pl", "en"] if locale == "pl" else ["en"]
@@ -58,7 +60,13 @@ class OCRService:
 
         return texts, confidences
 
-    def parse_image(self, image_bytes: bytes, timezone: str, context_date: datetime | None = None, locale: str = "en") -> OCRParseResult:
+    def parse_image(
+        self,
+        image_bytes: bytes,
+        timezone: str,
+        context_date: datetime | None = None,
+        locale: str = "en",
+    ) -> OCRParseResult:
         if not image_bytes:
             return OCRParseResult(timezone=timezone, errors=["No image data provided"])
 
@@ -71,7 +79,11 @@ class OCRService:
         texts, confidences = self._normalize_read_result(read_result)
         raw_text = " ".join(texts).strip()
         if not raw_text:
-            return OCRParseResult(timezone=timezone, errors=["Could not extract readable text from image"], raw_text="")
+            return OCRParseResult(
+                timezone=timezone,
+                errors=["Could not extract readable text from image"],
+                raw_text="",
+            )
 
         avg_conf = sum(confidences) / len(confidences) if confidences else 0.0
         nlp = NLPService()
@@ -86,8 +98,12 @@ class OCRService:
             start_at=parsed.start_at,
             end_at=end_at,
             timezone=timezone,
-            confidence_title=min(parsed.confidence_title, avg_conf) if parsed.title else 0.0,
-            confidence_date=min(parsed.confidence_date, avg_conf) if parsed.start_at else 0.0,
+            confidence_title=(
+                min(parsed.confidence_title, avg_conf) if parsed.title else 0.0
+            ),
+            confidence_date=(
+                min(parsed.confidence_date, avg_conf) if parsed.start_at else 0.0
+            ),
             confidence_raw=avg_conf,
             raw_text=raw_text,
             errors=parsed.errors,

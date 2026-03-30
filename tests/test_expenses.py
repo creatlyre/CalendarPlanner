@@ -1,4 +1,5 @@
 """Integration tests for expense management (Phase 14)."""
+
 import pytest
 
 
@@ -8,7 +9,13 @@ class TestExpenseRecurringCRUD:
     def test_create_recurring_expense(self, authenticated_client):
         res = authenticated_client.post(
             "/api/budget/expenses",
-            json={"year": 2026, "month": 0, "name": "Czynsz", "amount": 2500, "recurring": True},
+            json={
+                "year": 2026,
+                "month": 0,
+                "name": "Czynsz",
+                "amount": 2500,
+                "recurring": True,
+            },
         )
         assert res.status_code == 200
         data = res.json()["data"]
@@ -20,11 +27,23 @@ class TestExpenseRecurringCRUD:
     def test_get_recurring_expenses(self, authenticated_client):
         authenticated_client.post(
             "/api/budget/expenses",
-            json={"year": 2026, "month": 0, "name": "Czynsz", "amount": 2500, "recurring": True},
+            json={
+                "year": 2026,
+                "month": 0,
+                "name": "Czynsz",
+                "amount": 2500,
+                "recurring": True,
+            },
         )
         authenticated_client.post(
             "/api/budget/expenses",
-            json={"year": 2026, "month": 0, "name": "Internet", "amount": 80, "recurring": True},
+            json={
+                "year": 2026,
+                "month": 0,
+                "name": "Internet",
+                "amount": 80,
+                "recurring": True,
+            },
         )
         res = authenticated_client.get("/api/budget/expenses?year=2026")
         assert res.status_code == 200
@@ -36,7 +55,13 @@ class TestExpenseRecurringCRUD:
     def test_update_recurring_expense(self, authenticated_client):
         create = authenticated_client.post(
             "/api/budget/expenses",
-            json={"year": 2026, "month": 0, "name": "Czynsz", "amount": 2500, "recurring": True},
+            json={
+                "year": 2026,
+                "month": 0,
+                "name": "Czynsz",
+                "amount": 2500,
+                "recurring": True,
+            },
         )
         eid = create.json()["data"]["id"]
         res = authenticated_client.put(
@@ -50,7 +75,13 @@ class TestExpenseRecurringCRUD:
     def test_delete_recurring_expense(self, authenticated_client):
         create = authenticated_client.post(
             "/api/budget/expenses",
-            json={"year": 2026, "month": 0, "name": "Czynsz", "amount": 2500, "recurring": True},
+            json={
+                "year": 2026,
+                "month": 0,
+                "name": "Czynsz",
+                "amount": 2500,
+                "recurring": True,
+            },
         )
         eid = create.json()["data"]["id"]
         res = authenticated_client.delete(f"/api/budget/expenses/{eid}")
@@ -77,7 +108,11 @@ class TestExpenseOnetimeCRUD:
         assert data["recurring"] is False
 
     def test_get_onetime_expenses_by_year(self, authenticated_client):
-        for month, name, amount in [(1, "Serwis", 500), (6, "Wakacje", 5000), (12, "Święta", 2000)]:
+        for month, name, amount in [
+            (1, "Serwis", 500),
+            (6, "Wakacje", 5000),
+            (12, "Święta", 2000),
+        ]:
             authenticated_client.post(
                 "/api/budget/expenses",
                 json={"year": 2026, "month": month, "name": name, "amount": amount},
@@ -117,7 +152,13 @@ class TestExpenseAutoRecurring:
     def test_recurring_in_year_data(self, authenticated_client):
         authenticated_client.post(
             "/api/budget/expenses",
-            json={"year": 2026, "month": 0, "name": "Czynsz", "amount": 2500, "recurring": True},
+            json={
+                "year": 2026,
+                "month": 0,
+                "name": "Czynsz",
+                "amount": 2500,
+                "recurring": True,
+            },
         )
         res = authenticated_client.get("/api/budget/expenses?year=2026")
         data = res.json()["data"]
@@ -154,7 +195,12 @@ class TestExpenseValidation:
         """Negative one-time expense acts as a correction/patch."""
         res = authenticated_client.post(
             "/api/budget/expenses",
-            json={"year": 2026, "month": 1, "name": "Poprawka styczen", "amount": -5400},
+            json={
+                "year": 2026,
+                "month": 1,
+                "name": "Poprawka styczen",
+                "amount": -5400,
+            },
         )
         assert res.status_code == 200
         data = res.json()["data"]
@@ -165,7 +211,13 @@ class TestExpenseValidation:
         """Recurring expenses must stay positive."""
         res = authenticated_client.post(
             "/api/budget/expenses",
-            json={"year": 2026, "month": 0, "name": "Bad recurring", "amount": -100, "recurring": True},
+            json={
+                "year": 2026,
+                "month": 0,
+                "name": "Bad recurring",
+                "amount": -100,
+                "recurring": True,
+            },
         )
         assert res.status_code == 422
 
@@ -194,11 +246,31 @@ class TestExpenseBulk:
     def test_bulk_create_recurring(self, authenticated_client):
         res = authenticated_client.post(
             "/api/budget/expenses/bulk",
-            json={"expenses": [
-                {"year": 2026, "month": 0, "name": "Czynsz", "amount": 6300, "recurring": True},
-                {"year": 2026, "month": 0, "name": "Internet", "amount": 80, "recurring": True},
-                {"year": 2026, "month": 0, "name": "Netflix", "amount": 30, "recurring": True},
-            ]},
+            json={
+                "expenses": [
+                    {
+                        "year": 2026,
+                        "month": 0,
+                        "name": "Czynsz",
+                        "amount": 6300,
+                        "recurring": True,
+                    },
+                    {
+                        "year": 2026,
+                        "month": 0,
+                        "name": "Internet",
+                        "amount": 80,
+                        "recurring": True,
+                    },
+                    {
+                        "year": 2026,
+                        "month": 0,
+                        "name": "Netflix",
+                        "amount": 30,
+                        "recurring": True,
+                    },
+                ]
+            },
         )
         assert res.status_code == 200
         data = res.json()["data"]
@@ -208,10 +280,12 @@ class TestExpenseBulk:
     def test_bulk_create_onetime(self, authenticated_client):
         res = authenticated_client.post(
             "/api/budget/expenses/bulk",
-            json={"expenses": [
-                {"year": 2026, "month": 1, "name": "Wiertla", "amount": 65},
-                {"year": 2026, "month": 3, "name": "Robot szyby", "amount": 3000},
-            ]},
+            json={
+                "expenses": [
+                    {"year": 2026, "month": 1, "name": "Wiertla", "amount": 65},
+                    {"year": 2026, "month": 3, "name": "Robot szyby", "amount": 3000},
+                ]
+            },
         )
         assert res.status_code == 200
         data = res.json()["data"]
@@ -230,9 +304,11 @@ class TestExpenseBulk:
     def test_bulk_validation_rejects_invalid(self, authenticated_client):
         res = authenticated_client.post(
             "/api/budget/expenses/bulk",
-            json={"expenses": [
-                {"year": 2026, "month": 1, "name": "", "amount": 100},
-            ]},
+            json={
+                "expenses": [
+                    {"year": 2026, "month": 1, "name": "", "amount": 100},
+                ]
+            },
         )
         assert res.status_code == 422
 
@@ -241,7 +317,13 @@ class TestExpenseBulk:
         for name in ["Rent", "Insurance", "Phone"]:
             authenticated_client.post(
                 "/api/budget/expenses",
-                json={"year": 2026, "month": 0, "name": name, "amount": 1000, "recurring": True},
+                json={
+                    "year": 2026,
+                    "month": 0,
+                    "name": name,
+                    "amount": 1000,
+                    "recurring": True,
+                },
             )
         # Also create one onetime
         authenticated_client.post(
@@ -249,7 +331,9 @@ class TestExpenseBulk:
             json={"year": 2026, "month": 3, "name": "Gift", "amount": 200},
         )
         # Delete all recurring for 2026
-        res = authenticated_client.delete("/api/budget/expenses/bulk?year=2026&type=recurring")
+        res = authenticated_client.delete(
+            "/api/budget/expenses/bulk?year=2026&type=recurring"
+        )
         assert res.status_code == 200
         assert res.json()["deleted"] == 3
         # Onetime still exists
@@ -261,7 +345,13 @@ class TestExpenseBulk:
         # Create recurring + onetime
         authenticated_client.post(
             "/api/budget/expenses",
-            json={"year": 2026, "month": 0, "name": "Rent", "amount": 1000, "recurring": True},
+            json={
+                "year": 2026,
+                "month": 0,
+                "name": "Rent",
+                "amount": 1000,
+                "recurring": True,
+            },
         )
         for m in [1, 5]:
             authenticated_client.post(
@@ -269,7 +359,9 @@ class TestExpenseBulk:
                 json={"year": 2026, "month": m, "name": f"Item {m}", "amount": 100},
             )
         # Delete all onetime for 2026
-        res = authenticated_client.delete("/api/budget/expenses/bulk?year=2026&type=onetime")
+        res = authenticated_client.delete(
+            "/api/budget/expenses/bulk?year=2026&type=onetime"
+        )
         assert res.status_code == 200
         assert res.json()["deleted"] == 2
         # Recurring still exists
@@ -344,22 +436,34 @@ class TestExpenseCategories:
 
     def test_create_expense_with_category(self, authenticated_client):
         # Get categories (seeds presets)
-        cats = authenticated_client.get("/api/budget/expenses/categories").json()["data"]
+        cats = authenticated_client.get("/api/budget/expenses/categories").json()[
+            "data"
+        ]
         cat_id = cats[0]["id"]
         # Create expense with category
         res = authenticated_client.post(
             "/api/budget/expenses",
-            json={"year": 2026, "month": 1, "name": "Weekly groceries", "amount": 250, "category_id": cat_id},
+            json={
+                "year": 2026,
+                "month": 1,
+                "name": "Weekly groceries",
+                "amount": 250,
+                "category_id": cat_id,
+            },
         )
         assert res.status_code == 200
         assert res.json()["data"]["category_id"] == cat_id
         # Verify in year data
-        year_data = authenticated_client.get("/api/budget/expenses?year=2026").json()["data"]
+        year_data = authenticated_client.get("/api/budget/expenses?year=2026").json()[
+            "data"
+        ]
         ot = year_data["onetime_expenses"]
         assert any(e["category_id"] == cat_id for e in ot)
 
     def test_update_expense_category(self, authenticated_client):
-        cats = authenticated_client.get("/api/budget/expenses/categories").json()["data"]
+        cats = authenticated_client.get("/api/budget/expenses/categories").json()[
+            "data"
+        ]
         cat_id = cats[0]["id"]
         create = authenticated_client.post(
             "/api/budget/expenses",
@@ -374,21 +478,41 @@ class TestExpenseCategories:
         assert res.json()["data"]["category_id"] == cat_id
 
     def test_expenses_by_category_breakdown(self, authenticated_client):
-        cats = authenticated_client.get("/api/budget/expenses/categories").json()["data"]
+        cats = authenticated_client.get("/api/budget/expenses/categories").json()[
+            "data"
+        ]
         cat_a = cats[0]["id"]
         cat_b = cats[1]["id"]
         # Create expenses with categories
         authenticated_client.post(
             "/api/budget/expenses",
-            json={"year": 2026, "month": 1, "name": "Milk", "amount": 50, "category_id": cat_a},
+            json={
+                "year": 2026,
+                "month": 1,
+                "name": "Milk",
+                "amount": 50,
+                "category_id": cat_a,
+            },
         )
         authenticated_client.post(
             "/api/budget/expenses",
-            json={"year": 2026, "month": 2, "name": "Bread", "amount": 30, "category_id": cat_a},
+            json={
+                "year": 2026,
+                "month": 2,
+                "name": "Bread",
+                "amount": 30,
+                "category_id": cat_a,
+            },
         )
         authenticated_client.post(
             "/api/budget/expenses",
-            json={"year": 2026, "month": 1, "name": "Monthly rent", "amount": 2000, "category_id": cat_b},
+            json={
+                "year": 2026,
+                "month": 1,
+                "name": "Monthly rent",
+                "amount": 2000,
+                "category_id": cat_b,
+            },
         )
         # Uncategorized
         authenticated_client.post(
@@ -414,10 +538,26 @@ class TestExpenseCategoryAdvanced:
         res = authenticated_client.get("/api/budget/expenses/categories")
         names = {c["name"] for c in res.json()["data"]}
         expected = {
-            "Groceries", "Rent", "Utilities", "Transport", "Entertainment",
-            "Health", "Education", "Home", "Clothing", "Children",
-            "Personal Care", "Pets", "Events", "Savings & Finance", "Travel",
-            "Shopping", "Electronics", "Garden", "Loan", "Other",
+            "Groceries",
+            "Rent",
+            "Utilities",
+            "Transport",
+            "Entertainment",
+            "Health",
+            "Education",
+            "Home",
+            "Clothing",
+            "Children",
+            "Personal Care",
+            "Pets",
+            "Events",
+            "Savings & Finance",
+            "Travel",
+            "Shopping",
+            "Electronics",
+            "Garden",
+            "Loan",
+            "Other",
         }
         assert names == expected
 
@@ -433,20 +573,32 @@ class TestExpenseCategoryAdvanced:
         assert isinstance(data["Groceries"], list)
         assert len(data["Groceries"]) > 5
 
-    def test_expenses_return_category_id_for_frontend_filter(self, authenticated_client):
+    def test_expenses_return_category_id_for_frontend_filter(
+        self, authenticated_client
+    ):
         """XCAT-04: Expenses include category_id so frontend can filter."""
-        cats = authenticated_client.get("/api/budget/expenses/categories").json()["data"]
+        cats = authenticated_client.get("/api/budget/expenses/categories").json()[
+            "data"
+        ]
         cat_id = cats[0]["id"]
         # Create one with category, one without
         authenticated_client.post(
             "/api/budget/expenses",
-            json={"year": 2026, "month": 1, "name": "Categorized", "amount": 50, "category_id": cat_id},
+            json={
+                "year": 2026,
+                "month": 1,
+                "name": "Categorized",
+                "amount": 50,
+                "category_id": cat_id,
+            },
         )
         authenticated_client.post(
             "/api/budget/expenses",
             json={"year": 2026, "month": 1, "name": "Uncategorized", "amount": 30},
         )
-        year_data = authenticated_client.get("/api/budget/expenses?year=2026").json()["data"]
+        year_data = authenticated_client.get("/api/budget/expenses?year=2026").json()[
+            "data"
+        ]
         onetime = year_data["onetime_expenses"]
         assert len(onetime) == 2
         has_cat = [e for e in onetime if e["category_id"] == cat_id]
@@ -468,16 +620,24 @@ class TestExpenseCategoryAdvanced:
             "/api/budget/expenses",
             json={"year": 2026, "month": 2, "name": "Netflix", "amount": 50},
         )
-        assert r1.json()["data"]["category_id"] is not None, "Auto-categorize on create should assign category"
-        assert r2.json()["data"]["category_id"] is not None, "Auto-categorize on create should assign category"
+        assert (
+            r1.json()["data"]["category_id"] is not None
+        ), "Auto-categorize on create should assign category"
+        assert (
+            r2.json()["data"]["category_id"] is not None
+        ), "Auto-categorize on create should assign category"
         # Run auto-categorize — should find 0 uncategorized (already assigned on create)
-        res = authenticated_client.post("/api/budget/expenses/auto-categorize?year=2026")
+        res = authenticated_client.post(
+            "/api/budget/expenses/auto-categorize?year=2026"
+        )
         assert res.status_code == 200
         result = res.json()["data"]
         assert result["total"] == 0
         assert result["updated"] == 0
         # Verify expenses still have categories
-        year_data = authenticated_client.get("/api/budget/expenses?year=2026").json()["data"]
+        year_data = authenticated_client.get("/api/budget/expenses?year=2026").json()[
+            "data"
+        ]
         onetime = year_data["onetime_expenses"]
         assert all(e["category_id"] is not None for e in onetime)
 

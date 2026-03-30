@@ -50,7 +50,9 @@ async def get_household_info(user=Depends(get_current_user), db=Depends(get_db))
         "calendar_id": info["calendar"].id if info["calendar"] else None,
         "calendar_name": info["calendar"].name if info["calendar"] else None,
         "member_count": info["member_count"],
-        "members": [{"id": m.id, "email": m.email, "name": m.name} for m in info["members"]],
+        "members": [
+            {"id": m.id, "email": m.email, "name": m.name} for m in info["members"]
+        ],
     }
 
 
@@ -64,7 +66,9 @@ async def invite_household_member(
     supabase_refresh: Optional[str] = Cookie(None),
 ):
     if request.email.lower() == user.email.lower():
-        raise HTTPException(status_code=400, detail=_msg(http_request, "users.cannot_invite_self"))
+        raise HTTPException(
+            status_code=400, detail=_msg(http_request, "users.cannot_invite_self")
+        )
 
     db_auth_token = session
     if session and decode_legacy_session_token(session):
@@ -107,10 +111,15 @@ async def invite_household_member(
 
 
 @router.post("/accept-invitation")
-async def accept_invitation(request: Request, user=Depends(get_current_user), db=Depends(get_db)):
+async def accept_invitation(
+    request: Request, user=Depends(get_current_user), db=Depends(get_db)
+):
     service = UserService(db)
     result = service.accept_household_invitation(user.id)
 
     if result:
-        return {"message": _msg(request, "users.invitation_accepted"), "calendar_id": result.calendar_id}
+        return {
+            "message": _msg(request, "users.invitation_accepted"),
+            "calendar_id": result.calendar_id,
+        }
     return {"message": _msg(request, "users.no_pending_invitations")}
