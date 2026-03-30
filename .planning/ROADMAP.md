@@ -107,6 +107,16 @@ Plans:
 - [ ] 01-02-PLAN.md — Version API endpoint + service worker update notifications
 - [ ] 01-03-PLAN.md — Checkpoint: configure secrets, build APK, install on device
 
+### Phase 2: Migrate TWA to Capacitor Native Shell
+
+**Goal:** Replace the current TWA (Chrome-dependent) Android wrapper with a Capacitor native shell that bundles all web assets in the APK, removes the Chrome dependency, enables full offline-first launch, and produces a Play Store-ready artifact. Use the Capacitor MCP server for verified plugin APIs and CLI commands during planning/execution.
+**Requirements**: [CAP-01: Remove Chrome dependency — app uses embedded WebView, CAP-02: Bundle all HTML/CSS/JS assets in APK for instant first launch, CAP-03: Full offline support without prior network access, CAP-04: Retain existing keystore and signing config, CAP-05: CI/CD pipeline updated for Capacitor build, CAP-06: Digital Asset Links still functional, CAP-07: Verification — install on physical device and confirm standalone fullscreen launch with no browser bar]
+**Depends on:** Phase 1
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd-plan-phase 2 to break down)
+
 ---
 
 *Roadmap updated: 2026-03-30 — v6.0 milestone started*

@@ -34,6 +34,7 @@ Previous milestones archived. See `.planning/milestones/` for full history.
 ### Roadmap Evolution
 
 - Phase 1 added: Android APK Distribution and Auto-Update Pipeline (build signed APK via GitHub Actions CI/CD, auto-rebuild on master push, OTA version detection for update prompts)
+- Phase 2 added: Migrate TWA to Capacitor Native Shell (replace Chrome-dependent TWA with Capacitor, bundle web assets in APK, full offline-first, Play Store-ready)
 
 ### Decisions
 
