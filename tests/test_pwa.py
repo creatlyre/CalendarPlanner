@@ -2,7 +2,7 @@
 Tests for PWA & Mobile Distribution (Phase 32).
 
 Validates manifest, service worker, icons, offline page, base.html integration,
-auth bypass for PWA routes, TWA config, and native deferral documentation.
+auth bypass for PWA routes, Capacitor config, and native deferral documentation.
 """
 import json
 import os
@@ -186,39 +186,36 @@ class TestPwaPublicRoutes:
         assert resp.status_code == 200
 
 
-# ── MOB-02: TWA Configuration ──────────────────────────────────────────────
+# ── MOB-02: Capacitor Configuration ────────────────────────────────────────
 
 
-class TestTwaConfig:
-    """android/twa-config.json is valid and has correct Dobry Plan metadata."""
+class TestCapacitorConfig:
+    """capacitor.config.ts is valid and has correct Dobry Plan metadata."""
 
-    def test_twa_config_exists(self):
-        assert os.path.exists("android/twa-config.json")
+    def _read_config(self):
+        with open("capacitor.config.ts", encoding="utf-8") as f:
+            return f.read()
 
-    def test_twa_config_valid_json(self):
-        with open("android/twa-config.json") as f:
-            data = json.load(f)
-        assert isinstance(data, dict)
+    def test_capacitor_config_exists(self):
+        assert os.path.exists("capacitor.config.ts")
 
-    def test_twa_config_metadata(self):
-        with open("android/twa-config.json") as f:
-            data = json.load(f)
-        assert data["name"] == "Dobry Plan"
-        assert data["startUrl"] == "/dashboard"
-        assert data["packageId"] == "app.dobryplan.twa"
-        assert data["display"] == "standalone"
+    def test_capacitor_config_app_id(self):
+        content = self._read_config()
+        assert "app.dobryplan.twa" in content
 
-    def test_twa_config_host(self):
-        with open("android/twa-config.json") as f:
-            data = json.load(f)
-        assert "host" in data
-        assert data["host"]  # non-empty
+    def test_capacitor_config_app_name(self):
+        content = self._read_config()
+        assert "Dobry Plan" in content
 
-    def test_android_readme_exists(self):
-        assert os.path.exists("android/README.md")
-        content = open("android/README.md", encoding="utf-8").read()
-        assert len(content) > 500
-        assert "bubblewrap" in content.lower() or "Bubblewrap" in content
+    def test_capacitor_config_server_url(self):
+        content = self._read_config()
+        assert "synco-production-e9da.up.railway.app" in content
+        assert "cleartext: false" in content
+
+    def test_capacitor_android_project_exists(self):
+        assert os.path.exists("android/app/build.gradle")
+        content = open("android/app/build.gradle", encoding="utf-8").read()
+        assert "capacitor-android" in content
 
 
 # ── MOB-03: Native Deferral Documentation ──────────────────────────────────
@@ -240,7 +237,7 @@ class TestNativeDeferral:
 
     def test_twa_mentioned(self):
         content = self._read_monetization()
-        assert "TWA" in content or "Trusted Web Activity" in content
+        assert "TWA" in content or "Trusted Web Activity" in content or "Capacitor" in content
 
     def test_native_deferral_explicit(self):
         content = self._read_monetization()
