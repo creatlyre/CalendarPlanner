@@ -103,9 +103,7 @@ class ShoppingRepository:
 
     def update_section(self, section_id: str, data: dict) -> ShoppingSection | None:
         data["updated_at"] = datetime.utcnow().isoformat()
-        row = self.db.update(
-            "shopping_sections", {"id": f"eq.{section_id}"}, data
-        )
+        row = self.db.update("shopping_sections", {"id": f"eq.{section_id}"}, data)
         return _to_section(row) if row else None
 
     def delete_section(self, section_id: str) -> bool:
@@ -145,6 +143,12 @@ class ShoppingRepository:
             data["section_id"] = section_id
         row = self.db.insert("shopping_items", data)
         return _to_item(row)
+
+    def bulk_create_items(self, items: list[dict]) -> list[ShoppingItem]:
+        if not items:
+            return []
+        rows = self.db.bulk_insert("shopping_items", items)
+        return [_to_item(row) for row in rows]
 
     def update_item(self, item_id: str, data: dict) -> ShoppingItem | None:
         data["updated_at"] = datetime.utcnow().isoformat()

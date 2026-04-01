@@ -117,14 +117,21 @@ class ShoppingService:
 
         created: list[ShoppingItem] = []
         uncategorized_names: list[str] = []
+        payloads: list[dict] = []
+
         for name in names:
             section_id = self._categorize_item(
                 calendar_id, name, sections=sections, overrides=overrides
             )
-            item = self.repo.create_item(calendar_id, name, section_id)
-            created.append(item)
-            if not section_id:
+            data = {"calendar_id": calendar_id, "name": name}
+            if section_id:
+                data["section_id"] = section_id
+            else:
                 uncategorized_names.append(name)
+            payloads.append(data)
+
+        if payloads:
+            created = self.repo.bulk_create_items(payloads)
 
         return {
             "items": [
